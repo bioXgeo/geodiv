@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1557332454559.000,
+    "dirty" : true,
+    "encoding" : "UTF-8",
+    "folds" : "42|23|251|0|\n",
+    "hash" : "3599438668",
+    "id" : "1DF77E5E",
+    "lastKnownWriteTime" : 1558381803,
+    "last_content_update" : 1558458280051,
+    "path" : "~/Documents/SyntheticLandscape/surface_metrics/geodiv_test.R",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "257,15",
+        "scrollLine" : "0",
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

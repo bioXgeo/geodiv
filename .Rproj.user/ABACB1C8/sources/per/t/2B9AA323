@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1557758129992.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2944919131",
+    "id" : "2B9AA323",
+    "lastKnownWriteTime" : 1558458464,
+    "last_content_update" : 1558458464053,
+    "path" : "~/Documents/SyntheticLandscape/surface_metrics/geodiv/R/movingwindow.R",
+    "project_path" : "R/movingwindow.R",
+    "properties" : {
+        "cursorPosition" : "134,16",
+        "scrollLine" : "0"
+    },
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

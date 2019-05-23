@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1557428818754.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3797416204",
+    "id" : "F589CA80",
+    "lastKnownWriteTime" : 1557504460,
+    "last_content_update" : 1557504460768,
+    "path" : "~/Documents/SyntheticLandscape/surface_metrics/geodiv/tests/testthat/test_inputs.R",
+    "project_path" : "tests/testthat/test_inputs.R",
+    "properties" : {
+        "cursorPosition" : "135,0",
+        "scrollLine" : "0",
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

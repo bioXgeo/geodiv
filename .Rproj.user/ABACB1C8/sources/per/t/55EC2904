@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1558549865275.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1364452298",
+    "id" : "55EC2904",
+    "lastKnownWriteTime" : 1558558867,
+    "last_content_update" : 1558558867253,
+    "path" : "~/Documents/SyntheticLandscape/surface_metrics/geodiv/src/sfd.cpp",
+    "project_path" : "src/sfd.cpp",
+    "properties" : {
+        "cursorPosition" : "30,26",
+        "scrollLine" : "33"
+    },
+    "relative_order" : 6,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "cpp"
+}
