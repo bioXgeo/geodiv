@@ -269,9 +269,9 @@ srw <- function(x, plot = FALSE) {
 #' x <- crop(normforest, extent(-123, -122.99, 43, 43.01))
 #'
 #' # calculate the fractal dimension
-#' Sfd <- sfd(x)
+#' Sfd <- sfd_old(x)
 #' @export
-sfd <- function(x) {
+sfd_old <- function(x) {
   if(class(x) != 'RasterLayer') {stop('x must be a raster.')}
 
   # this has been checked against the matlab version and produces the same results
@@ -358,12 +358,12 @@ sfd <- function(x) {
       realv <- Re(fim[j, i])
       imagv <- Im(fim[j, i])
       if (realv == 0) {
-        value <- pi / 2
+        value = pi / 2
       } else {
         value <- atan((imagv / realv))
+        phaseim[j, i] <- value
+        ang <- floor(180 * (pi / 2 + value) / pi)
       }
-      phaseim[j, i] <- value
-      ang <- floor(180 * (pi / 2 + value) / pi)
       if (ang < 0) {
         ang <- 0
       }
