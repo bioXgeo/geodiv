@@ -21,6 +21,25 @@ using namespace Rcpp;
 #include <math.h>
 #define MAXCOL 2000000
 
+//' Calculate the fractal dimension of a raster.
+//'
+//' Calculates the 3D fractal dimension of a raster using the
+//' triangular prism surface area method.
+//'
+//' @param x A raster.
+//' @return A numeric value representing the fractal dimension of
+//' the image.
+//' @examples
+//'
+//' # import raster image
+//' data(normforest)
+//'
+//' # crop raster to much smaller area
+//' x <- crop(normforest, extent(-123, -122.99, 43, 43.01))
+//'
+//' # calculate the fractal dimension
+//' Sfd <- sfd(x)
+//' @export
 // [[Rcpp::export]]
 double sfd(NumericMatrix mat){
   /* find center area (if rectangular) */
