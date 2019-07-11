@@ -1,4 +1,9 @@
-#include <Rcpp.h>
+//sfd.cpp
+
+#include <stdio.h>
+#include <RcppArmadillo.h>
+// [[Rcpp::depends(RcppArmadillo)]]
+
 using namespace Rcpp;
 
 // This is a simple example of exporting a C++ function to R. You can
@@ -48,7 +53,27 @@ double sfd(NumericMatrix mat){
   int rowmax =  mat.nrow();
   int colmax = mat.ncol();
   double floor (double);
-  double area[100], resolution[100];
+  double area[25], resolution[25];
+  double crossr;
+  /* normalize matrix values */
+  NumericMatrix newmat(rowmax, colmax);
+  double minimum = 99999;
+  for (int x=0; x<rowmax; x++) {
+    for (int y=0; y<colmax; y++) {
+       minimum = std::min(mat(x, y), minimum);
+    }
+  }
+  double maximum = -99999;
+  for (int x=0; x<rowmax; x++) {
+    for (int y=0; y<colmax; y++) {
+      maximum = std::max(mat(x, y), maximum);
+    }
+  }
+  for (int x=0; x<rowmax; x++) {
+    for (int y=0; y<colmax; y++) {
+      newmat(x,y) = (mat(x,y) - minimum) / (maximum - minimum);
+    }
+  }
   int n = 1, size, slop;
   /* Select short side of array */
   /* if rowmax > colmax, size = colmax. otherwise, size = rowmax. */
@@ -68,11 +93,10 @@ double sfd(NumericMatrix mat){
   slop = floor((colmax - n) / 2.);
   begin_col = slop + 1;
   int end_col = n + slop + 1;
-
   /* compute the fractal dimension for each step out from center */
   int row, col, step = 1;
   double side, diag;
-  double a, b, c, d, e, w, x, y, z, o, p, q, r, sa, sb, sc, sd, aa, ab, ac, ad, surface_area, sqrt (double);
+  double a, b, c, d, e, w, x, y, z, o, p, q, r, sa, sb, sc, sd, aa, ab, ac, ad, surface_area;
   /* Repeat for area sequence 1,4,16,64,255 etc. */
   int time;
   for (time=1; time<=steps; time++) {
@@ -83,10 +107,10 @@ double sfd(NumericMatrix mat){
     /* Process whole array at this size */
     for (row = begin_row; row < end_row; row += step) {
       for (col = begin_col; col < end_col; col += step) {
-        a = mat(row, col);
-        b = mat(row, col + step);
-        c = mat(row + step, col + step);
-        d = mat(row + step, col);
+        a = newmat(row,col);
+        b = newmat(row,col + step);
+        c = newmat(row + step,col + step);
+        d = newmat(row + step,col);
         /* e is the center point of four pixel values */
         e = 0.25 * (a + b + c + d);
         /* w,x,y,z are external sides of the square */
@@ -105,10 +129,10 @@ double sfd(NumericMatrix mat){
         sc = 0.5 * (y + q + r);
         sd = 0.5 * (z + o + r);
         /* Solve area~ from Heron's formula */
-        aa = sqrt (labs(sa * (sa - w) * (sa - p) * (sa - o)));
-        ab = sqrt (labs(sb * (sb - x) * (sb - p) * (sb - q))) ;
-        ac = sqrt (labs(sc * (sc - y) * (sc - q) * (sc - r)));
-        ad = sqrt (labs(sd * (sd - z) * (sd - o) * (sd - r)));
+        aa = sqrt (fabs(sa * (sa - w) * (sa - p) * (sa - o)));
+        ab = sqrt (fabs(sb * (sb - x) * (sb - p) * (sb - q)));
+        ac = sqrt (fabs(sc * (sc - y) * (sc - q) * (sc - r)));
+        ad = sqrt (fabs(sd * (sd - z) * (sd - o) * (sd - r)));
         /* Add to total surface area */
         surface_area += aa + ab + ac + ad;
       }
@@ -118,10 +142,9 @@ double sfd(NumericMatrix mat){
     resolution[time] = step * step;
     step *= 2;
   }
-
   /* find final fractal dimension */
   double resavg = 0.0, areaavg = 0.0, cross = 0.0, sumres = 0.0,
-    sumarea = 0.0, dimension, beta;
+    sumarea = 0.0, fd, beta;
   /* Do log transform and compute means */
   for (n = 1; n <= steps; n++) {
     resolution[n] = log(resolution[n]);
@@ -140,9 +163,18 @@ double sfd(NumericMatrix mat){
     sumres += ((resolution[n] - resavg) * (resolution[n] - resavg));
     sumarea += ((area[n] - areaavg) * (area[n] - areaavg));
   }
+  if (sumres == 0.0) {
+    sumres = 1;
+  }
+  if (sumarea == 0.0) {
+    sumarea = 1;
+  }
   /* Compute correlation coefficient and fractal dimension */
-  r = cross / sqrt(sumres * sumarea);
-  beta = r * sqrt(sumarea) / sqrt(sumres);
-  dimension = 2.0 - beta;
-  return dimension;
+  crossr = cross / sqrt(sumres * sumarea);
+  beta = crossr * sqrt(sumarea) / sqrt(sumres);
+  fd = 2.0 - beta;
+  return fd;
 }
+
+/* STILL NEED TO NORMALIZE RASTER SO THAT CHANGING MAGNITUDES DOESN'T MATTER. ALSO NEED TO CONNECT
+/* INTO R PACKAGE. */

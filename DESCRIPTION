@@ -23,7 +23,8 @@ Imports:
     doSNOW (>= 1.0.16),
     snow (>= 0.4-3),
     sf (>= 0.7-4),
-    zoo (>= 1.8-5)
+    zoo (>= 1.8-5),
+    Rcpp (>= 1.0.1)
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -31,4 +32,4 @@ RoxygenNote: 6.1.1
 Suggests: 
     testthat
 LinkingTo: 
-    Rcpp
+    Rcpp, RcppArmadillo

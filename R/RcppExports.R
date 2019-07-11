@@ -21,6 +21,6 @@
 #' Sfd <- sfd(x)
 #' @export
 sfd <- function(mat) {
-    .Call('_geodiv_sfd', PACKAGE = 'geodiv', mat)
+    .Call(`_geodiv_sfd`, mat)
 }
 
