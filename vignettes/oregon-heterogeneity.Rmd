@@ -1,0 +1,55 @@
+---
+title: "Assessing landscape heterogeneity in Oregon State"
+author: "Annie C. Smith"
+date: "August 28, 2019"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{oregon-heterogeneity}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+First, import *geodiv*.
+
+```{r setup}
+
+library(geodiv)
+
+```
+
+Now, open and plot a raster of the Enhanced Vegetation Index (EVI) for Oregon State. 
+
+```{r data}
+
+# import EVI raster into R
+data(oregonEVI)
+
+# look up scalar and apply to data
+?oregonEVI
+oregonEVI <- oregonEVI * 0.0001
+
+# mask any values that are outside of the state bounds
+
+
+# plot maximum growing season EVI for Oregon
+plot(oregonEVI, xlab = 'Longitude', ylab = 'Latitude', main = 'Maximum Growing Season EVI')
+
+```
+
+We now want to remove any trend that there may be over the entire raster, because we are only interested in the heterogeneity, not the overall values. This is made easy by a function included in *geodiv*.
+
+```{r remove trend}
+
+# remove overall trend in values over raster (this removes the best-fit polynomial plane)
+evi <- remove_plane(oregonEVI)
+
+# plot again to see what the new raster looks like
+plot(evi, xlab = 'Longitude', ylab = 'Latitude', main = 'EVI without Trend')
+
+```

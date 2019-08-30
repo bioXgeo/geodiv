@@ -4,10 +4,13 @@
 \name{orforest}
 \alias{orforest}
 \title{NDVI for a portion of southwestern Oregon, USA.}
-\format{A raster image with 371 x 371 pixels, with the WGS84
-  projection at ~30 meter resolution.
+\format{A raster image with 371 x 371 pixels
 \describe{
-  \item{value}{NDVI, range = 0-1, bounds = -123, -122.9, 43.0002, 43.1}
+  \item{range}{0 -- 1}
+  \item{bounds}{-123, -122.9, 43.0002, 43.1}
+  \item{resolution}{30m x 30m}
+  \item{projection}{WGS84}
+  \item{scalar}{1}
   ...
 }}
 \usage{

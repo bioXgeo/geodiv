@@ -7,7 +7,7 @@
 sfd(mat)
 }
 \arguments{
-\item{x}{A raster.}
+\item{x}{A matrix.}
 }
 \value{
 A numeric value representing the fractal dimension of
@@ -22,8 +22,9 @@ triangular prism surface area method.
 # import raster image
 data(normforest)
 
-# crop raster to much smaller area
-x <- crop(normforest, extent(-123, -122.99, 43, 43.01))
+
+# convert to matrix
+x <- raster::as.matrix(normforest)
 
 # calculate the fractal dimension
 Sfd <- sfd(x)
