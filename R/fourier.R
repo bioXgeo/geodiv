@@ -227,7 +227,7 @@ srw <- function(x, plot = FALSE) {
   Br <- list()
   Br[1] <- 0
   for (i in 2:length(lines)) {
-    templine <- crop(lines[i], extent(xmin(amp_img), xmax(amp_img), ymin, ymax(amp_img)))
+    templine <- crop(lines[i], extent(xmin(amp_img), xmax(amp_img), ymin(amp_img), ymax(amp_img)))
     Br[i] <- extract(amp_img, templine, fun = sum)
   }
 

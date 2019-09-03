@@ -15,11 +15,15 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 ```
-First, import *geodiv*.
+First, import *geodiv* and any other necessary packages.
 
 ```{r setup}
 
 library(geodiv)
+library(raster)
+library(mapdata)
+library(maptools)
+library(rgeos)
 
 ```
 
@@ -35,7 +39,9 @@ data(oregonEVI)
 oregonEVI <- oregonEVI * 0.0001
 
 # mask any values that are outside of the state bounds
-
+oregon <- map(database = 'state', regions = 'oregon', fill = TRUE, plot = FALSE)
+oregonPoly <- map2SpatialPolygons(oregon, IDs = oregon$names, proj4string = CRS(proj4string(oregonEVI)))
+oregonEVI <- mask(x = oregonEVI, mask = oregonPoly)
 
 # plot maximum growing season EVI for Oregon
 plot(oregonEVI, xlab = 'Longitude', ylab = 'Latitude', main = 'Maximum Growing Season EVI')
@@ -51,5 +57,349 @@ evi <- remove_plane(oregonEVI)
 
 # plot again to see what the new raster looks like
 plot(evi, xlab = 'Longitude', ylab = 'Latitude', main = 'EVI without Trend')
+
+```
+
+Now that we have a clean raster, we need to sample locations at which to calculate metrics. We will select uniformly-distributed points across the state to get a good representation of all ecosystems.
+
+``` {r sample}
+
+# create a grid of points across the state with 1/2 degree spacing
+pt_grid <- makegrid(oregonPoly, cellsize = 0.5)
+pt_grid <- SpatialPoints(pt_grid, proj4string = CRS(proj4string(evi)))
+
+# cut to state outline
+pt_grid <- gIntersection(pt_grid, oregonPoly)
+
+# convert to sample data frame
+samp_pts <- as.data.frame(coordinates(pt_grid))
+
+# let's take a look in table form
+head(samp_pts)
+
+# where are the points located on the map?
+plot(evi, xlab = 'Longitude', ylab = 'Latitude', main = 'Sample Locations')
+points(x = samp_pts$x, y = samp_pts$y, pch = 19)
+
+# how many points?
+nrow(samp_pts)
+
+```
+
+This results in 108 sample points. At each of these points, we will calculate all surface metrics. First, we'll do this for a single point.
+
+``` {r single example}
+
+# create function to run all functions and output results
+run_all <- function(r){
+
+  # run all functions
+  cat('Sa: ', '\n')
+  sa <- sa(r)
+  print(sa)
+  cat('\n')
+
+  cat('Sq: ', '\n')
+  sq <- sq(r)
+  print(sq)
+  cat('\n')
+
+  cat('S10z: ', '\n')
+  s10z <-s10z(r)
+  print(s10z)
+  cat('\n')
+
+  cat('Sdq: ', '\n')
+  sdq <- sdq(r)
+  print(sdq)
+  cat('\n')
+
+  cat('Sdq6: ', '\n')
+  sdq6 <- sdq6(r)
+  print(sdq6)
+  cat('\n')
+
+  cat('Sdr: ', '\n')
+  sdr <- sdr(r)
+  print(sdr)
+  cat('\n')
+
+  cat('Sbi: ', '\n')
+  sbi <- sbi(r)
+  print(sbi)
+  cat('\n')
+
+  cat('Sci: ', '\n')
+  sci <- sci(r)
+  print(sci)
+  cat('\n')
+
+  cat('Ssk (Adjacent): ', '\n')
+  ssk_adj <- ssk(r, adj = TRUE)
+  print(ssk_adj)
+  cat('\n')
+
+  cat('Sku (excess): ', '\n')
+  sku_excess <- sku(r, excess = TRUE)
+  print(sku_excess)
+  cat('\n')
+
+  cat('Sds: ', '\n')
+  sds <- sds(r)
+  print(sds)
+  cat('\n')
+
+  cat('Sfd: ', '\n')
+  sfd <- sfd(as.matrix(r))
+  print(sfd)
+  cat('\n')
+
+  cat('Srw function - no plotting: ', '\n')
+  srwvals <- srw(r, plot = FALSE) # this takes a while
+  print(srwvals)
+  cat('\n')
+
+  cat('Srw: ', '\n')
+  srw <- srwvals[[1]]
+  print(srw)
+  cat('\n')
+
+  cat('Srwi: ', '\n')
+  srwi <- srwvals[[2]]
+  print(srwi)
+  cat('\n')
+
+  cat('Shw: ', '\n')
+  shw <- srwvals[[3]]
+  print(shw)
+  cat('\n')
+
+  cat('Std function - no plotting: ', '\n')
+  stdvals <- std(r, plot = FALSE)
+  print(stdvals)
+  cat('\n')
+
+  cat('Std: ', '\n')
+  std <- stdvals[[1]]
+  print(std)
+  cat('\n')
+
+  cat('Stdi: ', '\n')
+  stdi <- stdvals[[2]]
+  print(stdi)
+  cat('\n')
+
+  cat('Svi: ', '\n')
+  svi <- svi(r)
+  print(svi)
+  cat('\n')
+
+  cat('Str function: ', '\n')
+  strvals <- str(r, threshold = c(0.2, 1 / exp(1)))
+  print(strvals)
+  cat('\n')
+
+  cat('Str (20%): ', '\n')
+  str20 <- strvals[[1]]
+  print(str20)
+  cat('\n')
+
+  cat('Str (37%): ', '\n')
+  str37 <- strvals[[2]]
+  print(str37)
+  cat('\n')
+
+  cat('Ssc: ', '\n')
+  ssc <- ssc(r)
+  print(ssc)
+  cat('\n')
+
+  cat('Sv: ', '\n')
+  sv <- sv(r)
+  print(sv)
+  cat('\n')
+
+  cat('Sp: ', '\n')
+  sp <- sph(r)
+  print(sp)
+  cat('\n')
+
+  cat('Sk: ', '\n')
+  sk <- sk(r)
+  print(sk)
+  cat('\n')
+
+  cat('Smean: ', '\n')
+  smean <- smean(r)
+  print(smean)
+  cat('\n')
+
+  cat('Spk: ', '\n')
+  spk <- spk(r)
+  print(spk)
+  cat('\n')
+
+  cat('Svk: ', '\n')
+  svk <- svk(r)
+  print(svk)
+  cat('\n')
+
+  cat('Scl function - no plotting: ', '\n')
+  sclvals <- scl(r, threshold = c(0.2, 1 / exp(1)), plot = FALSE)
+  print(sclvals)
+  cat('\n')
+
+  cat('Scl (20%): ', '\n')
+  scl20 <- sclvals[[1]] # never gets to 0.2
+  print(scl20)
+  cat('\n')
+
+  cat('Scl (37%): ', '\n')
+  scl37 <- sclvals[[2]]
+  print(scl37)
+  cat('\n')
+
+  cat('Sdc 0-5%: ', '\n')
+  sdc0_5 <- sdc(r, 0, 0.05)
+  print(sdc0_5)
+  cat('\n')
+
+  cat('Sdc 50-55%: ', '\n')
+  sdc50_55 <- sdc(r, 0.50, 0.55)
+  print(sdc50_55)
+  cat('\n')
+
+  cat('Sdc 80-85%: ', '\n')
+  sdc80_85 <- sdc(r, 0.80, 0.85)
+  print(sdc80_85)
+  cat('\n')
+
+  return(cat('Finished with raster.', '\n'))
+}
+
+# select a point
+samp_pt <- samp_pts[10,]
+
+# calculate smaller extent surrounding point (0.25 degrees on from center to all sides)
+bound_box <- extent(samp_pt$x - 0.25, samp_pt$x + 0.25, samp_pt$y - 0.25, samp_pt$y + 0.25)
+bound_box <- as(bound_box, 'SpatialPolygons')
+
+# plot the box
+plot(evi, xlab = 'Longitude', ylab = 'Latitude', main = 'Sample Location for Test')
+plot(bound_box, add = TRUE)
+
+# crop the raster
+samp_evi <- crop(evi, bound_box)
+
+# look at the cropped area
+plot(samp_evi, xlab = 'Longitude', ylab = 'Latitude', main = 'Sample Location for Test')
+
+# run all functions on this test area
+run_all(samp_evi)
+
+```
+
+This can take a while, primarily due to the Srw (radial wavelength) and Scl (correlation lengths) functions. However, we want to know how all functions are useful for distinguishing ecosystems, so we'll leave them in for now.
+
+Now we want to run the functions over all points and output the results to a dataframe. This will require re-writing the *run_all* function slightly and looping over all sampled points.
+
+``` {r all points}
+
+# create modified run_all function that outputs results to dataframe
+run_all <- function(r){
+
+  # run all functions
+  sa <- sa(r)
+  sq <- sq(r)
+  s10z <-s10z(r)
+  sdq <- sdq(r)
+  sdq6 <- sdq6(r)
+  sdr <- sdr(r)
+  sbi <- sbi(r)
+  sci <- sci(r)
+  ssk_adj <- ssk(r, adj = TRUE)
+  sku_excess <- sku(r, excess = TRUE)
+  sds <- sds(r)
+  sfd <- sfd(as.matrix(r))
+  srwvals <- srw(r, plot = FALSE)
+  srw <- srwvals[[1]]
+  srwi <- srwvals[[2]]
+  shw <- srwvals[[3]]
+  stdvals <- std(r, plot = FALSE)
+  std <- stdvals[[1]]
+  stdi <- stdvals[[2]]
+  svi <- svi(r)
+  strvals <- str(r, threshold = c(0.2, 1 / exp(1)))
+  str20 <- strvals[[1]]
+  str37 <- strvals[[2]]
+  ssc <- ssc(r)
+  sv <- sv(r)
+  sp <- sph(r)
+  sk <- sk(r)
+  smean <- smean(r)
+  spk <- spk(r)
+  svk <- svk(r)
+  sclvals <- scl(r, threshold = c(0.2, 1 / exp(1)), plot = FALSE)
+  scl20 <- sclvals[[1]]
+  scl37 <- sclvals[[2]]
+  sdc0_5 <- sdc(r, 0, 0.05)
+  sdc50_55 <- sdc(r, 0.50, 0.55)
+  sdc80_85 <- sdc(r, 0.80, 0.85)
+
+  result_df <- data.frame(x = mean(coordinates(r)[, 1]), y = mean(coordinates(r)[, 2]),
+                          metric = c('sa', 'sq', 's10z', 'sdq', 'sdq6', 'sdr', 'sbi', 'sci',
+                                     'ssk', 'sku', 'sds', 'sfd', 'srw', 'srwi', 'shw', 
+                                     'std', 'stdi', 'svi', 'str20', 'str37', 'ssc', 'sv',
+                                     'sp', 'sk', 'smean', 'spk', 'svk', 'scl20', 'scl37',
+                                     'sdc0_5', 'sdc50_55', 'sdc80_85'), 
+                          value = c(sa, sq, s10z, sdq, sdq6, sdr, sbi, sci, ssk_adj,
+                                    sku_excess, sds, sfd, srw, srwi, shw, std, stdi, svi,
+                                    str20, str37, ssc, sv, sp, sk, smean, spk, svk, scl20,
+                                    scl37, sdc0_5, sdc50_55, sdc80_85))
+  return(result_df)
+}
+
+# loop over all points, cropping raster and running all functions for each
+for (i in seq(1, nrow(samp_pts))){
+  # write out what we're doing
+  cat('Calculating metrics for point: ', i, '\n')
+  
+  # select point
+  samp_pt <- samp_pts[i,]
+
+  # calculate smaller extent surrounding point (0.25 degrees on from center to all sides)
+  bound_box <- extent(samp_pt$x - 0.25, samp_pt$x + 0.25, samp_pt$y - 0.25, samp_pt$y + 0.25)
+  bound_box <- as(bound_box, 'SpatialPolygons')
+  
+  # crop the raster
+  samp_evi <- crop(evi, bound_box)
+  
+  # if irregular, remove rows with NA vals
+  # get rows/cols with nas
+  na_col <- which(colSums(is.na(samp_evi)) > 0)
+  na_row <- which(rowSums(is.na(samp_evi)) > 0)
+  if (length(na_col) + length(na_row) != 0) {
+      # list only good rows/cols
+    good_cols <- seq(1, ncol(samp_evi))[-na_col]
+    good_rows <- seq(1, nrow(samp_evi))[-na_row]
+    # crop raster
+    new_ext <- extent(samp_evi, min(good_rows), max(good_rows), min(good_cols), max(good_cols))
+    samp_evi <- crop(samp_evi, new_ext)
+  }
+
+  # calculate metrics
+  out <- run_all(samp_evi)
+  out$point <- i
+  
+  # add dataframes (or create if first point)
+  if (i == 1){
+    result <- out
+  } else {
+    result <- rbind(result, out)
+  }
+  
+  # remove data
+  rm(samp_pt, bound_box, samp_evi, out)
+}
 
 ```
