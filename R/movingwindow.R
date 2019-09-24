@@ -42,7 +42,7 @@
 #'    \item{\code{'sku_exc'}: excess kurtosis}
 #'    \item{\code{'sku'}: kurtosis}
 #'    \item{\code{'sds'}: summit density}
-#'    \item{\code{'sfd'}: 2d fractal dimension}
+#'    \item{\code{'sfd'}: 3d fractal dimension}
 #'    \item{\code{'srw'}: dominant radial wavelength}
 #'    \item{\code{'srwi'}: radial wavelength index}
 #'    \item{\code{'shw'}: mean half wavelength}
@@ -148,22 +148,22 @@ texture_image <- function(x, window_type = 'square', size = 11, epsg_proj = 5070
     try(stopCluster(cl), silent = TRUE)
     cl <- makeCluster(ncores)
     doSNOW::registerDoSNOW(cl)
-    clusterExport(cl = cl, list = list('x', 'out', 'coords', 'size',
+    snow::clusterExport(cl = cl, list = list('x', 'out', 'coords', 'size',
                                              'window_type', 'epsg_proj',
                                              'metric', 'threshold', 'low', 'high'),
                         envir = environment())
     # for each list in new_pixlist, run a for loop over all values
-    result <- parLapply(cl, new_pixlist, function(inds) {
+    result <- snow::parLapply(cl, new_pixlist, function(inds) {
       outvals <- c()
       for (i in inds) {
         pt_coords <- coords[i, ]
-        rownum <- rowFromCell(x, i)
-        colnum <- colFromCell(x, i)
+        rownum <- raster::rowFromCell(x, i)
+        colnum <- raster::colFromCell(x, i)
 
         if (window_type == 'square') {
-          outval <- window_metric(x, 'square', size, epsg_proj = epsg_proj, rownum, colnum, metric, threshold, low, high)
+          outval <- geodiv::window_metric(x, 'square', size, epsg_proj = epsg_proj, rownum, colnum, metric, threshold, low, high)
         } else {
-          outval <- window_metric(x, 'circle', size, epsg_proj = epsg_proj, rownum, colnum, metric, threshold, low, high)
+          outval <- geodiv::window_metric(x, 'circle', size, epsg_proj = epsg_proj, rownum, colnum, metric, threshold, low, high)
         }
         outvals <- c(outvals, outval)
       }
@@ -214,7 +214,7 @@ texture_image <- function(x, window_type = 'square', size = 11, epsg_proj = 5070
 #'    \item{\code{'sku_exc'}: excess kurtosis}
 #'    \item{\code{'sku'}: kurtosis}
 #'    \item{\code{'sds'}: summit density}
-#'    \item{\code{'sfd'}: 2d fractal dimension}
+#'    \item{\code{'sfd'}: 3d fractal dimension}
 #'    \item{\code{'srw'}: dominant radial wavelength}
 #'    \item{\code{'srwi'}: radial wavelength index}
 #'    \item{\code{'shw'}: mean half wavelength}
@@ -304,7 +304,7 @@ window_metric <- function(x, window_type = 'square', size = 11, epsg_proj = 5070
     # fill in middle
     ext_x[(size + 1):(nrow(ext_x) - size), (size + 1):(ncol(ext_x) - size)] <- getValues(x)
     # fill in corners with nearest point value (always the same)
-    ext_x_mat <- na.approx(matrix(ext_x, nrow = nrow(ext_x), ncol = ncol(ext_x)), rule = 2)
+    ext_x_mat <- zoo::na.approx(matrix(ext_x, nrow = nrow(ext_x), ncol = ncol(ext_x)), rule = 2)
     ext_x <- setValues(ext_x, t(ext_x_mat))
 
     # crop to square
@@ -404,7 +404,7 @@ window_metric <- function(x, window_type = 'square', size = 11, epsg_proj = 5070
     outval <- sds(cropped_x)
   }
   if (metric == 'sfd') {
-    outval <- sfd(cropped_x)
+    outval <- sfd(as.matrix(cropped_x))
   }
   if (metric == 'srw') {
     outval <- srw(cropped_x, plot = FALSE)[[1]]
