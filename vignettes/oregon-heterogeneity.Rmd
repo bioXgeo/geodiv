@@ -31,27 +31,30 @@ library(ggplot2)
 
 ```
 
-Now, open and plot a raster of the Enhanced Vegetation Index (EVI) for Oregon State. 
+Now, open and plot rasters of the Enhanced Vegetation Index (EVI) and
+SRTM elevation for Oregon State. 
 
 First, we want to open the data.
 ```{r data1}
 
-# import EVI raster into R
+# import EVI and elevation rasters into R
 data(oregonEVI)
+data(oregonElev)
 
 ```
 
-Next, we want to take a look at what dataset includes. As it includes a scalar, we apply that value.
+Next, we want to take a look at what those datasets include. As the EVI data include a scalar, we apply that value.
 
 ```{r data2}
 
 # look up scalar and apply to data
+?oregonElev
 ?oregonEVI
 oregonEVI <- oregonEVI * 0.0001
 
 ```
 
-Now, we can make a map, masking any values outside of the Oregon state bounds.
+Now, we can make maps, masking any values outside of the Oregon state bounds.
 
 ```{r data3}
 
@@ -59,9 +62,13 @@ Now, we can make a map, masking any values outside of the Oregon state bounds.
 oregon <- map(database = 'state', regions = 'oregon', fill = TRUE, plot = FALSE)
 oregonPoly <- map2SpatialPolygons(oregon, IDs = oregon$names, proj4string = CRS(proj4string(oregonEVI)))
 oregonEVI <- mask(x = oregonEVI, mask = oregonPoly)
+oregonElev <- mask(x = oregonElev, mask = oregonPoly)
 
 # plot maximum growing season EVI for Oregon
 plot(oregonEVI, xlab = 'Longitude', ylab = 'Latitude', main = 'Maximum Growing Season EVI')
+
+# plot elevation (in meters) for Oregon
+plot(oregonElev, xlab = 'Longitude', ylab = 'Latitude', main = 'Elevation (m)')
 
 ```
 
@@ -69,16 +76,17 @@ plot(oregonEVI, xlab = 'Longitude', ylab = 'Latitude', main = 'Maximum Growing S
 
 ##Removing the Best Fit Plane
 
-For surface metrics, we don't really care about the actual values so much as their contrast. Because of this, we now want to remove any trend that there may be over the entire raster. This is made easy by a function included in *geodiv*, 'remove_plane.'
+For surface metrics, we don't really care about the actual values so much as their contrast. Because of this, we now want to remove any trends that there may be over the rasters. This is made easy by a function included in *geodiv*, 'remove_plane.'
 
 ```{r remove trend}
 
-# remove overall trend in values over raster (this removes the best-fit polynomial plane)
+# remove overall trends in values over rasters (this removes the best-fit polynomial plane)
 evi <- remove_plane(oregonEVI)
+elev <- remove_plane(oregonElev)
 
 ```
 
-Note that this returned the order of polynomial that best fits any trend in the data. This is process is automated and considers polynomials orders of 1 -- 3. If you want a custom order of polynomial, you can use the 'fitplane' function to calculate the best fit plane of that order polynomial.
+Note that this returned the order of polynomial that best fits any trend in the data. This is process is automated and considers polynomials of orders of 1 -- 3. If you want a custom order of polynomial, you can use the 'fitplane' function to calculate the best fit plane of that order polynomial.
 
 For now, let's keep the results of the 'remove_plane' function and take a look at the results.
 
@@ -86,14 +94,15 @@ For now, let's keep the results of the 'remove_plane' function and take a look a
 
 # plot again to see what the new raster looks like
 plot(evi, xlab = 'Longitude', ylab = 'Latitude', main = 'EVI without Trend')
+plot(elev, xlab = 'Longitude', ylab = 'Latitude', main = 'Elevation without Trend')
 
 ```
 
 ## Sampling Locations
 
-Now that we have a clean raster, we need to sample locations at which to calculate metrics. We will select uniformly-distributed points across the state to get a good representation of all ecosystems.
+Now that we have clean rasters, we need to sample locations at which to calculate metrics. We will select uniformly-distributed points across the state to get a good representation of all ecosystems.
 
-First, we create a grid with a cell size of 0.5 degrees over the raster area. We then convert the created grid to spatial points so that they may be plotted.
+First, we create a grid with a cell size of 0.5 degrees over the state. We then convert the grid to spatial points so that they may be plotted.
 
 ``` {r sample1, include = FALSE}
 
@@ -103,7 +112,7 @@ pt_grid <- SpatialPoints(pt_grid, proj4string = CRS(proj4string(evi)))
 
 ```
 
-Now that we have points, we expect that some will fall outside of the state bounds. This is because the 'makegrid' function uses the extent of the input polygon, not the exact bounds. We clip (intersect) the points to the state bounds and convert those points into a dataframe. Finally, let's take a look at the results.
+We expect that some points will fall outside of the state bounds. This is because the 'makegrid' function uses the extent of the input polygon, not the exact bounds. We clip (intersect) the points to the state bounds and convert those points into a dataframe. Finally, let's take a look at the results.
 
 ```{r sample2}
 
@@ -123,7 +132,7 @@ Let's also plot the resulting points to make sure they look correct.
 ```{r sample3}
 
 # where are the points located on the map?
-plot(evi, xlab = 'Longitude', ylab = 'Latitude', main = 'Sample Locations')
+plot(elev, xlab = 'Longitude', ylab = 'Latitude', main = 'Sample Locations')
 points(x = samp_pts$x, y = samp_pts$y, pch = 19)
 
 ```
@@ -189,7 +198,7 @@ run_all <- function(r){
   print(sci)
   cat('\n')
 
-  cat('Ssk (Adjacent): ', '\n')
+  cat('Ssk (adjusted): ', '\n')
   ssk_adj <- ssk(r, adj = TRUE)
   print(ssk_adj)
   cat('\n')
@@ -348,11 +357,12 @@ samp_pt <- samp_pts[10,]
 bound_box <- extent(samp_pt$x - 0.25, samp_pt$x + 0.25, samp_pt$y - 0.25, samp_pt$y + 0.25)
 bound_box <- as(bound_box, 'SpatialPolygons')
 
-# crop the raster
+# crop the rasters
 samp_evi <- crop(evi, bound_box)
+samp_elev <- crop(elev, bound_box)
 
 # plot the box
-plot(evi, xlab = 'Longitude', ylab = 'Latitude', main = 'Sample Location for Test')
+plot(elev, xlab = 'Longitude', ylab = 'Latitude', main = 'Sample Location for Test')
 plot(bound_box, add = TRUE)
 
 ```
@@ -362,7 +372,7 @@ We then want to know what the variables represent, so we look at the sample loca
 ```{r single point2}
 
 # look at the cropped area
-plot(samp_evi, xlab = 'Longitude', ylab = 'Latitude', main = 'Sample Location for Test')
+plot(samp_elev, xlab = 'Longitude', ylab = 'Latitude', main = 'Sample Location for Test')
 
 ```
 
@@ -370,8 +380,8 @@ Finally, we run the function to calculate each metric and look at the results.
 
 ```{r single point3}
 
-# run all functions on this test area
-run_all(samp_evi)
+# run all functions on this test area for elevation
+run_all(samp_elev)
 
 ```
 
@@ -381,8 +391,8 @@ These functions take longer because they are extracting raster values over sever
 
 ```{r plot extraction functions}
 
-srwvals <- srw(samp_evi, plot = TRUE) 
-stdvals <- std(samp_evi, plot = TRUE)
+srwvals <- srw(samp_elev, plot = TRUE) 
+stdvals <- std(samp_elev, plot = TRUE)
 
 ```
 
@@ -393,107 +403,108 @@ Now we want to run the functions over all points and output the results to a dat
 ``` {r all points}
 
 # create modified run_all function that outputs results to dataframe
-# run_all <- function(r){
-# 
-#   # run all functions
-#   sa <- sa(r)
-#   sq <- sq(r)
-#   s10z <-s10z(r)
-#   sdq <- sdq(r)
-#   sdq6 <- sdq6(r)
-#   sdr <- sdr(r)
-#   sbi <- sbi(r)
-#   sci <- sci(r)
-#   ssk_adj <- ssk(r, adj = TRUE)
-#   sku_excess <- sku(r, excess = TRUE)
-#   sds <- sds(r)
-#   sfd <- sfd(as.matrix(r))
-#   srwvals <- srw(r, plot = FALSE)
-#   srw <- srwvals[[1]]
-#   srwi <- srwvals[[2]]
-#   shw <- srwvals[[3]]
-#   stdvals <- std(r, plot = FALSE)
-#   std <- stdvals[[1]]
-#   stdi <- stdvals[[2]]
-#   svi <- svi(r)
-#   strvals <- str(r, threshold = c(0.2, 1 / exp(1)))
-#   str20 <- strvals[[1]]
-#   str37 <- strvals[[2]]
-#   ssc <- ssc(r)
-#   sv <- sv(r)
-#   sp <- sph(r)
-#   sk <- sk(r)
-#   smean <- smean(r)
-#   spk <- spk(r)
-#   svk <- svk(r)
-#   sclvals <- scl(r, threshold = c(0.2, 1 / exp(1)), plot = FALSE)
-#   scl20 <- sclvals[[1]]
-#   scl37 <- sclvals[[2]]
-#   sdc0_5 <- sdc(r, 0, 0.05)
-#   sdc50_55 <- sdc(r, 0.50, 0.55)
-#   sdc80_85 <- sdc(r, 0.80, 0.85)
-# 
-#   result_df <- data.frame(x = mean(coordinates(r)[, 1]), y = mean(coordinates(r)[, 2]),
-#                           metric = c('sa', 'sq', 's10z', 'sdq', 'sdq6', 'sdr', 'sbi', 'sci',
-#                                      'ssk', 'sku', 'sds', 'sfd', 'srw', 'srwi', 'shw', 
-#                                      'std', 'stdi', 'svi', 'str20', 'str37', 'ssc', 'sv',
-#                                      'sp', 'sk', 'smean', 'spk', 'svk', 'scl20', 'scl37',
-#                                      'sdc0_5', 'sdc50_55', 'sdc80_85'), 
-#                           value = c(sa, sq, s10z, sdq, sdq6, sdr, sbi, sci, ssk_adj,
-#                                     sku_excess, sds, sfd, srw, srwi, shw, std, stdi, svi,
-#                                     str20, str37, ssc, sv, sp, sk, smean, spk, svk, scl20,
-#                                     scl37, sdc0_5, sdc50_55, sdc80_85))
-#   return(result_df)
-# }
-# 
-# # loop over all points, cropping raster and running all functions for each
-# for (i in seq(1, nrow(samp_pts))){
-#   # write out what we're doing
-#   cat('Calculating metrics for point: ', i, '\n')
-#   
-#   # select point
-#   samp_pt <- samp_pts[i,]
-# 
-#   # calculate smaller extent surrounding point (0.25 degrees on from center to all sides)
-#   bound_box <- extent(samp_pt$x - 0.25, samp_pt$x + 0.25, samp_pt$y - 0.25, samp_pt$y + 0.25)
-#   bound_box <- as(bound_box, 'SpatialPolygons')
-#   
-#   # crop the raster
-#   samp_evi <- crop(evi, bound_box)
-#   
-#   # if irregular, remove rows with NA vals
-#   # get rows/cols with nas
-#   na_col <- which(colSums(is.na(samp_evi)) > 0)
-#   na_row <- which(rowSums(is.na(samp_evi)) > 0)
-#   if (length(na_col) + length(na_row) != 0) {
-#       # list only good rows/cols
-#     good_cols <- seq(1, ncol(samp_evi))[-na_col]
-#     good_rows <- seq(1, nrow(samp_evi))[-na_row]
-#     # crop raster
-#     new_ext <- extent(samp_evi, min(good_rows), max(good_rows), min(good_cols), max(good_cols))
-#     samp_evi <- crop(samp_evi, new_ext)
-#   }
-# 
-#   # calculate metrics
-#   out <- run_all(samp_evi)
-#   out$point <- i
-#   
-#   # add dataframes (or create if first point)
-#   if (i == 1){
-#     result <- out
-#   } else {
-#     result <- rbind(result, out)
-#   }
-#   
-#   # remove data
-#   rm(samp_pt, bound_box, samp_evi, out)
-# }
-# 
-# # write out result
-# write.csv(result, '~/Documents/surface_metrics/oregon_metric_results.csv', row.names = F)
+run_all <- function(r){
+
+  # run all functions
+  sa <- sa(r)
+  sq <- sq(r)
+  s10z <-s10z(r)
+  sdq <- sdq(r)
+  sdq6 <- sdq6(r)
+  sdr <- sdr(r)
+  sbi <- sbi(r)
+  sci <- sci(r)
+  ssk_adj <- ssk(r, adj = TRUE)
+  sku_excess <- sku(r, excess = TRUE)
+  sds <- sds(r)
+  sfd <- sfd(as.matrix(r))
+  srwvals <- srw(r, plot = FALSE)
+  srw <- srwvals[[1]]
+  srwi <- srwvals[[2]]
+  shw <- srwvals[[3]]
+  stdvals <- std(r, plot = FALSE)
+  std <- stdvals[[1]]
+  stdi <- stdvals[[2]]
+  svi <- svi(r)
+  strvals <- str(r, threshold = c(0.2, 1 / exp(1)))
+  str20 <- strvals[[1]]
+  str37 <- strvals[[2]]
+  ssc <- ssc(r)
+  sv <- sv(r)
+  sp <- sph(r)
+  sk <- sk(r)
+  smean <- smean(r)
+  spk <- spk(r)
+  svk <- svk(r)
+  sclvals <- scl(r, threshold = c(0.2, 1 / exp(1)), plot = FALSE)
+  scl20 <- sclvals[[1]]
+  scl37 <- sclvals[[2]]
+  sdc0_5 <- sdc(r, 0, 0.05)
+  sdc50_55 <- sdc(r, 0.50, 0.55)
+  sdc80_85 <- sdc(r, 0.80, 0.85)
+
+  result_df <- data.frame(x = mean(coordinates(r)[, 1]), y = mean(coordinates(r)[, 2]),
+                          metric = c('sa', 'sq', 's10z', 'sdq', 'sdq6', 'sdr', 'sbi', 'sci',
+                                     'ssk', 'sku', 'sds', 'sfd', 'srw', 'srwi', 'shw',
+                                     'std', 'stdi', 'svi', 'str20', 'str37', 'ssc', 'sv',
+                                     'sp', 'sk', 'smean', 'spk', 'svk', 'scl20', 'scl37',
+                                     'sdc0_5', 'sdc50_55', 'sdc80_85'),
+                          value = c(sa, sq, s10z, sdq, sdq6, sdr, sbi, sci, ssk_adj,
+                                    sku_excess, sds, sfd, srw, srwi, shw, std, stdi, svi,
+                                    str20, str37, ssc, sv, sp, sk, smean, spk, svk, scl20,
+                                    scl37, sdc0_5, sdc50_55, sdc80_85))
+  return(result_df)
+}
+
+# loop over all points, cropping raster and running all functions for each
+for (i in seq(65, nrow(samp_pts))){
+  # write out what we're doing
+  cat('Calculating metrics for point: ', i, '\n')
+
+  # select point
+  samp_pt <- samp_pts[i,]
+
+  # calculate smaller extent surrounding point (0.25 degrees on from center to all sides)
+  bound_box <- extent(samp_pt$x - 0.25, samp_pt$x + 0.25, samp_pt$y - 0.25, samp_pt$y + 0.25)
+  bound_box <- as(bound_box, 'SpatialPolygons')
+
+  # crop the raster
+  samp_elev <- crop(elev, bound_box)
+
+  # if irregular, remove rows with NA vals
+  # get rows/cols with nas
+  na_col <- which(colSums(is.na(samp_elev)) > 0)
+  na_row <- which(rowSums(is.na(samp_elev)) > 0)
+  if (length(na_col) + length(na_row) != 0) {
+      # list only good rows/cols
+    good_cols <- seq(1, ncol(samp_elev))[-na_col]
+    good_rows <- seq(1, nrow(samp_elev))[-na_row]
+    # crop raster
+    new_ext <- extent(samp_elev, min(good_rows), max(good_rows), min(good_cols), max(good_cols))
+    samp_elev <- crop(samp_elev, new_ext)
+  }
+
+  # calculate metrics
+  out <- run_all(samp_elev)
+  out$point <- i
+
+  # add dataframes (or create if first point)
+  if (i == 1){
+    result <- out
+  } else {
+    result <- rbind(result, out)
+  }
+
+  # remove data
+  rm(samp_pt, bound_box, samp_elev, out)
+}
+
+# write out result
+write.csv(result, '~/Documents/surface_metrics/oregon_metric_results_elev.csv', row.names = F)
 
 # read in the future, because the above takes a while
-result <- read.csv('~/Documents/surface_metrics/oregon_metric_results.csv')
+data_evi <- read.csv('~/Documents/surface_metrics/oregon_metric_results.csv')
+data_elev <- read.csv('~/Documents/surface_metrics/oregon_metric_results_elev.csv')
 
 ```
 
@@ -503,13 +514,11 @@ We now have metrics for all of the sampling locations. We want to see if the met
 
 ```{r map metrics}
 
-data <- result
-
 # distributions of a few variables
-hist(data$value[data$metric == 'sa'], breaks = 30)
-hist(data$value[data$metric == 'sbi'], breaks = 30)
-hist(data$value[data$metric == 'sfd'], breaks = 30)
-hist(data$value[data$metric == 'std'], breaks = 30)
+hist(data_elev$value[data_elev$metric == 'sa'], breaks = 30)
+hist(data_elev$value[data_elev$metric == 'sbi'], breaks = 30)
+hist(data_elev$value[data_elev$metric == 'sfd'], breaks = 30)
+hist(data_elev$value[data_elev$metric == 'std'], breaks = 30)
 
 ```
 
@@ -517,15 +526,40 @@ Histograms demonstrate some variation in the values at the sampling locations, b
 
 ```{r map metrics}
 
-# map the texture direction index
+# for plotting, convert raster values to dataframe
+elev_pixdf <- as(oregonElev, "SpatialPixelsDataFrame")
+elev_df <- as.data.frame(elev_pixdf)
+colnames(elev_df) <- c("value", "x", "y")
+
+evi_pixdf <- as(oregonEVI, "SpatialPixelsDataFrame")
+evi_df <- as.data.frame(evi_pixdf)
+colnames(evi_df) <- c("value", "x", "y")
+
+# map the metrics for elevation
 or_ggpoly <- map_data('state', 'oregon')
+
+# Sq
+ggplot(data = elev_df) +
+  geom_raster(aes(x = x, y = y, fill = value)) + 
+  scale_colour_gradientn(colours = terrain.colors(10)) #+
+  geom_polygon(data = or_ggpoly, aes(x = long, y = lat, group = region), fill = NA, colour = 'black') +
+  geom_point(data = data_elev[data_elev$metric == 'sq',], aes(x = x, y = y, size = value)) +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
+# Sdq
+# Sbi
+# Sfd
+
+# and also for EVI
 ggplot() +
   geom_polygon(data = or_ggpoly, aes(x = long, y = lat, group = region), fill = 'white', colour = 'black') +
-  geom_point(data = data[data$metric == 'std',], aes(x = x, y = y, size = value))
+  geom_point(data = data_evi[data_evi$metric == 'sfd',], aes(x = x, y = y, size = value))
+
 
 ```
 
-There aren't really any clear patterns in the map of texture direction, but combining metrics may improve our ability to distinguish ecosystems. 
+There aren't really any clear patterns in the map of texture direction, although it does appear that the texture direction of elevation in mountainous areas tends to be closer to 0, and in flatter areas closer to 180. We will combine metrics next in order to try improve to our ability to distinguish ecosystems. 
 
 We now want to investigate the observed groupings using a statistical approach that simplifies the many metrics into fewer groups, principal components analysis. The composition of the various components provides information on which metrics contain similar information. By observing how the first two or three principal components relate to one another, we can potentially split sites into ecosystems with various characteristics.
 
@@ -536,30 +570,34 @@ First, we have to clean up the data by reshaping it and removing any missing val
 library(tidyverse)
 
 # transform data into correct format (columns for each metric)
-data <- spread(data = data, key = metric, value = value)
+data_elev <- spread(data = data_elev, key = metric, value = value)
+data_evi <- spread(data = data_evi, key = metric, value = value)
 
 # order neatly
-data <- data[order(data$point),]
+data_elev <- data_elev[order(data_elev$point),]
+data_evi <- data_evi[order(data_evi$point),]
 
 # we should now have 108 neatly ordered rows
-nrow(data)
-head(data)
+nrow(data_elev)
+head(data_elev)
 
 # check for missing values
-sapply(data[, c(4:30, 32:35)], function(x) sum(is.na(x)))
+sapply(data_elev[, c(4:30, 32:35)], function(x) sum(is.na(x)))
 
 # str20 has one missing value, which makes sense because it means that autocorrelation
 # never decreases to 20% in that area
-# for now, we will remove str20 because it correlates extremely highly with str37
-plot(data$str20, data$str37)
+# for now, we will remove that point, and any others with missing locations
 
-# same with scl20, which is Inf for the same location (found by looking at the df)
+data_elev_noNA <- na.omit(data_elev) # now 97 points
+data_evi_noNA <- na.omit(data_evi) # now 107 points
 
 ```
 
-We located a couple of missing values in the texture aspect ratio (Str) and correlation length functions (Scl). 
+We located a few missing values in the texture aspect ratio (Str) and correlation length functions (Scl). 
 
 This makes a lot of sense, because the correlation length function determines the distance it takes to get the autocorrelation within the raster down to a specified value. Here, we see that the distance for an autocorrelation value of 37% is successfully estimated, but the distance for an autocorrelation value of 20% is not. This simply indicates that the raster values are highly autocorrelated in this area and do not ever decrease to 20%. We can see this high autocorrelation by looking at the autocorrelation function image.
+
+We also note missing values in the 3D fractal dimension (Sfd), mean peak height (Smean), and summit curvature (Ssc) variables. These are likely due to entirely flat areas of the landscape, where no peaks or patterns may be found.
 
 ```{r autocorrelation}
 
@@ -572,55 +610,52 @@ Now that we have investigated the data and decided which variables we can and wa
 ```{r pca1}
 
 # calculate principal components
-data_prc <- prcomp(data[, c(4:7, 9:30, 32:35)], center = TRUE, scale = TRUE)
-summary(data_prc)
+elev_prc <- prcomp(data_elev_noNA, center = TRUE, scale = TRUE)
+evi_prc <- prcomp(data_evi_noNA, center = TRUE, scale = TRUE)
+summary(elev_prc)
+summary(evi_prc)
 
-# take a look at the components
-screeplot(data_prc, type = "l", npcs = 15, main = "Screeplot of the first 10 PCs")
+# take a look at the components for elevation
+screeplot(elev_prc, type = "l", npcs = 15, main = "Screeplot of the first 10 PCs")
 abline(h = 1, col = "red", lty = 5)
 legend("topright", legend = c("Eigenvalue = 1"),
        col = c("red"), lty = 5, cex = 0.6)
 
-cumpro <- cumsum(data_prc$sdev ^ 2 / sum(data_prc$sdev ^ 2))
+cumpro <- cumsum(elev_prc$sdev ^ 2 / sum(elev_prc$sdev ^ 2))
 plot(cumpro[0:15], xlab = "PC #", ylab = "Amount of explained variance", main = "Cumulative variance plot")
 abline(v = 6, col = "blue", lty = 5)
-abline(h = 0.7833145, col = "blue", lty = 5)
+abline(h = 0.77001, col = "blue", lty = 5)
 legend("topleft", legend = c("Cut-off @ PC6"),
        col = c("blue"), lty = 5, cex = 0.6)
 
-# the first 2 components explain 54% of the variance, while the first three explain 62%
+# the first 2 components explain 44% of the variance, while the first three explain 56%
 
 # let's plot the first 2
-plot(data_prc$x[, 1], data_prc$x[, 2], xlab = "PC1 (32.1%)", ylab = "PC2 (22.1%)", main = "PC1 / PC2 - plot")
+plot(elev_prc$x[, 1], elev_prc$x[, 2], xlab = "PC1 (28.1%)", ylab = "PC2 (16.3%)", main = "PC1 / PC2 - plot")
 
-plot(data_prc$x[, 1], data_prc$x[, 3], xlab = "PC1 (32.1%)", ylab = "PC3 (8.0%)", main = "PC1 / PC3 - plot")
+plot(elev_prc$x[, 1], elev_prc$x[, 3], xlab = "PC1 (28.1%)", ylab = "PC3 (11.5%)", main = "PC1 / PC3 - plot")
 
-plot(data_prc$x[, 2], data_prc$x[, 3], xlab = "PC2 (22.1%)", ylab = "PC3 (8.0%)", main = "PC2 / PC3 - plot")
+plot(elev_prc$x[, 2], elev_prc$x[, 3], xlab = "PC2 (16.3%)", ylab = "PC3 (11.5%)", main = "PC2 / PC3 - plot")
 
 # how about mapping - are there any patterns?
-data$prc1 <- data_prc$x[, 1]
-data$prc2 <- data_prc$x[, 2]
-data$prc3 <- data_prc$x[, 3]
-
-# for plotting, convert EVI values to dataframe
-evi_pixdf <- as(oregonEVI, "SpatialPixelsDataFrame")
-evi_df <- as.data.frame(evi_pixdf)
-colnames(evi_df) <- c("value", "x", "y")
+data_elev_noNA$prc1 <- elev_prc$x[, 1]
+data_elev_noNA$prc2 <- elev_prc$x[, 2]
+data_elev_noNA$prc3 <- elev_prc$x[, 3]
 
 # principal component 1
 ggplot() +
-  geom_tile(data = evi_df, aes(x = x, y = y, fill = value), alpha = 0.8) + 
-  geom_point(data = data, aes(x = x, y = y, size = prc1))
+  geom_tile(data = elev_df, aes(x = x, y = y, fill = value), alpha = 0.8) + 
+  geom_point(data = data_elev_noNA, aes(x = x, y = y, size = prc1))
 
 # principal component 2
 ggplot() +
-  geom_tile(data = evi_df, aes(x = x, y = y, fill = value), alpha = 0.8) + 
-  geom_point(data = data, aes(x = x, y = y, size = prc2))
+  geom_tile(data = elev_df, aes(x = x, y = y, fill = value), alpha = 0.8) + 
+  geom_point(data = data_elev_noNA, aes(x = x, y = y, size = prc2))
 
 # principal component 3
 ggplot() +
-  geom_tile(data = evi_df, aes(x = x, y = y, fill = value), alpha = 0.8) + 
-  geom_point(data = data, aes(x = x, y = y, size = prc3))
+  geom_tile(data = elev_df, aes(x = x, y = y, fill = value), alpha = 0.8) + 
+  geom_point(data = data_elev_noNA, aes(x = x, y = y, size = prc3))
 
 ```
 

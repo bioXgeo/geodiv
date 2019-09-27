@@ -64,7 +64,7 @@ Metrics available:
    \item{\code{'sku_exc'}: excess kurtosis}
    \item{\code{'sku'}: kurtosis}
    \item{\code{'sds'}: summit density}
-   \item{\code{'sfd'}: 2d fractal dimension}
+   \item{\code{'sfd'}: 3d fractal dimension}
    \item{\code{'srw'}: dominant radial wavelength}
    \item{\code{'srwi'}: radial wavelength index}
    \item{\code{'shw'}: mean half wavelength}

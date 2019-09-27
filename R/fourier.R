@@ -108,7 +108,7 @@ std <- function(x, plot = FALSE) {
     Aalpha[i] <- extract(amp_img, lines[i], fun = sum)
   }
 
-  std <- .rad2deg(alpha[which(unlist(Aalpha) == max(unlist(Aalpha), na.rm = TRUE))])
+  std <- min(.rad2deg(alpha[which(unlist(Aalpha) == max(unlist(Aalpha), na.rm = TRUE))]), na.rm = TRUE)
   stdi <- mean(unlist(Aalpha), na.rm = TRUE) / max(unlist(Aalpha), na.rm = TRUE)
 
   return(list(std, stdi))

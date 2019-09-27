@@ -67,3 +67,21 @@
 #'   ...
 #' }
 "oregonEVI"
+
+#' Raster of elevation for Oregon, USA.
+#'
+#' A raster image of Shuttle Radar Topography Mission (SRTM)
+#' elevation over Oregon state, USA.
+#' The elevation data were prepared (aggregated to 270m resolution)
+#' in Google Earth Engine and downloaded on 25 September, 2019.
+#'
+#' @format A raster image with 1918 x 3670 pixels.
+#' \describe{
+#'   \item{range}{0 -- 3332}
+#'   \item{bounds}{-124.7039, -116.463, 41.99197, 46.29957}
+#'   \item{resolution}{270m x 270m}
+#'   \item{projection}{WGS84}
+#'   \item{scalar}{1}
+#'   ...
+#' }
+"oregonElev"
