@@ -118,6 +118,7 @@ We expect that some points will fall outside of the state bounds. This is becaus
 
 # cut to state outline
 pt_grid <- gIntersection(pt_grid, oregonPoly)
+points <- st_as_sf(as.data.frame(coordinates(pt_grid)), coords = c(1, 2), crs = 4326)
 
 # convert to sample data frame
 samp_pts <- as.data.frame(coordinates(pt_grid))
@@ -134,6 +135,8 @@ Let's also plot the resulting points to make sure they look correct.
 # where are the points located on the map?
 plot(elev, xlab = 'Longitude', ylab = 'Latitude', main = 'Sample Locations')
 points(x = samp_pts$x, y = samp_pts$y, pch = 19)
+
+test = get_map(location = c(lon = -120.688800, lat = 43.929687), zoom = 6)
 
 ```
 
@@ -457,50 +460,50 @@ run_all <- function(r){
 }
 
 # loop over all points, cropping raster and running all functions for each
-for (i in seq(65, nrow(samp_pts))){
-  # write out what we're doing
-  cat('Calculating metrics for point: ', i, '\n')
-
-  # select point
-  samp_pt <- samp_pts[i,]
-
-  # calculate smaller extent surrounding point (0.25 degrees on from center to all sides)
-  bound_box <- extent(samp_pt$x - 0.25, samp_pt$x + 0.25, samp_pt$y - 0.25, samp_pt$y + 0.25)
-  bound_box <- as(bound_box, 'SpatialPolygons')
-
-  # crop the raster
-  samp_elev <- crop(elev, bound_box)
-
-  # if irregular, remove rows with NA vals
-  # get rows/cols with nas
-  na_col <- which(colSums(is.na(samp_elev)) > 0)
-  na_row <- which(rowSums(is.na(samp_elev)) > 0)
-  if (length(na_col) + length(na_row) != 0) {
-      # list only good rows/cols
-    good_cols <- seq(1, ncol(samp_elev))[-na_col]
-    good_rows <- seq(1, nrow(samp_elev))[-na_row]
-    # crop raster
-    new_ext <- extent(samp_elev, min(good_rows), max(good_rows), min(good_cols), max(good_cols))
-    samp_elev <- crop(samp_elev, new_ext)
-  }
-
-  # calculate metrics
-  out <- run_all(samp_elev)
-  out$point <- i
-
-  # add dataframes (or create if first point)
-  if (i == 1){
-    result <- out
-  } else {
-    result <- rbind(result, out)
-  }
-
-  # remove data
-  rm(samp_pt, bound_box, samp_elev, out)
-}
-
-# write out result
-write.csv(result, '~/Documents/surface_metrics/oregon_metric_results_elev.csv', row.names = F)
+# for (i in seq(65, nrow(samp_pts))){
+#   # write out what we're doing
+#   cat('Calculating metrics for point: ', i, '\n')
+# 
+#   # select point
+#   samp_pt <- samp_pts[i,]
+# 
+#   # calculate smaller extent surrounding point (0.25 degrees on from center to all sides)
+#   bound_box <- extent(samp_pt$x - 0.25, samp_pt$x + 0.25, samp_pt$y - 0.25, samp_pt$y + 0.25)
+#   bound_box <- as(bound_box, 'SpatialPolygons')
+# 
+#   # crop the raster
+#   samp_elev <- crop(elev, bound_box)
+# 
+#   # if irregular, remove rows with NA vals
+#   # get rows/cols with nas
+#   na_col <- which(colSums(is.na(samp_elev)) > 0)
+#   na_row <- which(rowSums(is.na(samp_elev)) > 0)
+#   if (length(na_col) + length(na_row) != 0) {
+#       # list only good rows/cols
+#     good_cols <- seq(1, ncol(samp_elev))[-na_col]
+#     good_rows <- seq(1, nrow(samp_elev))[-na_row]
+#     # crop raster
+#     new_ext <- extent(samp_elev, min(good_rows), max(good_rows), min(good_cols), max(good_cols))
+#     samp_elev <- crop(samp_elev, new_ext)
+#   }
+# 
+#   # calculate metrics
+#   out <- run_all(samp_elev)
+#   out$point <- i
+# 
+#   # add dataframes (or create if first point)
+#   if (i == 1){
+#     result <- out
+#   } else {
+#     result <- rbind(result, out)
+#   }
+# 
+#   # remove data
+#   rm(samp_pt, bound_box, samp_elev, out)
+# }
+# 
+# # write out result
+# write.csv(result, '~/Documents/surface_metrics/oregon_metric_results_elev.csv', row.names = F)
 
 # read in the future, because the above takes a while
 data_evi <- read.csv('~/Documents/surface_metrics/oregon_metric_results.csv')
@@ -538,24 +541,89 @@ colnames(evi_df) <- c("value", "x", "y")
 # map the metrics for elevation
 or_ggpoly <- map_data('state', 'oregon')
 
+### for Elevation
 # Sq
 ggplot(data = elev_df) +
-  geom_raster(aes(x = x, y = y, fill = value)) + 
-  scale_colour_gradientn(colours = terrain.colors(10)) #+
+  geom_raster(aes(x = x, y = y, fill = value), alpha = 0.8) + 
+  scale_fill_gradientn(colours = terrain.colors(10), name = 'Elevation (m)') +
   geom_polygon(data = or_ggpoly, aes(x = long, y = lat, group = region), fill = NA, colour = 'black') +
   geom_point(data = data_elev[data_elev$metric == 'sq',], aes(x = x, y = y, size = value)) +
+  scale_size_continuous(name = 'Sq') +
   theme_bw() +
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank())
 # Sdq
+ggplot(data = elev_df) +
+  geom_raster(aes(x = x, y = y, fill = value), alpha = 0.8) + 
+  scale_fill_gradientn(colours = terrain.colors(10), name = 'Elevation (m)') +
+  geom_polygon(data = or_ggpoly, aes(x = long, y = lat, group = region), fill = NA, colour = 'black') +
+  geom_point(data = data_elev[data_elev$metric == 'sdq',], aes(x = x, y = y, size = value)) +
+  scale_size_continuous(name = 'Sdq') +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
 # Sbi
+ggplot(data = elev_df) +
+  geom_raster(aes(x = x, y = y, fill = value), alpha = 0.8) + 
+  scale_fill_gradientn(colours = terrain.colors(10), name = 'Elevation (m)') +
+  geom_polygon(data = or_ggpoly, aes(x = long, y = lat, group = region), fill = NA, colour = 'black') +
+  geom_point(data = data_elev[data_elev$metric == 'sbi',], aes(x = x, y = y, size = value)) +
+  scale_size_continuous(name = 'Sbi') +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
 # Sfd
+ggplot(data = elev_df) +
+  geom_raster(aes(x = x, y = y, fill = value), alpha = 0.8) + 
+  scale_fill_gradientn(colours = terrain.colors(10), name = 'Elevation (m)') +
+  geom_polygon(data = or_ggpoly, aes(x = long, y = lat, group = region), fill = NA, colour = 'black') +
+  geom_point(data = data_elev[data_elev$metric == 'sfd',], aes(x = x, y = y, size = value)) +
+  scale_size_continuous(name = 'Sfd') +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
 
 # and also for EVI
-ggplot() +
-  geom_polygon(data = or_ggpoly, aes(x = long, y = lat, group = region), fill = 'white', colour = 'black') +
-  geom_point(data = data_evi[data_evi$metric == 'sfd',], aes(x = x, y = y, size = value))
-
+# Sq
+ggplot(data = evi_df) +
+  geom_raster(aes(x = x, y = y, fill = value), alpha = 0.8) + 
+  scale_fill_gradientn(colours = terrain.colors(10), name = 'Elevation (m)') +
+  geom_polygon(data = or_ggpoly, aes(x = long, y = lat, group = region), fill = NA, colour = 'black') +
+  geom_point(data = data_evi[data_evi$metric == 'sq',], aes(x = x, y = y, size = value)) +
+  scale_size_continuous(name = 'Sq') +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
+# Sdq
+ggplot(data = evi_df) +
+  geom_raster(aes(x = x, y = y, fill = value), alpha = 0.8) + 
+  scale_fill_gradientn(colours = terrain.colors(10), name = 'Elevation (m)') +
+  geom_polygon(data = or_ggpoly, aes(x = long, y = lat, group = region), fill = NA, colour = 'black') +
+  geom_point(data = data_evi[data_evi$metric == 'sdq',], aes(x = x, y = y, size = value)) +
+  scale_size_continuous(name = 'Sdq') +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
+# Sbi
+ggplot(data = evi_df) +
+  geom_raster(aes(x = x, y = y, fill = value), alpha = 0.8) + 
+  scale_fill_gradientn(colours = terrain.colors(10), name = 'Elevation (m)') +
+  geom_polygon(data = or_ggpoly, aes(x = long, y = lat, group = region), fill = NA, colour = 'black') +
+  geom_point(data = data_evi[data_evi$metric == 'sbi',], aes(x = x, y = y, size = value)) +
+  scale_size_continuous('Sbi') +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
+# Sfd
+ggplot(data = evi_df) +
+  geom_raster(aes(x = x, y = y, fill = value), alpha = 0.8) + 
+  scale_fill_gradientn(colours = terrain.colors(10), name = 'Elevation (m)') +
+  geom_polygon(data = or_ggpoly, aes(x = long, y = lat, group = region), fill = NA, colour = 'black') +
+  geom_point(data = data_evi[data_evi$metric == 'sfd',], aes(x = x, y = y, size = value)) +
+  scale_size_continuous(name = 'Sfd') +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
 
 ```
 
@@ -642,20 +710,74 @@ data_elev_noNA$prc1 <- elev_prc$x[, 1]
 data_elev_noNA$prc2 <- elev_prc$x[, 2]
 data_elev_noNA$prc3 <- elev_prc$x[, 3]
 
+data_evi_noNA$prc1 <- evi_prc$x[, 1]
+data_evi_noNA$prc2 <- evi_prc$x[, 2]
+data_evi_noNA$prc3 <- evi_prc$x[, 3]
+
+
+### elevation
 # principal component 1
-ggplot() +
-  geom_tile(data = elev_df, aes(x = x, y = y, fill = value), alpha = 0.8) + 
-  geom_point(data = data_elev_noNA, aes(x = x, y = y, size = prc1))
-
+ggplot(data = elev_df) +
+  geom_raster(aes(x = x, y = y, fill = value), alpha = 0.8) + 
+  scale_fill_gradientn(colours = terrain.colors(10), name = 'Elevation (m)') +
+  geom_polygon(data = or_ggpoly, aes(x = long, y = lat, group = region), fill = NA, colour = 'black') +
+  geom_point(data = data_elev_noNA, aes(x = x, y = y, size = prc1)) +
+  scale_size_continuous(name = 'PC 1') +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
 # principal component 2
-ggplot() +
-  geom_tile(data = elev_df, aes(x = x, y = y, fill = value), alpha = 0.8) + 
-  geom_point(data = data_elev_noNA, aes(x = x, y = y, size = prc2))
-
+ggplot(data = elev_df) +
+  geom_raster(aes(x = x, y = y, fill = value), alpha = 0.8) + 
+  scale_fill_gradientn(colours = terrain.colors(10), name = 'Elevation (m)') +
+  geom_polygon(data = or_ggpoly, aes(x = long, y = lat, group = region), fill = NA, colour = 'black') +
+  geom_point(data = data_elev_noNA, aes(x = x, y = y, size = prc2)) +
+  scale_size_continuous(name = 'PC 2') +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
 # principal component 3
-ggplot() +
-  geom_tile(data = elev_df, aes(x = x, y = y, fill = value), alpha = 0.8) + 
-  geom_point(data = data_elev_noNA, aes(x = x, y = y, size = prc3))
+ggplot(data = elev_df) +
+  geom_raster(aes(x = x, y = y, fill = value), alpha = 0.8) + 
+  scale_fill_gradientn(colours = terrain.colors(10), name = 'Elevation (m)') +
+  geom_polygon(data = or_ggpoly, aes(x = long, y = lat, group = region), fill = NA, colour = 'black') +
+  geom_point(data = data_elev_noNA, aes(x = x, y = y, size = prc3)) +
+  scale_size_continuous(name = 'PC 3') +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
+
+### evi
+# principal component 1
+ggplot(data = evi_df) +
+  geom_raster(aes(x = x, y = y, fill = value), alpha = 0.8) + 
+  scale_fill_gradientn(colours = terrain.colors(10), name = 'EVI') +
+  geom_polygon(data = or_ggpoly, aes(x = long, y = lat, group = region), fill = NA, colour = 'black') +
+  geom_point(data = data_evi_noNA, aes(x = x, y = y, size = prc1)) +
+  scale_size_continuous(name = 'PC 1') +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
+# principal component 2
+ggplot(data = evi_df) +
+  geom_raster(aes(x = x, y = y, fill = value), alpha = 0.8) + 
+  scale_fill_gradientn(colours = terrain.colors(10), name = 'EVI') +
+  geom_polygon(data = or_ggpoly, aes(x = long, y = lat, group = region), fill = NA, colour = 'black') +
+  geom_point(data = data_evi_noNA, aes(x = x, y = y, size = prc2)) +
+  scale_size_continuous(name = 'PC 2') +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
+# principal component 3
+ggplot(data = evi_df) +
+  geom_raster(aes(x = x, y = y, fill = value), alpha = 0.8) + 
+  scale_fill_gradientn(colours = terrain.colors(10), name = 'EVI') +
+  geom_polygon(data = or_ggpoly, aes(x = long, y = lat, group = region), fill = NA, colour = 'black') +
+  geom_point(data = data_evi_noNA, aes(x = x, y = y, size = prc3)) +
+  scale_size_continuous(name = 'PC 3') +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
 
 ```
 
