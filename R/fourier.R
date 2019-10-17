@@ -207,28 +207,57 @@ srw <- function(x, plot = FALSE) {
   } else {
     ncircles <- 100
   }
-  nv <- 100
-  angle.inc <- 2 * pi / nv
-  angles <- seq(0, 2 * pi - angle.inc, by = angle.inc)
-  radius <- seq(0, half_dist, length.out = ncircles)
-  linex <- unlist(lapply(seq(1, length(radius)), function(x) origin[1] + radius[x] * cos(angles)))
-  liney <- unlist(lapply(seq(1, length(radius)), function(x) origin[2] + radius[x] * sin(angles)))
-  # number points per line
-  npts <- length(linex) / ncircles
-  linelist <- lapply(round(seq(1, length(linex) - npts, length.out = ncircles)),
-                     FUN = function(i) sp::Lines(list(sp::Line(cbind(linex[i:(i + (npts - 1))], liney[i:(i + (npts - 1))]))), ID = paste('p', i, sep = '')))
-  lines <- sp::SpatialLines(linelist, proj4string = sp::CRS(sp::proj4string(amp_img)))
 
-  # plot and get amplitude sums within each radius
-  if (plot == TRUE){
+  if (plot == TRUE) {
+    # calculate half circles extending from origin
+    if ((0.5 * ncol(amp_img)) <= 100) {
+      ncircles <- floor(0.5 * ncol(amp_img))
+    } else {
+     ncircles <- 100
+    }
+    nv <- 100
+    angle.inc <- 2 * pi / nv
+    angles <- seq(0, 2 * pi - angle.inc, by = angle.inc)
+    radius <- seq(0, half_dist, length.out = ncircles)
+    linex <- unlist(lapply(seq(1, length(radius)), function(x) origin[1] + radius[x] * cos(angles)))
+    liney <- unlist(lapply(seq(1, length(radius)), function(x) origin[2] + radius[x] * sin(angles)))
+    # number points per line
+    npts <- length(linex) / ncircles
+    linelist <- lapply(round(seq(1, length(linex) - npts, length.out = ncircles)),
+                       FUN = function(i) sp::Lines(list(sp::Line(cbind(linex[i:(i + (npts - 1))], liney[i:(i + (npts - 1))]))), ID = paste('p', i, sep = '')))
+    lines <- sp::SpatialLines(linelist, proj4string = sp::CRS(sp::proj4string(amp_img)))
+
+    # plot and get amplitude sums within each radius
     plot(amp_img)
     plot(lines, add = TRUE)
   }
+  # Br <- list()
+  # Br[1] <- 0
+  # for (i in 2:length(lines)) {
+  #   templine <- crop(lines[i], extent(xmin(amp_img), xmax(amp_img), ymin(amp_img), ymax(amp_img)))
+  #   Br[i] <- extract(amp_img, templine, fun = sum)
+  # }
+
+  # calculate distances from center to all other points
+  dist_rast <- amp_img
+  values(dist_rast) <- NA
+  center <- ceiling(dim(x) / 2)
+  nce <- ifelse(ncol(amp_img) / 2 == round(ncol(amp_img) / 2), 1, 0)
+  dist_rast[nrow(amp_img), center[2] + nce] <- 1
+  dist_rast <- distance(dist_rast)
+
+  # get maximum distance from center in x direction and radii to analyze
+  half_dist <- max(dist_rast[nrow(dist_rast), ])
+  radius <- seq(0, half_dist, length.out = ncircles)
+
+  # get all points some distance away from center, then
+  # sum all values at that distance and add to Br list
   Br <- list()
   Br[1] <- 0
-  for (i in 2:length(lines)) {
-    templine <- crop(lines[i], extent(xmin(amp_img), xmax(amp_img), ymin(amp_img), ymax(amp_img)))
-    Br[i] <- extract(amp_img, templine, fun = sum)
+  tolerance <- (radius[3] - radius[2]) / 2
+  for (i in 2:length(radius)) {
+    radius_inds <- which(near(getValues(dist_rast), radius[i], tol = tolerance))
+    Br[i] <- sum(amp_img[radius_inds], na.rm = TRUE)
   }
 
   if (plot == TRUE) {

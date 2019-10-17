@@ -4,23 +4,26 @@
 \alias{.maxdist}
 \title{Estimate Maximum Correlation Length}
 \usage{
-.maxdist(threshold, Aalpha, aacfimg)
+.maxdist(threshold, aacfimg, distimg)
 }
 \arguments{
 \item{threshold}{A number with a value between 0 and 1. Indicates
 the autocorrelation value to which the rates of decline are measured.}
 
-\item{Aalpha}{An list of dataframes produced by \code{scl()} that contain
-the AACF values along lines extending in multiple directions from the
-AACF origin (autocorrelation = 1).}
-
 \item{aacfimg}{A raster of the areal autocorrelation function. This
 is the AACF raster split in two in terms of height.}
+
+\item{distimg}{A raster of distances to all pixels from the center of the
+original image. Distances are in meters if original raster was
+unprojected, and are in map units (usually meters) if raster was projected
+(see raster::distance documentation for more details).}
 }
 \value{
 A list containing the maximum distances from an
   autocorrelation value of 1 to the specified autocorrelation value < 1.
-  Distances are in the units of the x, y coordinates of the raster image.
+  Distances are meters if original raster was unprojected, and are in
+  map units (usually meters) if raster was projected (see
+  raster::distance documentation for more details).
 }
 \description{
 Internal function to calculates the maximum distances to specified

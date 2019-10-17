@@ -90,7 +90,6 @@ aacf <- function(x) {
   return (list(af_norm, af_img))
 }
 
-
 #' Calculate Correlation Length
 #'
 #' Calculates the smallest and largest distances to specified autocorrelation
@@ -145,38 +144,40 @@ scl <- function(x, threshold = c(0.20, 1 / exp(1)), plot = FALSE) {
 
   ### line calculations are taken from the plotrix function draw.radial.line
   # calculate rays extending from origin
-  M <- 180
-  j <- seq(0, (M - 1))
-  alpha <- (pi * j) / M # angles
-  px <- c(0, half_dist) # line length
-  linex <- unlist(lapply(seq(1, length(alpha)), function(x) origin[1] + px * cos(alpha[x])))
-  liney <- unlist(lapply(seq(1, length(alpha)), function(x) origin[2] + px * sin(alpha[x])))
-  linelist <- lapply(seq(1, length(linex), 2),
-                     FUN = function(i) sp::Lines(sp::Line(cbind(linex[i:(i + 1)], liney[i:(i + 1)])),
-                                             ID = paste('l', i, sep = '')))
-  lines <- sp::SpatialLines(linelist, proj4string = sp::CRS(sp::proj4string(aacfimg)))
+  if (plot == TRUE) {
+    M <- 180
+    j <- seq(0, (M - 1))
+    alpha <- (pi * j) / M # angles
+    px <- c(0, half_dist) # line length
+    linex <- unlist(lapply(seq(1, length(alpha)), function(x) origin[1] + px * cos(alpha[x])))
+    liney <- unlist(lapply(seq(1, length(alpha)), function(x) origin[2] + px * sin(alpha[x])))
+    linelist <- lapply(seq(1, length(linex), 2),
+                      FUN = function(i) sp::Lines(sp::Line(cbind(linex[i:(i + 1)], liney[i:(i + 1)])),
+                                               ID = paste('l', i, sep = '')))
+    lines <- sp::SpatialLines(linelist, proj4string = sp::CRS(sp::proj4string(aacfimg)))
 
-  # plot and calculate amplitude sums along rays
-  if(plot == TRUE) {
+    # plot and calculate amplitude sums along rays
     plot(aacfimg)
     lines(lines)
   }
 
-  # get values for all points along line
-  Aalpha <- list()
-  for (i in 1:length(lines)) {
-    Aalpha[[i]] <- extract(aacfimg, lines[i], along = TRUE, cellnumbers = TRUE)
-  }
+  # calculate distances from center to all other points
+  dist_rast <- aacfimg
+  values(dist_rast) <- NA
+  center <- ceiling(dim(x) / 2)
+  nce <- ifelse(ncol(aacfimg) / 2 == round(ncol(aacfimg) / 2), 1, 0)
+  dist_rast[nrow(aacfimg), center[2] + nce] <- 1
+  dist_rast <- distance(dist_rast)
 
   # each line has length = half_dist, with each point approx. 1 pixel apart
   fast_dists <- list()
   for (i in 1:length(threshold)) {
-    fast_dists[[i]] <- suppressWarnings(.mindist(threshold[i], Aalpha, aacfimg))
+    fast_dists[[i]] <- suppressWarnings(.mindist(threshold[i], aacfimg, dist_rast))
   }
 
   slow_dists <- list()
   for (i in 1:length(threshold)) {
-    slow_dists[[i]] <- suppressWarnings(.maxdist(threshold[i], Aalpha, aacfimg))
+    slow_dists[[i]] <- suppressWarnings(.maxdist(threshold[i], aacfimg, dist_rast))
   }
 
   return(c(fast_dists, slow_dists))
@@ -191,38 +192,28 @@ scl <- function(x, threshold = c(0.20, 1 / exp(1)), plot = FALSE) {
 #'
 #' @param threshold A number with a value between 0 and 1. Indicates
 #'   the autocorrelation value to which the rates of decline are measured.
-#' @param Aalpha An list of dataframes produced by \code{scl()} that contain
-#'   the AACF values along lines extending in multiple directions from the
-#'   AACF origin (autocorrelation = 1).
 #' @param aacfimg A raster of the areal autocorrelation function. This
 #'   is the AACF raster split in two in terms of height.
+#' @param distimg A raster of distances to all pixels from the center of the
+#'   original image. Distances are in meters if original raster was
+#'   unprojected, and are in map units (usually meters) if raster was projected
+#'   (see raster::distance documentation for more details).
 #' @return A list containing the minimum distances from an
 #'   autocorrelation value of 1 to the specified autocorrelation value < 1.
-#'   Distances are in the units of the x, y coordinates of the raster image.
-.mindist <- function(threshold, Aalpha, aacfimg) {
-  # get index of minimum <= threshold value
-  decay_ind <- list()
-  for (j in 1:length(Aalpha)) {
-    decay_ind[[j]] <- lapply(Aalpha[[j]], FUN = function(x)
-      min(which(x[, 2] <= threshold), na.rm = TRUE))
-  }
-  decay_ind <- unlist(decay_ind)
+#'   Distances are meters if original raster was unprojected, and are in
+#'   map units (usually meters) if raster was projected (see
+#'   raster::distance documentation for more details).
+.mindist <- function(threshold, aacfimg, distimg) {
+  # get indices where value <= threshold value
+  decay_ind <- which(getValues(aacfimg) <= threshold)
 
-  # get distance to minimum index below threshold value
-  x <- sp::coordinates(aacfimg)[, 1]
-  y <- sp::coordinates(aacfimg)[, 2]
-  origin <- c(mean(sp::coordinates(aacfimg)[, 1]), ymin(aacfimg))
-  decay_celln <- list()
-  for (j in 1:length(Aalpha)) {
-    decay_celln[[j]] <- unlist(lapply(Aalpha[[j]], FUN = function(x) x[decay_ind[j], 1]))
-  }
-  decay_celln <- unlist(decay_celln)
-  decay_coords <- data.frame(x = x[decay_celln], y = y[decay_celln])
-  decay_coords <- decay_coords[decay_ind != Inf,]
-  decay_dist <- min(spatstat::crossdist.default(X = decay_coords$x[!is.na(decay_coords$x)], Y = decay_coords$y[!is.na(decay_coords$x)],
-                                      x2 = origin[1], y2 = origin[2]))
+  # find distances associated with aacf values less than threshold
+  decay_dist <- distimg[decay_ind]
 
-  return(decay_dist)
+  # find minimum distance where aacf is less than threshold
+  min_decay <- min(decay_dist, na.rm = TRUE)
+
+  return(min_decay)
 }
 
 #' Estimate Maximum Correlation Length
@@ -234,38 +225,28 @@ scl <- function(x, threshold = c(0.20, 1 / exp(1)), plot = FALSE) {
 #'
 #' @param threshold A number with a value between 0 and 1. Indicates
 #'   the autocorrelation value to which the rates of decline are measured.
-#' @param Aalpha An list of dataframes produced by \code{scl()} that contain
-#'   the AACF values along lines extending in multiple directions from the
-#'   AACF origin (autocorrelation = 1).
 #' @param aacfimg A raster of the areal autocorrelation function. This
 #'   is the AACF raster split in two in terms of height.
+#' @param distimg A raster of distances to all pixels from the center of the
+#'   original image. Distances are in meters if original raster was
+#'   unprojected, and are in map units (usually meters) if raster was projected
+#'   (see raster::distance documentation for more details).
 #' @return A list containing the maximum distances from an
 #'   autocorrelation value of 1 to the specified autocorrelation value < 1.
-#'   Distances are in the units of the x, y coordinates of the raster image.
-.maxdist <- function(threshold, Aalpha, aacfimg) {
-  # get index of minimum <= threshold value
-  decay_ind <- list()
-  for (j in 1:length(Aalpha)) {
-    decay_ind[[j]] <- lapply(Aalpha[[j]], FUN = function(x)
-      min(which(x[, 2] <= threshold), na.rm = TRUE))
-  }
-  decay_ind <- unlist(decay_ind)
+#'   Distances are meters if original raster was unprojected, and are in
+#'   map units (usually meters) if raster was projected (see
+#'   raster::distance documentation for more details).
+.maxdist <- function(threshold, aacfimg, distimg) {
+  # get indices where value <= threshold value
+  decay_ind <- which(getValues(aacfimg) <= threshold)
 
-  # get distance to minimum index below threshold value
-  x <- sp::coordinates(aacfimg)[, 1]
-  y <- sp::coordinates(aacfimg)[, 2]
-  origin <- c(mean(sp::coordinates(aacfimg)[, 1]), ymin(aacfimg))
-  decay_celln <- list()
-  for (j in 1:length(Aalpha)) {
-    decay_celln[[j]] <- unlist(lapply(Aalpha[[j]], FUN = function(x) x[decay_ind[j], 1]))
-  }
-  decay_celln <- unlist(decay_celln)
-  decay_coords <- data.frame(x = x[decay_celln], y = y[decay_celln])
-  decay_coords <- decay_coords[decay_ind != Inf,]
-  decay_dist <- max(spatstat::crossdist.default(X = decay_coords$x[!is.na(decay_coords$x)], Y = decay_coords$y[!is.na(decay_coords$x)],
-                                      x2 = origin[1], y2 = origin[2]))
+  # find distances associated with aacf values less than threshold
+  decay_dist <- distimg[decay_ind]
 
-  return(decay_dist)
+  # find maximum distance where aacf is less than threshold
+  max_decay <- max(decay_dist, na.rm = TRUE)
+
+  return(max_decay)
 }
 
 #' Estimate Texture Aspect Ratio
