@@ -7,11 +7,11 @@
 aacf(x)
 }
 \arguments{
-\item{x}{An n x n raster object.}
+\item{x}{An n x n raster or matrix object.}
 }
 \value{
-A list containing matrix and image representations
-  of the AACF. Both matrix and image values are normalized
+A raster or matrix representation
+  of the AACF. Both raster and matrix values are normalized
   so that the maximum is equal to 1.
 }
 \description{
@@ -29,5 +29,5 @@ data(normforest)
 aacf_list <- aacf(normforest)
 
 # plot resulting aacf image
-plot(aacf_list[[2]])
+plot(aacf_list)
 }

@@ -2,11 +2,11 @@
 #'
 #' Calculates the areal autocorrelation function (AACF) as the
 #' inverse of the Fourier power spectrum. \code{aacf(x)} returns
-#' the AACF in both matrix and image format.
+#' the AACF in both matrix and raster format.
 #'
-#' @param x An n x n raster object.
-#' @return A list containing matrix and image representations
-#'   of the AACF. Both matrix and image values are normalized
+#' @param x An n x n raster or matrix.
+#' @return A raster or matrix representation
+#'   of the AACF. Both raster and matrix values are normalized
 #'   so that the maximum is equal to 1.
 #' @examples
 #' library(raster)
@@ -18,17 +18,21 @@
 #' aacf_list <- aacf(normforest)
 #'
 #' # plot resulting aacf image
-#' plot(aacf_list[[2]])
+#' plot(aacf_list)
 #' @export
 aacf <- function(x) {
-  if(class(x) != 'RasterLayer') {stop('x must be a raster.')}
+  if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
 
   # get raster dimensions
   M <- ncol(x)
   N <- nrow(x)
 
   # get matrix of values
-  zmat <- matrix(getValues(x), ncol = M, nrow = N, byrow = TRUE)
+  if (class(x) == 'RasterLayer') {
+    zmat <- matrix(getValues(x), ncol = M, nrow = N, byrow = TRUE)
+  } else {
+    zmat <- x
+  }
 
   # if irregular non-na area, cut to biggest square possible
   if (sum(is.na(zmat)) != 0) {
@@ -84,10 +88,13 @@ aacf <- function(x) {
   # normalize to max 1
   af_norm <- af_shift / max(as.numeric(af_shift), na.rm = TRUE)
 
-  # set values of new raster
-  af_img <- setValues(x, af_norm)
-
-  return (list(af_norm, af_img))
+  if (class(x) == 'RasterLayer') {
+    # set values of new raster
+    af_img <- setValues(x, af_norm)
+    return(af_img)
+  } else {
+    return(af_norm)
+  }
 }
 
 #' Calculate Correlation Length
@@ -96,7 +103,7 @@ aacf <- function(x) {
 #' values (e.g., 0.2) of the areal autocorrelation function (AACF). All 180
 #' degrees from the origin of the AACF image are considered for the calculation.
 #'
-#' @param x A raster.
+#' @param x A raster or matrix.
 #' @param threshold A numeric vector containing values between 0 and 1. Indicates
 #'   the autocorrelation values to which the rates of decline are measured.
 #' @param plot Logical. Defaults to \code{FALSE}. If \code{TRUE}, the AACF and
@@ -116,7 +123,7 @@ aacf <- function(x) {
 #' # crop raster to much smaller area
 #' x <- crop(normforest, extent(-123, -122.99, 43, 43.01))
 #'
-#' # calculate aacf img and matrix
+#' # calculate aacf img or matrix
 #' aacf_list <- aacf(x)
 #'
 #' # estimate the fastest/slowest declines to 0.20 and 0.37 (1/e) autocorrelation
@@ -126,25 +133,39 @@ aacf <- function(x) {
 #' Scl20 <- sclvals[[1]]
 #' @export
 scl <- function(x, threshold = c(0.20, 1 / exp(1)), plot = FALSE) {
-  if(class(x) != 'RasterLayer') {stop('x must be a raster.')}
+  if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
   if(class(plot) != 'logical') {stop('plot argument must be TRUE/FALSE.')}
   if(class(threshold) != 'numeric') {stop('threshold must be numeric.')}
   if(sum(threshold < 0) >= 1) {stop('threshold values cannot be less than 0.')}
 
   # get aacf img
-  aacfimg <- aacf(x)[[2]]
+  aacfimg <- aacf(x)
 
-  # take amplitude image, cut in half (y direction)
-  half_dist <- (ymax(aacfimg) - ymin(aacfimg)) / 2
-  ymin <- ymax(aacfimg) - half_dist
-  aacfimg <- crop(aacfimg, c(xmin(aacfimg), xmax(aacfimg), ymin, ymax(aacfimg)))
+  if (class(aacfimg) == 'RasterLayer') {
+    # take amplitude image, cut in half (y direction)
+    half_dist <- (ymax(aacfimg) - ymin(aacfimg)) / 2
+    ymin <- ymax(aacfimg) - half_dist
+    aacfimg <- crop(aacfimg, c(xmin(aacfimg), xmax(aacfimg), ymin, ymax(aacfimg)))
 
-  # get origin of image (actually bottom center)
-  origin <- c(mean(sp::coordinates(aacfimg)[, 1]), ymin(aacfimg))
+    # get origin of image (actually bottom center)
+    origin <- c(mean(sp::coordinates(aacfimg)[, 1]), ymin(aacfimg))
+
+  } else {
+    # take amplitude image, cut in half (y direction)
+    half_dist <- nrow(aacfimg) / 2
+    ymin <- round(half_dist)
+    aacfimg <- aacfimg[0:ymin, 0:ncol(aacfimg)]
+
+    # get origin of image (actually bottom center)
+    origin <- c(nrow(aacfimg), round(ncol(aacfimg) / 2))
+  }
 
   ### line calculations are taken from the plotrix function draw.radial.line
   # calculate rays extending from origin
   if (plot == TRUE) {
+    if (class(x) == 'matrix') {
+      print("cannot draw lines for object of class 'matrix.'")
+    }
     M <- 180
     j <- seq(0, (M - 1))
     alpha <- (pi * j) / M # angles
@@ -159,6 +180,14 @@ scl <- function(x, threshold = c(0.20, 1 / exp(1)), plot = FALSE) {
     # plot and calculate amplitude sums along rays
     plot(aacfimg)
     lines(lines)
+  }
+
+  # convert matrix to raster if necessary
+  if (class(x) == 'matrix') {
+    aacf_rast <- raster(aacfimg)
+    extent(aacf_rast) <- c(0, ncol(aacfimg), 0, nrow(aacfimg))
+    crs(aacf_rast) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+    aacfimg <- aacf_rast
   }
 
   # calculate distances from center to all other points
@@ -180,7 +209,7 @@ scl <- function(x, threshold = c(0.20, 1 / exp(1)), plot = FALSE) {
     slow_dists[[i]] <- suppressWarnings(.maxdist(threshold[i], aacfimg, dist_rast))
   }
 
-  return(c(fast_dists, slow_dists))
+  return(c(unlist(fast_dists), unlist(slow_dists)))
 }
 
 #' Estimate Minimum Correlation Length
@@ -256,7 +285,7 @@ scl <- function(x, threshold = c(0.20, 1 / exp(1)), plot = FALSE) {
 #' the slowest decay lengths of the autocorrelation function to the
 #' defined autocorrelation values.
 #'
-#' @param x A raster.
+#' @param x A raster or matrix.
 #' @param threshold A vector of autocorrelation values with values
 #'   between 0 and 1. Indicates the autocorrelation value(s) to
 #'   which the rates of decline are measured.
@@ -280,8 +309,8 @@ scl <- function(x, threshold = c(0.20, 1 / exp(1)), plot = FALSE) {
 #' # autocorrelation value of 0.2 in the AACF
 #' Str20 <- strvals[[1]]
 #' @export
-str <- function(x, threshold = c(0.20, 1 / exp(1))) {
-  if(class(x) != 'RasterLayer') {stop('x must be a raster.')}
+str <- function(x, threshold = c(0.20, 1 / exp(1)), ...) {
+  if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
   if(class(threshold) != 'numeric') {stop('threshold must be numeric.')}
   if(sum(threshold < 0) >= 1) {stop('threshold values cannot be less than 0.')}
 
@@ -296,5 +325,5 @@ str <- function(x, threshold = c(0.20, 1 / exp(1))) {
     vals[[i]] <- minval / maxval
   }
 
-  return(vals)
+  return(unlist(vals))
 }

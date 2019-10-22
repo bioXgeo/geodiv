@@ -76,39 +76,24 @@
 #' # plot the result
 #' plot(sbi_img)
 #' @export
-texture_image <- function(x, window_type = 'square', size = 11, epsg_proj = 5070, metric, threshold = NULL,
-                          low = NULL, high = NULL, parallel = TRUE, ncores = NULL){
+texture_image <- function(x, window_type = 'square', size = 11, epsg_proj = 5070, metric, args, parallel = TRUE, ncores = NULL){
 
-  if(class(x) != 'RasterLayer') {stop('x must be a raster.')}
+  if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
   if(class(window_type) != 'character') {stop('window_type must be a string.')}
   if(class(size) != 'numeric') {stop('size must be numeric.')}
   if(class(epsg_proj) != 'numeric') {stop('epsg_proj must be numeric.')}
   if(class(metric) != 'character') {stop('metric must be a character.')}
-  if(!is.null(threshold) & class(threshold) != 'numeric') {stop('threshold must be numeric.')}
-  if(!is.null(low) & class(low) != 'numeric') {stop('low must be numeric.')}
-  if(!is.null(high) & class(high) != 'numeric') {stop('high must be numeric.')}
 
-  if(!is.null(low) & is.null(high)) {stop('high value is required if low value is given.')}
-  if(!is.null(high) & is.null(low)) {stop('high value is required if low value is given.')}
-  if(!is.null(threshold) & length(threshold) > 1) {stop('too many values provided to threshold.')}
   if(length(metric) > 1) {stop('too many values provided for metric.')}
   if(length(epsg_proj) > 1) {stop('too many values provided to epsg_proj.')}
   if(length(size) > 1) {stop('too many values provided to size.')}
   if(length(window_type) > 1) {stop('too many values provided to window_type.')}
 
-  if(!(metric %in% c('sa', 'sq', 's10z', 'sdq', 'sdq6', 'sdr', 'sbi', 'sci', 'ssk_adj',
-                     'ssk', 'sku_exc', 'sku', 'sds', 'sfd', 'srw', 'srwi', 'shw', 'std',
-                     'stdi', 'svi', 'str', 'ssc', 'sv', 'sph', 'sk', 'smean', 'spk', 'svk',
-                     'scl', 'sdc'))) {stop('invalid metric argument.')}
-
   if(missing(ncores)) {ncores <- parallel::detectCores() - 1}
-
-  # data frame of x, y locations
-  coords <- data.frame(xyFromCell(x, 1:ncell(x)))
 
   # get list of # total pixels, break up into smaller lists (by number of cores available)
   pixlist <- seq(1, length(x), 1)
-  seg_length <- ceiling(length(x) / ncores)
+  seg_length <- ceiling(length(x) / 50)
   segment <- ceiling(length(x) / seg_length)
   new_pixlist <- vector('list', segment)
   i <- 1
@@ -121,9 +106,128 @@ texture_image <- function(x, window_type = 'square', size = 11, epsg_proj = 5070
     }
     i <- i + 1
   }
+  cat('There are ', segment, ' clumps to analyze.', '\n', sep = '')
 
   # output raster
   out <- x
+
+  # add padding to raster
+  if (window_type == 'square') {
+    # change size to distance out from center
+    size <- floor(size / 2)
+
+    # continue values to edges to account for edge effect (# pixels radius/edge)
+
+    # first, get edge values that will be extended
+    firstrow_vals <- x[1, ]
+    firstcol_vals <- x[, 1]
+    lastrow_vals <- x[nrow(x), ]
+    lastcol_vals <- x[, ncol(x)]
+
+    # add pixels on all sides, increasing the extent of the raster as well
+    ext_x <- x
+    dim(ext_x) <- c(nrow(x) + (2 * size), ncol(x) + (2 * size))
+    extra_x <- size * res(x)[2]
+    extra_y <- size * res(x)[1]
+    extent(ext_x) <- extent(c(xmin(ext_x) - extra_x, xmax(ext_x) + extra_x,
+                              ymin(ext_x) - extra_y, ymax(ext_x) + extra_y))
+
+    # fill in top rows
+    ext_x[1:size, (size + 1):(ncol(ext_x) - size)] <- rep(firstrow_vals, size)
+    # fill in bottom rows
+    ext_x[(nrow(ext_x) - (size - 1)):nrow(ext_x), (size + 1):(ncol(ext_x) - size)] <- rep(lastrow_vals, size)
+    # fill in left columns
+    ext_x[(size + 1):(nrow(ext_x) - size), 1:size] <- t(firstcol_vals * matrix(1, nrow = nrow(x), ncol = size))
+    # fill in right columns
+    ext_x[(size + 1):(nrow(ext_x) - size), (ncol(ext_x) - (size - 1)):ncol(ext_x)] <- t(lastcol_vals * matrix(1, nrow = nrow(x), ncol = size))
+    # fill in middle
+    ext_x[(size + 1):(nrow(ext_x) - size), (size + 1):(ncol(ext_x) - size)] <- getValues(x)
+    # fill in corners with nearest point value (always the same)
+    ext_x_mat <- zoo::na.approx(matrix(ext_x, nrow = nrow(ext_x), ncol = ncol(ext_x)), rule = 2)
+    ext_x <- setValues(ext_x, t(ext_x_mat))
+
+    # data frame of x, y locations
+    coords <- data.frame(xyFromCell(x, 1:ncell(x)))
+    rownum <- rowFromCell(ext_x, pixlist) + size
+    colnum <- colFromCell(ext_x, pixlist) + size
+    rownum <- rownum[rownum <= nrow(x)]
+    colnum <- colnum[colnum <= ncol(x)]
+  } else {
+
+    # convert to new proj
+    projx <- projectRaster(x, crs = sp::CRS(sf::st_crs(epsg_proj)$proj4string))
+
+    # get equivalent # pixels of size
+    pixeq_size <- ceiling(size / res(projx))[1]
+
+    # extend...
+    # continue values to edges to account for edge effect (# pixels radius/edge)
+    firstrow_vals <- x[1, ]
+    firstcol_vals <- x[, 1]
+    lastrow_vals <- x[nrow(x), ]
+    lastcol_vals <- x[, ncol(x)]
+
+    # add pixels on all sides, increasing the extent of the raster as well
+    ext_x <- x
+    dim(ext_x) <- c(nrow(x) + (2 * pixeq_size), ncol(x) + (2 * pixeq_size))
+    extra_x <- pixeq_size * res(x)[2]
+    extra_y <- pixeq_size * res(x)[1]
+    extent(ext_x) <- extent(c(xmin(ext_x) - extra_x, xmax(ext_x) + extra_x,
+                              ymin(ext_x) - extra_y, ymax(ext_x) + extra_y))
+
+    # fill in top rows
+    ext_x[1:pixeq_size, (pixeq_size + 1):(ncol(ext_x) - pixeq_size)] <- rep(firstrow_vals, pixeq_size)
+    # fill in bottom rows
+    ext_x[(nrow(ext_x) - (pixeq_size - 1)):nrow(ext_x), (pixeq_size + 1):(ncol(ext_x) - pixeq_size)] <- rep(lastrow_vals, pixeq_size)
+    # fill in left columns
+    ext_x[(pixeq_size + 1):(nrow(ext_x) - pixeq_size), 1:pixeq_size] <- t(firstcol_vals * matrix(1, nrow = nrow(x), ncol = pixeq_size))
+    # fill in right columns
+    ext_x[(pixeq_size + 1):(nrow(ext_x) - pixeq_size), (ncol(ext_x) - (pixeq_size - 1)):ncol(ext_x)] <- t(lastcol_vals * matrix(1, nrow = nrow(x), ncol = pixeq_size))
+    # fill in middle
+    ext_x[(pixeq_size + 1):(nrow(ext_x) - pixeq_size), (pixeq_size + 1):(ncol(ext_x) - pixeq_size)] <- getValues(x)
+    # fill in corners with nearest point value (always the same)
+    ext_x_mat <- zoo::na.approx(matrix(ext_x, nrow = nrow(ext_x), ncol = ncol(ext_x)), rule = 2)
+    ext_x <- setValues(ext_x, t(ext_x_mat))
+
+    # data frame of x, y locations
+    coords <- data.frame(xyFromCell(x, 1:ncell(x)))
+    rownum <- rowFromCell(ext_x, pixlist) + pixeq_size
+    colnum <- colFromCell(ext_x, pixlist) + pixeq_size
+    rownum <- rownum[rownum <= nrow(x)]
+    colnum <- colnum[colnum <= ncol(x)]
+
+    # common size variable
+    size <- pixeq_size
+  }
+
+  # collect arguments
+  if (!is.null(args)) {
+    input_args <- args
+  } else {
+    input_args <- NULL
+  }
+
+  ### nest, split into segments, then lapply within segments
+  start = Sys.time()
+  # r_list <- list()
+  # sfQuickInit(cpus=3)
+  rast_list <- mclapply(new_pixlist, FUN = function(l) {
+    lapply(l, FUN = function(i) {window_metric(x = ext_x, i = i, 'square', size = size, 5070, coords, rownum, colnum)})
+    }, mc.cores = ncores, mc.cleanup = TRUE)
+  # sfQuickStop()
+  end = Sys.time()
+  print(end - start) # actually faster without clumping
+
+  start = Sys.time()
+  # r_list <- list()
+  # sfQuickInit(cpus=3)
+  result <- mclapply(rast_list, FUN = function(l) {
+    lapply(l, FUN = function(i) {apply_metric(x = i, metric = metric, args = input_args)})},
+    mc.cores = ncores, mc.cleanup = TRUE)
+  # sfQuickStop()
+  end = Sys.time()
+  print(end - start) #11.49 for 300 (3 cores), 44.04 for 1200 (3 cores), 2.061077 min. for 3402 (6 cores)
+
 
   if (parallel == FALSE) {
     result <- c()
@@ -156,6 +260,7 @@ texture_image <- function(x, window_type = 'square', size = 11, epsg_proj = 5070
     result <- snow::parLapply(cl, new_pixlist, function(inds) {
       outvals <- c()
       for (i in inds) {
+        cat('Analyzing clump: ', i, '\n', sep = '')
         pt_coords <- coords[i, ]
         rownum <- raster::rowFromCell(x, i)
         colnum <- raster::colFromCell(x, i)

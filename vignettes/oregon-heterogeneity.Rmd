@@ -136,7 +136,8 @@ Let's also plot the resulting points to make sure they look correct.
 plot(elev, xlab = 'Longitude', ylab = 'Latitude', main = 'Sample Locations')
 points(x = samp_pts$x, y = samp_pts$y, pch = 19)
 
-test = get_map(location = c(lon = -120.688800, lat = 43.929687), zoom = 6)
+or_map = get_map(location = c(lon = -120.688800, lat = 43.929687), zoom = 6)
+ggmap
 
 ```
 

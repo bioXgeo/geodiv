@@ -7,7 +7,7 @@
 str(x, threshold = c(0.2, 1/exp(1)))
 }
 \arguments{
-\item{x}{A raster.}
+\item{x}{A raster or matrix.}
 
 \item{threshold}{A vector of autocorrelation values with values
 between 0 and 1. Indicates the autocorrelation value(s) to
