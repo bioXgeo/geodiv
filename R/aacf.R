@@ -27,12 +27,17 @@ aacf <- function(x) {
   M <- ncol(x)
   N <- nrow(x)
 
-  # get matrix of values
-  if (class(x) == 'RasterLayer') {
-    zmat <- matrix(getValues(x), ncol = M, nrow = N, byrow = TRUE)
-  } else {
-    zmat <- x
+  data_type <- if(class(x) == 'matrix') {'matrix'} else {'RasterLayer'}
+
+  # convert matrix to raster if necessary (equal area)
+  if (class(x) == 'matrix') {
+    x <- raster(x)
+    extent(x) <- c(0, ncol(x), 0, nrow(x))
+    crs(x) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
   }
+
+  # get matrix of values
+  zmat <- matrix(getValues(x), ncol = M, nrow = N, byrow = TRUE)
 
   # if irregular non-na area, cut to biggest square possible
   if (sum(is.na(zmat)) != 0) {
@@ -88,7 +93,7 @@ aacf <- function(x) {
   # normalize to max 1
   af_norm <- af_shift / max(as.numeric(af_shift), na.rm = TRUE)
 
-  if (class(x) == 'RasterLayer') {
+  if (data_type == 'RasterLayer') {
     # set values of new raster
     af_img <- setValues(x, af_norm)
     return(af_img)
@@ -141,6 +146,8 @@ scl <- function(x, threshold = c(0.20, 1 / exp(1)), plot = FALSE) {
   # get aacf img
   aacfimg <- aacf(x)
 
+  data_type <- if(class(x) == 'matrix') {'matrix'} else {'RasterLayer'}
+
   if (class(aacfimg) == 'RasterLayer') {
     # take amplitude image, cut in half (y direction)
     half_dist <- (ymax(aacfimg) - ymin(aacfimg)) / 2
@@ -163,7 +170,7 @@ scl <- function(x, threshold = c(0.20, 1 / exp(1)), plot = FALSE) {
   ### line calculations are taken from the plotrix function draw.radial.line
   # calculate rays extending from origin
   if (plot == TRUE) {
-    if (class(x) == 'matrix') {
+    if (data_type == 'matrix') {
       print("cannot draw lines for object of class 'matrix.'")
     }
     M <- 180
@@ -183,7 +190,7 @@ scl <- function(x, threshold = c(0.20, 1 / exp(1)), plot = FALSE) {
   }
 
   # convert matrix to raster if necessary
-  if (class(x) == 'matrix') {
+  if (data_type == 'matrix') {
     aacf_rast <- raster(aacfimg)
     extent(aacf_rast) <- c(0, ncol(aacfimg), 0, nrow(aacfimg))
     crs(aacf_rast) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
