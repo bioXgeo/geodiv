@@ -167,11 +167,11 @@ texture_image <- function(x, window_type = 'square', size = 11, epsg_proj = 5070
       if (window_type == 'square') {
         outval <- window_metric(ext_x, i, 'square', size = size, epsg_proj = epsg_proj,
                                  coords = coords, rownum = rownum, colnum = colnum,
-                                metric = metric, args = args)
+                                metric = metric, args = input_args)
       } else {
         outval <- window_metric(ext_x, i, 'circle', size = size, epsg_proj = epsg_proj,
                                  coords = coords, rownum = rownum, colnum = colnum,
-                                metric = metric, args = args)
+                                metric = metric, args = input_args)
       }
 
       result <- c(result, outval)
@@ -187,7 +187,7 @@ texture_image <- function(x, window_type = 'square', size = 11, epsg_proj = 5070
                                                  size = size, epsg_proj = epsg_proj,
                                                  coords = coords, rownum = rownum,
                                                  colnum = colnum, metric = metric,
-                                                 args = args)})
+                                                 args = input_args)})
     }, mc.cores = ncores, mc.cleanup = TRUE)
     end <- Sys.time()
     cat('Total time to calculate metrics: ', end - start, '\n', sep = '')
@@ -211,7 +211,7 @@ texture_image <- function(x, window_type = 'square', size = 11, epsg_proj = 5070
                                                  size = size, epsg_proj = epsg_proj,
                                                  coords = coords, rownum = rownum,
                                                  colnum = colnum, metric = metric,
-                                                 args = args)})
+                                                 args = input_args)})
     })
     stopCluster(cl)
     end <- Sys.time()

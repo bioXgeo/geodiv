@@ -41,10 +41,10 @@ aacf <- function(x) {
                              xmax = origin[1],
                              ymin = origin[2],
                              ymax = origin[2])
-    potentials$xmin <- origin[1] - (res(x)[1] * seq(1, round(N / 2)))
-    potentials$xmax <- origin[1] + (res(x)[1] * seq(1, round(N / 2)))
-    potentials$ymin <- origin[2] - (res(x)[2] * seq(1, round(N / 2)))
-    potentials$ymax <- origin[2] + (res(x)[2] * seq(1, round(N / 2)))
+    potentials$xmin <- origin[1] - (res(x)[1] * seq(1, floor(N / 2)))
+    potentials$xmax <- origin[1] + (res(x)[1] * seq(1, floor(N / 2)))
+    potentials$ymin <- origin[2] - (res(x)[2] * seq(1, floor(N / 2)))
+    potentials$ymax <- origin[2] + (res(x)[2] * seq(1, floor(N / 2)))
 
     potentials$na <- sapply(seq(1, nrow(potentials)), FUN = function(i) {
       xmin <-
