@@ -4,11 +4,13 @@
 \alias{window_metric}
 \title{Calculate Texture Metric for Single Pixel}
 \usage{
-window_metric(x, window_type = "square", size = 11, epsg_proj = 5070,
-  rownum, colnum, metric, threshold = NULL, low = NULL, high = NULL)
+window_metric(x, i, window_type = "square", size = 11,
+  epsg_proj = 5070, coords, rownum, colnum, metric, args)
 }
 \arguments{
 \item{x}{A raster.}
+
+\item{i}{Index of cell at which to calculate the metric.}
 
 \item{window_type}{Character. Type of window, either circular or square.}
 
@@ -17,21 +19,17 @@ side for square windows (must be an odd value), or distance from
 center (in meters) for circular windows.}
 
 \item{epsg_proj}{Numeric. Appropriate equal area EPSG code used to
-crop raster to each circular window.}
+crop raster to each circular window. Only used for circular windows.}
 
-\item{rownum}{Numeric. Row number of pixel.}
+\item{rownum}{Vector of row numbers at which to calculate the metric.}
 
-\item{colnum}{Numeric. Column number of pixel.}
+\item{colnum}{Vector of column numbers at which to calculate the metric.}
 
 \item{metric}{Character. Metric to calculate for each window. Metrics
-are listed below.}
+from the geodiv package are listed below.}
 
-\item{threshold}{Numeric. Value of autocorrelation distance (0 - 1), if
-calculating \code{scl} or \code{str}.}
-
-\item{low}{Numeric. Low value (0 - 1) if calculating \code{sdc}.}
-
-\item{high}{Numeric. High value (0 - 1) if calculating \code{sdc}.}
+\item{args}{List. Arguments from function to be applied over each window
+(e.g., list(threshold = 0.2)).}
 }
 \value{
 A raster with pixel values representative of the metric
@@ -42,7 +40,7 @@ Calculates the various texture metrics over a window centered
 on an individual pixel.
 }
 \details{
-Metrics available:
+Metrics from geodiv package:
 \enumerate{
    \item{\code{'sa'}: average surface roughness}
    \item{\code{'sq'}: root mean square roughness}
@@ -76,13 +74,18 @@ Metrics available:
    \item{\code{'sdc'}: bearing area curve height interval}
 }
 }
+\note{
+Note that if calculating the metric at the edge of a raster or matrix,
+the input raster/matrix must be padded. This can be done using the \code{pad_edges}
+function.
+}
 \examples{
 library(raster)
 
 # import raster image
 data(normforest)
 
-# crop raster to much smaller area
+# crop raster to much smaller area if on a smaller computer
 x <- crop(normforest, extent(-123, -122.99, 43, 43.01))
 
 # get a surface of root mean square roughness

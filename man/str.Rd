@@ -4,7 +4,7 @@
 \alias{str}
 \title{Estimate Texture Aspect Ratio}
 \usage{
-str(x, threshold = c(0.2, 1/exp(1)))
+str(x, threshold = c(0.2, 1/exp(1)), ...)
 }
 \arguments{
 \item{x}{A raster or matrix.}

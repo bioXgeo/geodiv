@@ -5,41 +5,35 @@
 \title{Calculate Texture Metrics per Pixel}
 \usage{
 texture_image(x, window_type = "square", size = 11, epsg_proj = 5070,
-  metric, threshold = NULL, low = NULL, high = NULL,
-  parallel = TRUE, ncores = NULL)
+  metric, args = NULL, parallel = TRUE, ncores = NULL,
+  nclumps = 100)
 }
 \arguments{
-\item{x}{A raster.}
+\item{x}{A raster or matrix.}
 
 \item{window_type}{Character. Type of window, either circular or square.}
 
-\item{size}{Numeric. Size of window, in number of pixels on each
-side for square windows (must be an odd value), or distance from
-center (in meters) for circular windows.}
+\item{size}{Numeric. Size of window, in number of pixels extra on each side,
+or distance from center (in meters) for circular windows.}
 
 \item{epsg_proj}{Numeric. Appropriate equal area EPSG code used to
 crop raster to each circular window.}
 
 \item{metric}{Character. Metric to calculate for each window. Metrics
-are listed below.}
+from the geodiv package are listed below.}
 
-\item{threshold}{Numeric. Value of autocorrelation distance (0 - 1), if
-calculating \code{scl} or \code{str}.}
-
-\item{low}{Numeric. Low value (0 - 1) if calculating \code{sdc}.}
-
-\item{high}{Numeric. High value (0 - 1) if calculating \code{sdc}.}
+\item{args}{List. Arguments from function to be applied over each window
+(e.g., list(threshold = 0.2)).}
 
 \item{parallel}{Logical. Option to run the calculations in
 parallel on available cores.}
 
 \item{ncores}{Numeric. If parallel is TRUE, number of cores on which to
 run the calculations. Defaults to all available, minus 1.}
+
+\item{nclumps}{Numeric. Number of clumps to split the raster or matrix into.}
 }
 \value{
-A raster with pixel values representative of the metric
-value for the window surrounding that pixel.
-
 A raster with pixel values representative of the metric
 value for the window surrounding that pixel.
 }
@@ -49,7 +43,7 @@ on individual pixels. This creates a continuous surface of the
 texture metric.
 }
 \details{
-Metrics available:
+Metrics available from geodiv package:
 \enumerate{
    \item{\code{'sa'}: average surface roughness}
    \item{\code{'sq'}: root mean square roughness}
@@ -83,6 +77,9 @@ Metrics available:
    \item{\code{'sdc'}: bearing area curve height interval}
 }
 }
+\note{
+The total window size for square windows will be (size * 2) + 1.
+}
 \examples{
 library(raster)
 
@@ -94,7 +91,7 @@ x <- crop(normforest, extent(-123, -122.99, 43, 43.01))
 
 # get a surface of root mean square roughness
 sbi_img <- texture_image(x = x, window = 'square',
-size = 11, metric = 'sbi', parallel = FALSE)
+size = 11, metric = 'str', args = list(threshold = 0.2), parallel = TRUE)
 
 # plot the result
 plot(sbi_img)
