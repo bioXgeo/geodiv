@@ -3,7 +3,7 @@
 \name{slopemeans}
 \alias{slopemeans}
 \title{Determines the Average Slope Along Larger Segments of
-the Bearing Area Curve of a Raster}
+the Bearing Area Curve}
 \usage{
 slopemeans(slopes, l = 0.4)
 }

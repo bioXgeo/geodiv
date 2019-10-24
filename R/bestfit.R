@@ -3,7 +3,7 @@
 #' Determines the Slopes Along the Bearing Area Curve
 #'
 #' Calculates the slopes along the bearing area curve
-#' of a raster. Slopes are determined at points x,
+#' of a raster or matrix. Slopes are determined at points x,
 #' from point x - h to x + h.
 #'
 #' @param x A vector of x values.
@@ -60,7 +60,7 @@ slopecalc <- function(x, h, f) {
 }
 
 #' Determines the Average Slope Along Larger Segments of
-#' the Bearing Area Curve of a Raster
+#' the Bearing Area Curve
 #'
 #' Calculates the average slope over every segment
 #' of a specified percentage length of the total bearing

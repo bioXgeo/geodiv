@@ -7,7 +7,7 @@
 sku(x, excess = TRUE)
 }
 \arguments{
-\item{x}{A raster.}
+\item{x}{A raster or matrix.}
 
 \item{excess}{Logical, defaults to \code{TRUE}. If
 \code{TRUE}, excess kurtosis is calculated. If \code{FALSE},
@@ -18,10 +18,10 @@ normal distribution.}
 A numeric value representing kurtosis.
 }
 \description{
-Finds the kurtosis for a distribution of raster
+Finds the kurtosis for a distribution of raster or matrix
 values (Sku). Kurtosis represents the peakedness
 of the raster surface height distribution. Height
-is measured as the value of a raster and may not
+is measured as the value of a raster/matrix and may not
 necessarily represent actual height.
 }
 \examples{

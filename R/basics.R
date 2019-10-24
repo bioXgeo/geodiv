@@ -5,9 +5,9 @@
 #' Height is measured as the value of a raster and may not
 #' necessarily represent actual height.
 #'
-#' @param x A raster.
+#' @param x A raster or matrix.
 #' @return A value of average roughness in the units of the
-#'   original raster.
+#'   original raster or matrix.
 #' @examples
 #' # import raster image
 #' data(normforest)
@@ -16,9 +16,14 @@
 #' roughness <- sa(normforest)
 #' @export
 sa <- function(x) {
-  if(class(x) != 'RasterLayer') {stop('x must be a raster.')}
+  if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
 
-  z <- getValues(x)
+  if (class(x) == 'RasterLayer') {
+    z <- getValues(x)
+  } else {
+    z <- x
+  }
+
   zbar <- mean(z, na.rm = TRUE)
   N <- length(z)
 
@@ -35,9 +40,9 @@ sa <- function(x) {
 #' the value of a raster and may not necessarily
 #' represent actual height.
 #'
-#' @param x A raster.
+#' @param x A raster or matrix.
 #' @return A value of root mean square roughness in
-#'   the units of the original raster.
+#'   the units of the original raster or matrix.
 #' @examples
 #' # import raster image
 #' data(normforest)
@@ -46,9 +51,13 @@ sa <- function(x) {
 #' roughness <- sq(normforest)
 #' @export
 sq <- function(x) {
-  if(class(x) != 'RasterLayer') {stop('x must be a raster.')}
+  if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
 
-  z <- getValues(x)
+  if (class(x) == 'RasterLayer') {
+    z <- getValues(x)
+  } else {
+    z <- x
+  }
 
   val <- sd(z, na.rm = TRUE)
 
@@ -58,12 +67,12 @@ sq <- function(x) {
 #' Calculates the Skewness of Raster Values
 #'
 #' Finds the Fisher-Pearson coefficient of skewness
-#' for raster values (Ssk). Skewness represents the
+#' for raster or matrix values (Ssk). Skewness represents the
 #' asymmetry of the surface height distribution.
-#' Height is measured as the value of a raster and
+#' Height is measured as the value of a raster/matrix and
 #' may not necessarily represent actual height.
 #'
-#' @param x A raster.
+#' @param x A raster or matrix.
 #' @param adj Logical, defaults to \code{TRUE}. If \code{TRUE},
 #'   the adjusted Fisher-Pearson coefficient of skewness
 #'   is calculated. Otherwise, the standard coefficient is
@@ -79,7 +88,12 @@ ssk <- function(x, adj = TRUE) {
   if(class(x) != 'RasterLayer') {stop('x must be a raster.')}
   if(class(adj) != 'logical') {stop('adj argument must be TRUE/FALSE.')}
 
-  z <- getValues(x)
+  if (class(x) == 'RasterLayer') {
+    z <- getValues(x)
+  } else {
+    z <- x
+  }
+
   zbar <- mean(z, na.rm = TRUE)
   s <- sd(z, na.rm = TRUE)
   N <- length(z)
@@ -97,13 +111,13 @@ ssk <- function(x, adj = TRUE) {
 
 #' Calculates the Kurtosis of Raster Values
 #'
-#' Finds the kurtosis for a distribution of raster
+#' Finds the kurtosis for a distribution of raster or matrix
 #' values (Sku). Kurtosis represents the peakedness
 #' of the raster surface height distribution. Height
-#' is measured as the value of a raster and may not
+#' is measured as the value of a raster/matrix and may not
 #' necessarily represent actual height.
 #'
-#' @param x A raster.
+#' @param x A raster or matrix.
 #' @param excess Logical, defaults to \code{TRUE}. If
 #'   \code{TRUE}, excess kurtosis is calculated. If \code{FALSE},
 #'   kurtosis is calculated as the difference from the
@@ -117,10 +131,15 @@ ssk <- function(x, adj = TRUE) {
 #' Sku <- sku(normforest, excess = TRUE)
 #' @export
 sku <- function(x, excess = TRUE) {
-  if(class(x) != 'RasterLayer') {stop('x must be a raster.')}
+  if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
   if(class(excess) != 'logical') {stop('excess argument must be TRUE/FALSE.')}
 
-  z <- getValues(x)
+  if (class(x) == 'RasterLayer') {
+    z <- getValues(x)
+  } else {
+    z <- x
+  }
+
   zbar <- mean(z, na.rm = TRUE)
   s <- sd(z, na.rm = TRUE)
   N <- length(z)
@@ -136,13 +155,13 @@ sku <- function(x, excess = TRUE) {
   return(val)
 }
 
-#' Calculates the Maximum Valley Depth of a Surface Raster
+#' Calculates the Maximum Valley Depth of a Surface Image
 #'
 #' Finds the absolute value of the lowest value in the
-#' landscape (maximum valley depth; Sv) for a raster
+#' landscape (maximum valley depth; Sv) for a raster or matrix
 #' representing a surface.
 #'
-#' @param x A raster.
+#' @param x A raster or matrix.
 #' @return A numeric value of maximum valley depth.
 #' @examples
 #' # import raster image
@@ -152,22 +171,26 @@ sku <- function(x, excess = TRUE) {
 #' Sv <- sv(normforest)
 #' @export
 sv <- function(x) {
-  if(class(x) != 'RasterLayer') {stop('x must be a raster.')}
+  if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
 
-  z <- getValues(x)
+  if (class(x) == 'RasterLayer') {
+    z <- getValues(x)
+  } else {
+    z <- x
+  }
 
   val <- abs(min(z, na.rm = TRUE))
 
   return(val)
 }
 
-#' Calculates the Maximum Peak Height of a Surface Raster
+#' Calculates the Maximum Peak Height of a Surface Image
 #'
 #' Finds the absolute value of the highest value in the
-#' landscape (maximum peak height; Sph) for a raster
+#' landscape (maximum peak height; Sph) for a raster or matrix
 #' representing a surface.
 #'
-#' @param x A raster.
+#' @param x A raster or matrix.
 #' @return A numeric value of maximum peak height.
 #' @examples
 #' # import raster image
@@ -177,22 +200,26 @@ sv <- function(x) {
 #' Sph <- sph(normforest)
 #' @export
 sph <- function(x) {
-  if(class(x) != 'RasterLayer') {stop('x must be a raster.')}
+  if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
 
-  z <- getValues(x)
+  if (class(x) == 'RasterLayer') {
+    z <- getValues(x)
+  } else {
+    z <- x
+  }
 
   val <- abs(max(z, na.rm = TRUE))
 
   return(val)
 }
 
-#' Calculates the Mean Peak Height of a Surface Raster
+#' Calculates the Mean Peak Height of a Surface Image
 #'
 #' Finds the mean height of positive values in the
-#' landscape (mean peak height; Smean) for a raster
+#' landscape (mean peak height; Smean) for a raster or matrix
 #' representing a surface.
 #'
-#' @param x A raster.
+#' @param x A raster or matrix.
 #' @return A numeric value of mean peak height.
 #' @examples
 #' # import raster image
@@ -202,9 +229,13 @@ sph <- function(x) {
 #' Smean <- smean(normforest)
 #' @export
 smean <- function(x) {
-  if(class(x) != 'RasterLayer') {stop('x must be a raster.')}
+  if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
 
-  z <- getValues(x)
+  if (class(x) == 'RasterLayer') {
+    z <- getValues(x)
+  } else {
+    z <- x
+  }
 
   val <- mean(z[z > 0], na.rm = TRUE)
 

@@ -2,12 +2,12 @@
 % Please edit documentation in R/bearingarea.R
 \name{sdc}
 \alias{sdc}
-\title{Height Intervals of the Bearing Area Curve for a Raster}
+\title{Height Intervals of the Bearing Area Curve}
 \usage{
 sdc(x, low, high)
 }
 \arguments{
-\item{x}{A raster.}
+\item{x}{A raster or matrix.}
 
 \item{low}{Numeric value along the x-axis corresponding
 to the lowest value of interest along the x-axis.}

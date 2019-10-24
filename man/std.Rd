@@ -29,11 +29,8 @@ library(raster)
 # import raster image
 data(normforest)
 
-# crop raster to much smaller area
-x <- crop(normforest, extent(-123, -122.99, 43, 43.01))
-
 # calculate Std and Stdi
-stdvals <- std(x)
+stdvals <- std(normforest)
 
 # extract each value
 Std <- stdvals[1]

@@ -7,17 +7,16 @@
 fitplane(x, order)
 }
 \arguments{
-\item{x}{A raster.}
+\item{x}{A raster or matrix.}
 
 \item{order}{Numeric. Indicates the polynomial order to be fit.}
 }
 \value{
-A matrix of the same size as the raster with values
-  predicted from the polynomial fit.
+A matrix with values predicted from the polynomial fit.
 }
 \description{
 Fits a polynomial plane of order \code{n} to a raster
-image.
+or matrix.
 }
 \examples{
 library(raster)

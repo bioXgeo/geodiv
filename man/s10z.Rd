@@ -7,7 +7,7 @@
 s10z(x)
 }
 \arguments{
-\item{x}{A raster object.}
+\item{x}{A raster or matrix.}
 }
 \value{
 A numeric value representing the ten-point height.

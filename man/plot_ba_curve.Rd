@@ -7,18 +7,18 @@
 plot_ba_curve(x, divisions = FALSE)
 }
 \arguments{
-\item{x}{A raster.}
+\item{x}{A raster or matrix.}
 
 \item{divisions}{Logical, defaults to \code{FALSE}. If
 \code{TRUE}, divisions of the curve will be plotted.
 See details section for more information.}
 }
 \value{
-Plots the Bearing Area curve for a raster.
+Plots the Bearing Area curve.
 }
 \description{
 Calculates and plots the Bearing Area curve for a raster
-using the \code{bearing_area()} function (with correctly
+or matrix using the \code{bearing_area()} function (with correctly
 rotated results).
 }
 \details{

@@ -7,14 +7,14 @@
 bearing_area(x)
 }
 \arguments{
-\item{x}{A raster.}
+\item{x}{A raster or matrix.}
 }
 \value{
 A function describing the rotated Bearing Area curve.
 }
 \description{
 Finds a rotated version of the Bearing Area (Abbott-Firestone)
-curve from a raster. The resulting function should be
+curve from a raster or matrix. The resulting function should be
 rotated 90 degrees clockwise to get the actual Bearing
 Area curve.
 }

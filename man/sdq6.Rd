@@ -7,14 +7,15 @@
 sdq6(x)
 }
 \arguments{
-\item{x}{A raster object.}
+\item{x}{A raster or matrix.}
 }
 \value{
 A numeric value representing the seven-point root
-  mean square slope, Sdq6.
+  mean square slope, Sdq6. The units of the returned value
+  are change in z per one unit (pixel).
 }
 \description{
-Calculates the area root mean square slope of a raster
+Calculates the area root mean square slope of a raster or matrix
 surface using the seven-point method. This function is based
 on the equations found at
 https://www.ntmdt-si.ru/data/media/files/manuals/image_analisys_p9_nov12.e.pdf.

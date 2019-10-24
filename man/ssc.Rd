@@ -7,14 +7,14 @@
 ssc(x)
 }
 \arguments{
-\item{x}{A raster object.}
+\item{x}{A raster or matrix.}
 }
 \value{
 A numeric value representing the average curvature of
   surface peaks.
 }
 \description{
-Calculates the mean summit curvature of a raster. Mean summit
+Calculates the mean summit curvature of a raster or matrix. Mean summit
 curvature is the average principle curvature of local maximas
 on the surface.
 }

@@ -6,13 +6,13 @@
 
 #' Find Local Peaks
 #'
-#' Locates local peaks on a raster. A peak is defined as any pixel where
+#' Locates local peaks on a raster or matrix. A peak is defined as any pixel where
 #' all 8 surrounding pixels have lower values, and the center pixel
 #' has a positive value.
 #'
-#' @param x A raster object.
+#' @param x A raster or matrix.
 #' @return A dataframe of local peak locations (\code{x, y}) and
-#'   values (\code{val}). The raster location index (\code{ind}),
+#'   values (\code{val}). The raster or matrix location index (\code{ind}),
 #'   row (\code{row}), and column (\code{col}) are also listed.
 #' @examples
 #' # import raster image
@@ -27,12 +27,19 @@
 #' Sds <- nrow(peaks) / ((N - 1) * (M - 1))
 #' @export
 findpeaks <- function(x) {
-  if(class(x) != 'RasterLayer') {stop('x must be a raster.')}
+  if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
 
   N <- dim(x)[1] # rows
   M <- dim(x)[2] # cols
 
   peaks <- data.frame(x = NA, y = NA, val = NA, ind = NA, row = NA, col = NA)
+
+  # convert matrix to raster if necessary (equal area)
+  if (data_type == 'matrix') {
+    x <- raster(x)
+    extent(x) <- c(0, ncol(x), 0, nrow(x))
+    crs(x) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+  }
 
   # center values, indices, and coordinates
   centers <- getValues(x)
@@ -78,13 +85,13 @@ findpeaks <- function(x) {
 
 #' Find Local Valleys
 #'
-#' Locates local valleys on a raster. A valley is defined as any pixel where
+#' Locates local valleys on a raster or matrix. A valley is defined as any pixel where
 #' all 8 surrounding pixels have higher values, and the center pixel
 #' has a negative value.
 #'
-#' @param x A raster object.
+#' @param x A raster or matrix.
 #' @return A dataframe of local valley locations (\code{x, y}) and
-#'   values (\code{val}). The raster location index (\code{ind}),
+#'   values (\code{val}). The raster or matrix location index (\code{ind}),
 #'   row (\code{row}), and column (\code{col}) are also listed.
 #' @examples
 #' # import raster image
@@ -102,12 +109,20 @@ findpeaks <- function(x) {
 #' S10z <- (sum(top_peaks$val) + sum(abs(bottom_valleys$val))) / 5
 #' @export
 findvalleys <- function(x) {
-  if(class(x) != 'RasterLayer') {stop('x must be a raster.')}
+  if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
 
   N <- dim(x)[1] # rows
   M <- dim(x)[2] # cols
 
   peaks <- data.frame(x = NA, y = NA, val = NA, ind = NA, row = NA, col = NA)
+
+  # convert matrix to raster if necessary (equal area)
+  if (data_type == 'matrix') {
+    x <- raster(x)
+    extent(x) <- c(0, ncol(x), 0, nrow(x))
+    crs(x) <- "+proj=aea +la
+    t_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+  }
 
   # center values, indices, and coordinates
   centers <- getValues(x)
@@ -154,11 +169,11 @@ findvalleys <- function(x) {
 
 #' Mean Summit Curvature
 #'
-#' Calculates the mean summit curvature of a raster. Mean summit
+#' Calculates the mean summit curvature of a raster or matrix. Mean summit
 #' curvature is the average principle curvature of local maximas
 #' on the surface.
 #'
-#' @param x A raster object.
+#' @param x A raster or matrix.
 #' @return A numeric value representing the average curvature of
 #'   surface peaks.
 #' @examples
@@ -169,7 +184,15 @@ findvalleys <- function(x) {
 #' Ssc <- ssc(normforest)
 #' @export
 ssc <- function(x) {
-  if(class(x) != 'RasterLayer') {stop('x must be a raster.')}
+  if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
+
+  # convert matrix to raster if necessary (equal area)
+  if (data_type == 'matrix') {
+    x <- raster(x)
+    extent(x) <- c(0, ncol(x), 0, nrow(x))
+    crs(x) <- "+proj=aea +la
+    t_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+  }
 
   # z values, coordinates, and resolution (change in x, y)
   z <- getValues(x)
@@ -230,10 +253,10 @@ ssc <- function(x) {
 
 #' Summit Density
 #'
-#' Calculates the summit density of a raster. Summit density is the number of local
+#' Calculates the summit density of a raster or matrix. Summit density is the number of local
 #' peaks per unit area.
 #'
-#' @param x A raster object.
+#' @param x A raster or matrix.
 #' @return A numeric value representing the summit density.
 #' @examples
 #' # import raster image
@@ -243,7 +266,7 @@ ssc <- function(x) {
 #' Sds <- sds(normforest)
 #' @export
 sds <- function(x) {
-  if(class(x) != 'RasterLayer') {stop('x must be a raster.')}
+  if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
 
   M <- nrow(x)
   N <- ncol(x)
@@ -260,7 +283,7 @@ sds <- function(x) {
 #' Calculates the average height abover the mean surface for the five highest local maxima
 #' plus the average height below the mean surface for the five lowest local minima.
 #'
-#' @param x A raster object.
+#' @param x A raster or matrix.
 #' @return A numeric value representing the ten-point height.
 #' @examples
 #' # import raster image
@@ -270,7 +293,7 @@ sds <- function(x) {
 #' S10z <- s10z(normforest)
 #' @export
 s10z <- function(x) {
-  if(class(x) != 'RasterLayer') {stop('x must be a raster.')}
+  if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
 
   peaks <- findpeaks(x)
   valleys <- findvalleys(x)

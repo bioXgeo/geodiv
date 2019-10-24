@@ -2,19 +2,19 @@
 % Please edit documentation in R/basics.R
 \name{sv}
 \alias{sv}
-\title{Calculates the Maximum Valley Depth of a Surface Raster}
+\title{Calculates the Maximum Valley Depth of a Surface Image}
 \usage{
 sv(x)
 }
 \arguments{
-\item{x}{A raster.}
+\item{x}{A raster or matrix.}
 }
 \value{
 A numeric value of maximum valley depth.
 }
 \description{
 Finds the absolute value of the lowest value in the
-landscape (maximum valley depth; Sv) for a raster
+landscape (maximum valley depth; Sv) for a raster or matrix
 representing a surface.
 }
 \examples{

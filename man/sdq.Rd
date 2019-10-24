@@ -7,14 +7,15 @@
 sdq(x)
 }
 \arguments{
-\item{x}{A raster object.}
+\item{x}{A raster or matrix.}
 }
 \value{
 A numeric value representing the two-point root
-  mean square slope, Sdq.
+  mean square slope, Sdq. The units of the returned value
+  are change in z per one unit (pixel).
 }
 \description{
-Calculates the root mean square slope of a raster
+Calculates the root mean square slope of a raster or matrix
 surface using the two-point method. This function is based
 on the equations found at
 https://www.ntmdt-si.ru/data/media/files/manuals/image_analisys_p9_nov12.e.pdf.

@@ -2,22 +2,22 @@
 % Please edit documentation in R/utilities.R
 \name{remove_plane}
 \alias{remove_plane}
-\title{Removes the Best Fit Polynomial Plane from a Raster}
+\title{Removes the Best Fit Polynomial Plane from a Surface}
 \usage{
 remove_plane(x)
 }
 \arguments{
-\item{x}{A raster.}
+\item{x}{A raster or matrix.}
 }
 \value{
-A raster of the same size as the input with values
+A raster or matrix of the same size as the input with values
   equal to the difference between the original and bestfit
-  plane rasters.
+  plane.
 }
 \description{
-Finds the best fit polynomial plane for a raster image and
-subtracts it from the actual raster values. The remaining
-raster has positive values where the actual values are higher
+Finds the best fit polynomial plane for a surface and
+subtracts it from the actual values. The remaining
+surface has positive values where the actual values are higher
 than the plane and negative values where the actual value
 are lower than the plane.
 }

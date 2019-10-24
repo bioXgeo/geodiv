@@ -1,9 +1,9 @@
-#' Offset Raster Values
+#' Offset Raster or Matrix Values
 #'
-#' Calculates a matrix of raster values with a negative
+#' Calculates a matrix of values with a negative
 #' or positive, x or y, offset.
 #'
-#' @param r A raster object.
+#' @param r A raster or matrix.
 #' @param xdist Numeric indicating the number and direction (+, -)
 #'   of columns for the offset.
 #' @param ydist Numeric indicating the number and direction (+, -)
@@ -21,7 +21,7 @@
 #'   the top. The absolute value must be \code{>= abs(ydist)}.
 #' @param scale Logical. Indicates whether or not to scale the values of
 #'   the raster.
-#' @return A numeric vector of raster values created from a matrix of the values
+#' @return A numeric vector of values created from a matrix of the values
 #'   with the specified offset. The vector is created from a matrix with
 #'    \code{xrm} fewer columns and \code{yrm} fewer rows than the original
 #'   raster value matrix.
@@ -41,7 +41,7 @@ zshift <- function(r, xdist = 0, ydist = 0, xrm, yrm, scale = FALSE) {
   try(if(missing(xrm)) (xrm = xdist))
   try(if(missing(yrm)) (yrm = ydist))
 
-  if(class(r) != 'RasterLayer') {stop('r must be a raster.')}
+  if(class(r) != 'RasterLayer' & class(r) != 'matrix') {stop('x must be a raster or matrix.')}
   if(class(xdist) != 'numeric') {stop('xdist must be numeric.')}
   if(class(ydist) != 'numeric') {stop('ydist must be numeric.')}
   if(class(xrm) != 'numeric') {stop('xrm must be numeric.')}

@@ -2,19 +2,19 @@
 % Please edit documentation in R/basics.R
 \name{sph}
 \alias{sph}
-\title{Calculates the Maximum Peak Height of a Surface Raster}
+\title{Calculates the Maximum Peak Height of a Surface Image}
 \usage{
 sph(x)
 }
 \arguments{
-\item{x}{A raster.}
+\item{x}{A raster or matrix.}
 }
 \value{
 A numeric value of maximum peak height.
 }
 \description{
 Finds the absolute value of the highest value in the
-landscape (maximum peak height; Sph) for a raster
+landscape (maximum peak height; Sph) for a raster or matrix
 representing a surface.
 }
 \examples{

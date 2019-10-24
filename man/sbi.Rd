@@ -2,12 +2,12 @@
 % Please edit documentation in R/bearingarea.R
 \name{sbi}
 \alias{sbi}
-\title{Surface Bearing Index of a Raster}
+\title{Surface Bearing Index}
 \usage{
 sbi(x)
 }
 \arguments{
-\item{x}{A raster.}
+\item{x}{A raster or matrix.}
 }
 \value{
 A numeric value representing the surface bearing index.

@@ -2,7 +2,7 @@
 % Please edit documentation in R/bearingarea.R
 \name{sk}
 \alias{sk}
-\title{Core Roughness Depth of a Raster}
+\title{Core Roughness Depth}
 \usage{
 sk(x)
 }

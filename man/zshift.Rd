@@ -2,12 +2,12 @@
 % Please edit documentation in R/zshift.R
 \name{zshift}
 \alias{zshift}
-\title{Offset Raster Values}
+\title{Offset Raster or Matrix Values}
 \usage{
 zshift(r, xdist = 0, ydist = 0, xrm, yrm, scale = FALSE)
 }
 \arguments{
-\item{r}{A raster object.}
+\item{r}{A raster or matrix.}
 
 \item{xdist}{Numeric indicating the number and direction (+, -)
 of columns for the offset.}
@@ -32,13 +32,13 @@ the top. The absolute value must be \code{>= abs(ydist)}.}
 the raster.}
 }
 \value{
-A numeric vector of raster values created from a matrix of the values
+A numeric vector of values created from a matrix of the values
   with the specified offset. The vector is created from a matrix with
    \code{xrm} fewer columns and \code{yrm} fewer rows than the original
   raster value matrix.
 }
 \description{
-Calculates a matrix of raster values with a negative
+Calculates a matrix of values with a negative
 or positive, x or y, offset.
 }
 \examples{

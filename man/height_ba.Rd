@@ -7,7 +7,7 @@
 height_ba(x, xval)
 }
 \arguments{
-\item{x}{A raster.}
+\item{x}{A raster or matrix.}
 
 \item{xval}{Numeric value along the x-axis.}
 }
