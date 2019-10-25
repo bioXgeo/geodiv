@@ -7,15 +7,15 @@
 findpeaks(x)
 }
 \arguments{
-\item{x}{A raster object.}
+\item{x}{A raster or matrix.}
 }
 \value{
 A dataframe of local peak locations (\code{x, y}) and
-  values (\code{val}). The raster location index (\code{ind}),
+  values (\code{val}). The raster or matrix location index (\code{ind}),
   row (\code{row}), and column (\code{col}) are also listed.
 }
 \description{
-Locates local peaks on a raster. A peak is defined as any pixel where
+Locates local peaks on a raster or matrix. A peak is defined as any pixel where
 all 8 surrounding pixels have lower values, and the center pixel
 has a positive value.
 }

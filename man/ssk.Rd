@@ -7,7 +7,7 @@
 ssk(x, adj = TRUE)
 }
 \arguments{
-\item{x}{A raster.}
+\item{x}{A raster or matrix.}
 
 \item{adj}{Logical, defaults to \code{TRUE}. If \code{TRUE},
 the adjusted Fisher-Pearson coefficient of skewness
@@ -24,8 +24,8 @@ Ssk <- ssk(normforest, adj = TRUE)
 }
 \description{
 Finds the Fisher-Pearson coefficient of skewness
-for raster values (Ssk). Skewness represents the
+for raster or matrix values (Ssk). Skewness represents the
 asymmetry of the surface height distribution.
-Height is measured as the value of a raster and
+Height is measured as the value of a raster/matrix and
 may not necessarily represent actual height.
 }

@@ -7,7 +7,7 @@
 find_flat(x, perc = 0.4)
 }
 \arguments{
-\item{x}{A raster.}
+\item{x}{A raster or matrix.}
 
 \item{perc}{Numeric between 0 and 1. The percentage of
 the curve over which to fit the line.}

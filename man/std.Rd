@@ -7,14 +7,15 @@
 std(x, plot = FALSE)
 }
 \arguments{
-\item{x}{A raster.}
+\item{x}{A raster or matrix.}
 
 \item{plot}{Logical. If \code{TRUE}, returns a plot of the
 amplitude spectrum with lines showing directions in which
-amplitude is summed for the Std and Stdi calculations.}
+amplitude is summed for the Std and Stdi calculations.
+Plotting is not possible when input is a matrix.}
 }
 \value{
-A list containing numeric values for the angle of
+A vector containing numeric values for the angle of
   dominating texture and the texture direction index.
 }
 \description{
@@ -28,13 +29,10 @@ library(raster)
 # import raster image
 data(normforest)
 
-# crop raster to much smaller area
-x <- crop(normforest, extent(-123, -122.99, 43, 43.01))
-
 # calculate Std and Stdi
-stdvals <- std(x)
+stdvals <- std(normforest)
 
 # extract each value
-Std <- stdvals[[1]]
-Stdi <- stdvals[[2]]
+Std <- stdvals[1]
+Stdi <- stdvals[2]
 }

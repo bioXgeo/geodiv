@@ -7,13 +7,13 @@
 sds(x)
 }
 \arguments{
-\item{x}{A raster object.}
+\item{x}{A raster or matrix.}
 }
 \value{
 A numeric value representing the summit density.
 }
 \description{
-Calculates the summit density of a raster. Summit density is the number of local
+Calculates the summit density of a raster or matrix. Summit density is the number of local
 peaks per unit area.
 }
 \examples{

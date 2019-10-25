@@ -2,12 +2,12 @@
 % Please edit documentation in R/bearingarea.R
 \name{svk}
 \alias{svk}
-\title{Reduced Valley Depth of a Raster}
+\title{Reduced Valley Depth}
 \usage{
 svk(x)
 }
 \arguments{
-\item{x}{A raster.}
+\item{x}{A raster or matrix.}
 }
 \value{
 A numeric value representing the reduced valley depth.

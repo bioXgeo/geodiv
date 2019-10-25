@@ -7,16 +7,16 @@
 bestfitplane(x)
 }
 \arguments{
-\item{x}{A raster.}
+\item{x}{A raster or matrix.}
 }
 \value{
-A raster of the same size as the input with values
+A raster or matrix of the same size as the input with values
   predicted from the best polynomial fit.
 }
 \description{
-Finds the best fit polynomial plane for a raster image. This
+Finds the best fit polynomial plane for a surface. This
 function tests least squares polynomial fits with orders of
-2 - 3 and determines which order minimizes the error when the
+1 - 3 and determines which order minimizes the error when the
 fit is subtracted from the original image.
 }
 \examples{

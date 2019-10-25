@@ -17,12 +17,11 @@
 #' Calculate a Least Squares Polynomial Plane
 #'
 #' Fits a polynomial plane of order \code{n} to a raster
-#' image.
+#' or matrix.
 #'
-#' @param x A raster.
+#' @param x A raster or matrix.
 #' @param order Numeric. Indicates the polynomial order to be fit.
-#' @return A matrix of the same size as the raster with values
-#'   predicted from the polynomial fit.
+#' @return A matrix with values predicted from the polynomial fit.
 #' @examples
 #' library(raster)
 #'
@@ -39,18 +38,25 @@
 #' plot(x)
 #' @export
 fitplane <- function(x, order) {
-  if(class(x) != 'RasterLayer') {stop('x must be a raster.')}
-  if(class(order) == 'numeric') {
-    warning('numeric order, converting to integer.')
+  if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
+  if(order %% 1 > 0) {
+    warning('order will be rounded to the nearest integer.')
     order <- as.integer(floor(order))}
-  if(class(order) != 'integer') {stop('order must be integer.')}
   if(length(order) > 1) {stop('too many values supplied to order.')}
-  if(order <= 0) {stop('order must be >= 1.')}
+  if(order < 0) {stop('order must be >= 0.')}
 
-  # extract coordinates and values
-  xcoord <- sp::coordinates(x)[, 1]
-  ycoord <- sp::coordinates(x)[, 2]
-  z <- getValues(x)
+  order <- as.integer(order)
+
+  if (class(x) == 'RasterLayer') {
+    # extract coordinates and values
+    xcoord <- sp::coordinates(x)[, 1]
+    ycoord <- sp::coordinates(x)[, 2]
+    z <- getValues(x)
+  } else {
+    xcoord <- rep(seq(1, ncol(x)), nrow(x))
+    ycoord <- rep(seq(1, nrow(x)), each = ncol(x))
+    z <- c(x)
+  }
 
   # fit least squares polynomial with order = order
   surfmod <- spatial::surf.ls(np = order, xcoord[!is.na(z)], ycoord[!is.na(z)], z[!is.na(z)])
@@ -63,13 +69,13 @@ fitplane <- function(x, order) {
 
 #' Finds the Best Fit Polynomial Plane
 #'
-#' Finds the best fit polynomial plane for a raster image. This
+#' Finds the best fit polynomial plane for a surface. This
 #' function tests least squares polynomial fits with orders of
-#' 2 - 3 and determines which order minimizes the error when the
+#' 1 - 3 and determines which order minimizes the error when the
 #' fit is subtracted from the original image.
 #'
-#' @param x A raster.
-#' @return A raster of the same size as the input with values
+#' @param x A raster or matrix.
+#' @return A raster or matrix of the same size as the input with values
 #'   predicted from the best polynomial fit.
 #' @examples
 #' library(raster)
@@ -84,17 +90,21 @@ fitplane <- function(x, order) {
 #' plot(poly)
 #' @export
 bestfitplane <- function(x) {
-  if(class(x) != 'RasterLayer') {stop('x must be a raster.')}
+  if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
 
   # fit least squares plane for polynomials from orders 2 - 3
-  mods <- lapply(seq(2, 3), FUN = function(i) fitplane(x, order = i))
+  mods <- lapply(seq(0, 3), FUN = function(i) fitplane(x, order = i))
 
   # convert raster to matrix
-  xmat <- matrix(x, nrow = nrow(x), ncol = ncol(x), byrow = TRUE)
+  if (class(x) == 'RasterLayer') {
+    xmat <- matrix(x, nrow = nrow(x), ncol = ncol(x), byrow = TRUE)
+  } else {
+    xmat <- x
+  }
 
   # calculate raster errors from best fit planes for each order tested
-  errlist <- lapply(seq(2, 3), FUN = function(i) xmat - mods[[(i - 1)]])
-  meanerr <- lapply(seq(2, 3), FUN = function(i) mean(errlist[[(i - 1)]], na.rm = TRUE))
+  errlist <- lapply(seq(1, 4), FUN = function(i) xmat - mods[[(i)]])
+  meanerr <- lapply(seq(1, 4), FUN = function(i) abs(mean(errlist[[(i)]], na.rm = TRUE)))
 
   # determine which order is best
   bestfit <- which(as.numeric(meanerr) == min(as.numeric(meanerr), na.rm = TRUE))
@@ -105,24 +115,28 @@ bestfitplane <- function(x) {
   }
 
   # fill in raster with best fit values
-  bfx <- setValues(x, mods[[bestfit]])
+  if (class(x) == 'RasterLayer'){
+    bfx <- setValues(x, mods[[bestfit]])
+  } else {
+    bfx <- matrix(mods[[bestfit]], nrow = nrow(x), ncol = ncol(x), byrow = TRUE)
+  }
 
-  print(paste('Order of polynomial that minimizes errors: ', bestfit, sep = ''))
+  print(paste('Order of polynomial that minimizes errors: ', bestfit - 1, sep = ''))
   return(bfx)
 }
 
-#' Removes the Best Fit Polynomial Plane from a Raster
+#' Removes the Best Fit Polynomial Plane from a Surface
 #'
-#' Finds the best fit polynomial plane for a raster image and
-#' subtracts it from the actual raster values. The remaining
-#' raster has positive values where the actual values are higher
+#' Finds the best fit polynomial plane for a surface and
+#' subtracts it from the actual values. The remaining
+#' surface has positive values where the actual values are higher
 #' than the plane and negative values where the actual value
 #' are lower than the plane.
 #'
-#' @param x A raster.
-#' @return A raster of the same size as the input with values
+#' @param x A raster or matrix.
+#' @return A raster or matrix of the same size as the input with values
 #'   equal to the difference between the original and bestfit
-#'   plane rasters.
+#'   plane.
 #' @examples
 #' library(raster)
 #'
@@ -136,7 +150,7 @@ bestfitplane <- function(x) {
 #' plot(new_rast)
 #' @export
 remove_plane <- function(x) {
-  if(class(x) != 'RasterLayer') {stop('x must be a raster.')}
+  if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
 
   bfx <- bestfitplane(x)
 

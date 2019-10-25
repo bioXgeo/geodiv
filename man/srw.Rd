@@ -7,14 +7,14 @@
 srw(x, plot = FALSE)
 }
 \arguments{
-\item{x}{A raster.}
+\item{x}{A raster or matrix.}
 
 \item{plot}{Logical. If \code{TRUE}, returns a plot of the
 amplitude spectrum with lines showing the radii at which
 Srw, Srwi, and Shw are calculated.}
 }
 \value{
-A list containing numeric values for the dominant
+A vector containing numeric values for the dominant
   radial wavelength, radial wavelength index, and mean half
   wavelength.
 }
@@ -29,14 +29,11 @@ library(raster)
 # import raster image
 data(normforest)
 
-# crop raster to much smaller area
-x <- crop(normforest, extent(-123, -122.99, 43, 43.01))
-
 # calculate metrics
-srwvals <- srw(x)
+srwvals <- srw(normforest)
 
 # extract each value
-Srw <- srwvals[[1]]
-Srwi <- srwvals[[2]]
-Shw <- srwvals[[3]]
+Srw <- srwvals[1]
+Srwi <- srwvals[2]
+Shw <- srwvals[3]
 }

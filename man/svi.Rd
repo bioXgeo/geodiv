@@ -2,12 +2,12 @@
 % Please edit documentation in R/bearingarea.R
 \name{svi}
 \alias{svi}
-\title{Valley Fluid Retention Index of a Raster}
+\title{Valley Fluid Retention Index}
 \usage{
 svi(x)
 }
 \arguments{
-\item{x}{A raster.}
+\item{x}{A raster or matrix.}
 }
 \value{
 A numeric value representing the valley fluid

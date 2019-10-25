@@ -22,6 +22,7 @@ Imports:
     rgeos (>= 0.4-3),
     doSNOW (>= 1.0.16),
     snow (>= 0.4-3),
+    parallel (>= 3.6.1),
     sf (>= 0.7-4),
     zoo (>= 1.8-5),
     Rcpp (>= 1.0.1)

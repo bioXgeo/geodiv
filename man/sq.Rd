@@ -7,11 +7,11 @@
 sq(x)
 }
 \arguments{
-\item{x}{A raster.}
+\item{x}{A raster or matrix.}
 }
 \value{
 A value of root mean square roughness in
-  the units of the original raster.
+  the units of the original raster or matrix.
 }
 \description{
 Finds the root mean square roughness of a surface

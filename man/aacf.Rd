@@ -7,7 +7,7 @@
 aacf(x)
 }
 \arguments{
-\item{x}{An n x n raster or matrix object.}
+\item{x}{An n x n raster or matrix.}
 }
 \value{
 A raster or matrix representation
@@ -17,7 +17,7 @@ A raster or matrix representation
 \description{
 Calculates the areal autocorrelation function (AACF) as the
 inverse of the Fourier power spectrum. \code{aacf(x)} returns
-the AACF in both matrix and image format.
+the AACF in both matrix and raster format.
 }
 \examples{
 library(raster)

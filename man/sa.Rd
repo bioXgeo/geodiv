@@ -7,11 +7,11 @@
 sa(x)
 }
 \arguments{
-\item{x}{A raster.}
+\item{x}{A raster or matrix.}
 }
 \value{
 A value of average roughness in the units of the
-  original raster.
+  original raster or matrix.
 }
 \description{
 Finds the average roughness of a surface (Sa) as the absolute

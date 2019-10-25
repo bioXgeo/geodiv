@@ -5,14 +5,15 @@
 
 #' Root Mean Square Slope of Surface
 #'
-#' Calculates the root mean square slope of a raster
+#' Calculates the root mean square slope of a raster or matrix
 #' surface using the two-point method. This function is based
 #' on the equations found at
 #' https://www.ntmdt-si.ru/data/media/files/manuals/image_analisys_p9_nov12.e.pdf.
 #'
-#' @param x A raster object.
+#' @param x A raster or matrix.
 #' @return A numeric value representing the two-point root
-#'   mean square slope, Sdq.
+#'   mean square slope, Sdq. The units of the returned value
+#'   are change in z per one unit (pixel).
 #' @examples
 #' # import raster image
 #' data(normforest)
@@ -21,12 +22,10 @@
 #' Sdq <- sdq(normforest)
 #' @export
 sdq <- function(x) {
-  if(class(x) != 'RasterLayer') {stop('x must be a raster.')}
+  if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
 
-  # z values, coordinates, and resolution (change in x, y)
-  z <- getValues(x)
-  deltax <- res(x)[1]
-  deltay <- res(x)[2]
+  deltax <- 1
+  deltay <- 1
 
   # calculate z with an offset of x + 1, y + 1
   z_xplus <- zshift(x, xdist = 1, ydist = 0, yrm = 1)
@@ -43,14 +42,15 @@ sdq <- function(x) {
 
 #' Root Area Mean Square Slope of Surface
 #'
-#' Calculates the area root mean square slope of a raster
+#' Calculates the area root mean square slope of a raster or matrix
 #' surface using the seven-point method. This function is based
 #' on the equations found at
 #' https://www.ntmdt-si.ru/data/media/files/manuals/image_analisys_p9_nov12.e.pdf.
 #'
-#' @param x A raster object.
+#' @param x A raster or matrix.
 #' @return A numeric value representing the seven-point root
-#'   mean square slope, Sdq6.
+#'   mean square slope, Sdq6. The units of the returned value
+#'   are change in z per one unit (pixel).
 #' @examples
 #' # import raster image
 #' data(normforest)
@@ -59,11 +59,10 @@ sdq <- function(x) {
 #' Sdq6 <- sdq6(normforest)
 #' @export
 sdq6 <- function(x) {
-  if(class(x) != 'RasterLayer') {stop('x must be a raster.')}
+  if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
 
-  # get resolution
-  deltax <- res(x)[1]
-  deltay <- res(x)[2]
+  deltax <- 1 # per unit, not per degree, etc.
+  deltay <- 1
 
   # get dimensions
   N <- dim(x)[1] # rows

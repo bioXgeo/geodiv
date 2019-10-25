@@ -2,12 +2,12 @@
 % Please edit documentation in R/bearingarea.R
 \name{spk}
 \alias{spk}
-\title{Reduced Peak Height of a Raster}
+\title{Reduced Peak Height}
 \usage{
 spk(x)
 }
 \arguments{
-\item{x}{A raster.}
+\item{x}{A raster or matrix.}
 }
 \value{
 A numeric value representing the reduced peak height.

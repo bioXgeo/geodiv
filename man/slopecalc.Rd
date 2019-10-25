@@ -21,7 +21,7 @@ with centerpoint x.
 }
 \description{
 Calculates the slopes along the bearing area curve
-of a raster. Slopes are determined at points x,
+of a raster or matrix. Slopes are determined at points x,
 from point x - h to x + h.
 }
 \examples{

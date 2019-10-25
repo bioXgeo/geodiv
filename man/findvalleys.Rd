@@ -7,15 +7,15 @@
 findvalleys(x)
 }
 \arguments{
-\item{x}{A raster object.}
+\item{x}{A raster or matrix.}
 }
 \value{
 A dataframe of local valley locations (\code{x, y}) and
-  values (\code{val}). The raster location index (\code{ind}),
+  values (\code{val}). The raster or matrix location index (\code{ind}),
   row (\code{row}), and column (\code{col}) are also listed.
 }
 \description{
-Locates local valleys on a raster. A valley is defined as any pixel where
+Locates local valleys on a raster or matrix. A valley is defined as any pixel where
 all 8 surrounding pixels have higher values, and the center pixel
 has a negative value.
 }

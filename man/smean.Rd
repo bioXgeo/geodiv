@@ -2,19 +2,19 @@
 % Please edit documentation in R/basics.R
 \name{smean}
 \alias{smean}
-\title{Calculates the Mean Peak Height of a Surface Raster}
+\title{Calculates the Mean Peak Height of a Surface Image}
 \usage{
 smean(x)
 }
 \arguments{
-\item{x}{A raster.}
+\item{x}{A raster or matrix.}
 }
 \value{
 A numeric value of mean peak height.
 }
 \description{
 Finds the mean height of positive values in the
-landscape (mean peak height; Smean) for a raster
+landscape (mean peak height; Smean) for a raster or matrix
 representing a surface.
 }
 \examples{
