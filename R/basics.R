@@ -85,7 +85,7 @@ sq <- function(x) {
 #' Ssk <- ssk(normforest, adj = TRUE)
 #' @export
 ssk <- function(x, adj = TRUE) {
-  if(class(x) != 'RasterLayer') {stop('x must be a raster.')}
+  if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
   if(class(adj) != 'logical') {stop('adj argument must be TRUE/FALSE.')}
 
   if (class(x) == 'RasterLayer') {

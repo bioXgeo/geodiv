@@ -38,11 +38,11 @@ data(normforest)
 x <- crop(normforest, extent(-123, -122.99, 43, 43.01))
 
 # calculate aacf img or matrix
-aacf_list <- aacf(x)
+aacf_out <- aacf(x)
 
 # estimate the fastest/slowest declines to 0.20 and 0.37 (1/e) autocorrelation
-sclvals <- scl(aacf_list[[2]])
+sclvals <- scl(aacf_out)
 
 # calculate Scl20, the minimum distance to an autocorrelation value of 0.2 in the AACF
-Scl20 <- sclvals[[1]]
+Scl20 <- sclvals[1]
 }

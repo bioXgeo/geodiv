@@ -2,28 +2,27 @@
 % Please edit documentation in R/surfacearea.R
 \name{surface_area}
 \alias{surface_area}
-\title{Surface Area of a Raster}
+\title{Surface Area}
 \usage{
 surface_area(x)
 }
 \arguments{
-\item{x}{A raster object.}
+\item{x}{A raster or matrix.}
 }
 \value{
-A numeric value representing the scaled surface area of
-  the raster.
+A numeric value representing the scaled surface area.
 }
 \description{
-Calculates the scaled surface area of a raster.
+Calculates the scaled surface area of a raster or matrix.
 }
 \details{
-This function scales both x and y, as well as the raster value (z),
+This function scales both x and y, as well as the surface value (z),
 to between 0 and 1 to best match their units. This is done because
 most satellite data have units where the x, y units do not equal the
 z units. The surface area represents the surface area of the sample
 area (N-1, M-1).
 
-Note that the raster object may have NA values around the edges,
+Note that the surface object may have NA values around the edges,
 but should not have any missing values within the main area.
 }
 \examples{

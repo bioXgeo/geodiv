@@ -26,8 +26,8 @@ library(raster)
 data(normforest)
 
 # calculate aacf img and matrix
-aacf_list <- aacf(normforest)
+aacf_out <- aacf(normforest)
 
 # plot resulting aacf image
-plot(aacf_list)
+plot(aacf_out)
 }
