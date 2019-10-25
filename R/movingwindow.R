@@ -21,8 +21,9 @@
 #' @param ncores Numeric. If parallel is TRUE, number of cores on which to
 #' run the calculations. Defaults to all available, minus 1.
 #' @param nclumps Numeric. Number of clumps to split the raster or matrix into.
-#' @return A raster with pixel values representative of the metric
-#' value for the window surrounding that pixel.
+#' @return A raster or list of rasters (if function results in multiple outputs)
+#' with pixel values representative of the metric value for the window
+#' surrounding that pixel.
 #' @note The total window size for square windows will be (size * 2) + 1.
 #' @details Metrics available from geodiv package:
 #' \enumerate{
@@ -164,15 +165,9 @@ texture_image <- function(x, window_type = 'square', size = 11, epsg_proj = 5070
     print('Beginning calculation of metrics over windows...')
     start <- Sys.time()
     for (i in pixlist) {
-      if (window_type == 'square') {
-        outval <- window_metric(ext_x, i, 'square', size = size, epsg_proj = epsg_proj,
-                                 coords = coords, rownum = rownum, colnum = colnum,
+      outval <- window_metric(ext_x, i, window_type = window_type, size = size, epsg_proj = epsg_proj,
+                                coords = coords, rownum = rownum, colnum = colnum,
                                 metric = metric, args = input_args)
-      } else {
-        outval <- window_metric(ext_x, i, 'circle', size = size, epsg_proj = epsg_proj,
-                                 coords = coords, rownum = rownum, colnum = colnum,
-                                metric = metric, args = input_args)
-      }
 
       result <- c(result, outval)
     }
@@ -192,22 +187,22 @@ texture_image <- function(x, window_type = 'square', size = 11, epsg_proj = 5070
     end <- Sys.time()
     cat('Total time to calculate metrics: ', end - start, '\n', sep = '')
 
-    result <- unlist(result, recursive = TRUE)
+    result <- do.call(unlist, args = list(result, recursive = TRUE))
   } else {
     print('Beginning calculation of metrics over windows...')
     start <- Sys.time()
     # make and start cluster
     try(stopCluster(cl), silent = TRUE)
-    cl <- makeCluster(ncores)
+    cl <- makeCluster(ncores, type = 'SOCK')
     doSNOW::registerDoSNOW(cl)
     snow::clusterExport(cl = cl, list = list('ext_x', 'coords', 'size',
                                              'window_type', 'epsg_proj',
                                              'rownum', 'colnum',
-                                             'new_pixlist', 'metric', 'args'),
+                                             'new_pixlist', 'metric', 'input_args'),
                         envir = environment())
     # for each list in new_pixlist, run lapply
     result <- snow::parLapply(cl, new_pixlist, fun = function(l) {
-      lapply(l, FUN = function(i) {window_metric(x = ext_x, i = i, window_type = window_type,
+      lapply(l, FUN = function(i) {geodiv::window_metric(x = ext_x, i = i, window_type = window_type,
                                                  size = size, epsg_proj = epsg_proj,
                                                  coords = coords, rownum = rownum,
                                                  colnum = colnum, metric = metric,
@@ -217,12 +212,18 @@ texture_image <- function(x, window_type = 'square', size = 11, epsg_proj = 5070
     end <- Sys.time()
     cat('Total time to calculate metrics: ', end - start, '\n', sep = '')
 
-    result <- unlist(result, recursive = TRUE)
+    result <- do.call(unlist, args = list(result, recursive = TRUE))
   }
 
-  out <- setValues(out, result)
+  # deal with functions that have multiple outputs
+  outfinal <- list()
+  nresult <- length(result) / length(x)
+  for (i in 1:nresult) {
+    temp <- result[seq(i, length(result), nresult)]
+    outfinal[[i]] <- setValues(out, temp)
+  }
 
-  return(out)
+  return(outfinal)
 }
 
 #' Calculate Texture Metric for Single Pixel

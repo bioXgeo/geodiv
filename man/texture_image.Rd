@@ -34,8 +34,9 @@ run the calculations. Defaults to all available, minus 1.}
 \item{nclumps}{Numeric. Number of clumps to split the raster or matrix into.}
 }
 \value{
-A raster with pixel values representative of the metric
-value for the window surrounding that pixel.
+A raster or list of rasters (if function results in multiple outputs)
+with pixel values representative of the metric value for the window
+surrounding that pixel.
 }
 \description{
 Calculates the various texture metrics over windows centered

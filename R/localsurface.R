@@ -35,7 +35,7 @@ findpeaks <- function(x) {
   peaks <- data.frame(x = NA, y = NA, val = NA, ind = NA, row = NA, col = NA)
 
   # convert matrix to raster if necessary (equal area)
-  if (data_type == 'matrix') {
+  if (class(x) == 'matrix') {
     x <- raster(x)
     extent(x) <- c(0, ncol(x), 0, nrow(x))
     crs(x) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
@@ -117,7 +117,7 @@ findvalleys <- function(x) {
   peaks <- data.frame(x = NA, y = NA, val = NA, ind = NA, row = NA, col = NA)
 
   # convert matrix to raster if necessary (equal area)
-  if (data_type == 'matrix') {
+  if (class(x) == 'matrix') {
     x <- raster(x)
     extent(x) <- c(0, ncol(x), 0, nrow(x))
     crs(x) <- "+proj=aea +la
@@ -187,7 +187,7 @@ ssc <- function(x) {
   if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
 
   # convert matrix to raster if necessary (equal area)
-  if (data_type == 'matrix') {
+  if (class(x) == 'matrix') {
     x <- raster(x)
     extent(x) <- c(0, ncol(x), 0, nrow(x))
     crs(x) <- "+proj=aea +la

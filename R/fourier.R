@@ -121,6 +121,11 @@ std <- function(x, plot = FALSE) {
   # calculate distances from center to all other points
   center <- ceiling(dim(x) / 2)
   nce <- ifelse(ncol(amp_img) / 2 == round(ncol(amp_img) / 2), 1, 0)
+  dist_rast <- amp_img
+  values(dist_rast) <- NA
+  dist_rast[nrow(amp_img), center[2] + nce] <- 1
+  dist_rast <- distance(dist_rast)
+  min_dist <- min(max(dist_rast[nrow(dist_rast),]), max(dist_rast[center[2] + nce]))
 
   # calculate angles from center to all points
   angle_rast <- amp_img
@@ -140,6 +145,9 @@ std <- function(x, plot = FALSE) {
   for (i in 1:length(alpha)) {
     # get indices where angle is within range of desired angle
     angle_ind <- which(dplyr::near(getValues(angle_rast), alpha[i], 0.25))
+    # cut off at shortest distance to edge (so all rays are the same length)
+    good_cells <- which(getValues(dist_rast) <= min_dist)
+    angle_ind <- angle_ind[angle_ind %in% good_cells]
     angle_sum <- sum(amp_img[angle_ind], na.rm = TRUE)
     Aalpha[i] <- angle_sum
   }
