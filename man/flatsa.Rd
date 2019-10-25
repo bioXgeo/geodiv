@@ -2,20 +2,20 @@
 % Please edit documentation in R/surfacearea.R
 \name{flatsa}
 \alias{flatsa}
-\title{Surface Area of a Flattened Raster}
+\title{Flattened Surface Area}
 \usage{
 flatsa(x)
 }
 \arguments{
-\item{x}{A raster object.}
+\item{x}{A raster or matrix.}
 }
 \value{
 A numeric value representing the scaled surface
-  area of a flattened raster with the same x, y bounds.
+  area of a flattened surface with the same x, y bounds.
 }
 \description{
-Calculates the surface area of a flat raster with the
-same x, y bounds as the study raster.
+Calculates the surface area of a flat raster or matrix with the
+same x, y bounds as the study surface.
 }
 \details{
 This function scales both x and y to between 0 and 1. This

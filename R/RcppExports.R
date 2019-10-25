@@ -14,14 +14,13 @@
 #' # import raster image
 #' data(normforest)
 #'
-#'
 #' # convert to matrix
 #' x <- raster::as.matrix(normforest)
 #'
 #' # calculate the fractal dimension
 #' Sfd <- sfd(x)
 #' @export
-sfd <- function(mat) {
-    .Call(`_geodiv_sfd`, mat)
+sfd <- function(x) {
+    .Call(`_geodiv_sfd`, x)
 }
 

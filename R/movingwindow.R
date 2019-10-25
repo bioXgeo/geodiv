@@ -68,11 +68,12 @@
 #' x <- crop(normforest, extent(-123, -122.99, 43, 43.01))
 #'
 #' # get a surface of root mean square roughness
-#' sbi_img <- texture_image(x = x, window = 'square',
-#' size = 11, metric = 'str', args = list(threshold = 0.2), parallel = TRUE)
+#' sq_img <- texture_image(x = x, window = 'square',
+#' size = 11, metric = 'sq',
+#' parallel = TRUE, ncores = 2)
 #'
 #' # plot the result
-#' plot(sbi_img)
+#' plot(sq_img)
 #' @export
 texture_image <- function(x, window_type = 'square', size = 11, epsg_proj = 5070,
                           metric, args = NULL, parallel = TRUE, ncores = NULL, nclumps = 100){
@@ -177,7 +178,7 @@ texture_image <- function(x, window_type = 'square', size = 11, epsg_proj = 5070
     # get smaller rasters
     print('Beginning calculation of metrics over windows...')
     start <- Sys.time()
-    result <- mclapply(new_pixlist, FUN = function(l) {
+    result <- parallel::mclapply(new_pixlist, FUN = function(l) {
       lapply(l, FUN = function(i) {window_metric(x = ext_x, i = i, window_type = window_type,
                                                  size = size, epsg_proj = epsg_proj,
                                                  coords = coords, rownum = rownum,
@@ -231,7 +232,7 @@ texture_image <- function(x, window_type = 'square', size = 11, epsg_proj = 5070
 #' Calculates the various texture metrics over a window centered
 #' on an individual pixel.
 #'
-#' @param x A raster.
+#' @param x A raster or matrix.
 #' @param i Index of cell at which to calculate the metric.
 #' @param window_type Character. Type of window, either circular or square.
 #' @param size Numeric. Size of window, in number of pixels on each
@@ -239,6 +240,9 @@ texture_image <- function(x, window_type = 'square', size = 11, epsg_proj = 5070
 #' center (in meters) for circular windows.
 #' @param epsg_proj Numeric. Appropriate equal area EPSG code used to
 #' crop raster to each circular window. Only used for circular windows.
+#' @param coords Matrix of coordinates for the input raster or matrix.
+#' x-coordinates should be in the first column, and y-coordinates should
+#' be in the second column.
 #' @param rownum Vector of row numbers at which to calculate the metric.
 #' @param colnum Vector of column numbers at which to calculate the metric.
 #' @param metric Character. Metric to calculate for each window. Metrics
@@ -292,12 +296,19 @@ texture_image <- function(x, window_type = 'square', size = 11, epsg_proj = 5070
 #' # crop raster to much smaller area if on a smaller computer
 #' x <- crop(normforest, extent(-123, -122.99, 43, 43.01))
 #'
+#' # get coordinates, rownums, cellnums
+#' ext_x <- pad_edges(x, window_type = 'square', size = 4)
+#' coords <- data.frame(xyFromCell(x, 1:ncell(x)))
+#' rownum <- rowFromCell(x, pixlist) + 4
+#' colnum <- colFromCell(x, pixlist) + 4
+#'
 #' # get a surface of root mean square roughness
-#' sbi_img <- window_metric(x = x, window = 'circle',
-#' size = 90, epsg_proj = 5070, rownum = 3, colnum = 3, metric = 'sbi')
+#' sq_img <- window_metric(x = x, i = 40, window = 'square',
+#' size = 4, epsg_proj = 5070, coords = coords,
+#' rownum = rownum, colnum = colnum, metric = 'sq')
 #' @export
 window_metric <- function(x, i, window_type = 'square', size = 11, epsg_proj = 5070,
-                          coords, rownum, colnum, metric, args) {
+                          coords, rownum, colnum, metric, args = NULL) {
 
   # row and column number
   rownum <- rownum[i]

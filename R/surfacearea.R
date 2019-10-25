@@ -2,10 +2,10 @@
 # from https://www.ntmdt-si.ru/data/media/files/manuals/image_analisys_p9_nov12.e.pdf
 # diagram for actual equations used: file:///home/annie/Downloads/9783642364570-c2%20(1).pdf, page 17/30
 
-#' Surface Area of a Flattened Raster
+#' Flattened Surface Area
 #'
-#' Calculates the surface area of a flat raster with the
-#' same x, y bounds as the study raster.
+#' Calculates the surface area of a flat raster or matrix with the
+#' same x, y bounds as the study surface.
 #'
 #' This function scales both x and y to between 0 and 1. This
 #' is done because most satellite data have units where the x,
@@ -13,9 +13,9 @@
 #' surface area is usually compared to the actual surface area.
 #' Surface area is calculated over the sample area (N-1, M-1).
 #'
-#' @param x A raster object.
+#' @param x A raster or matrix.
 #' @return A numeric value representing the scaled surface
-#'   area of a flattened raster with the same x, y bounds.
+#'   area of a flattened surface with the same x, y bounds.
 #' @examples
 #' # import raster image
 #' data(normforest)
@@ -24,7 +24,7 @@
 #' flatsa(normforest)
 #' @export
 flatsa <- function(x) {
-  if(class(x) != 'RasterLayer') {stop('x must be a raster.')}
+  if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
 
   # In case the value area of the raster is an odd shape,
   # calculate the surface area of the flattened raster in the same way
@@ -32,6 +32,13 @@ flatsa <- function(x) {
   # get dimensions
   N <- dim(x)[1] # rows
   M <- dim(x)[2] # cols
+
+  # convert matrix to raster if necessary (equal area)
+  if (class(x) == 'matrix') {
+    x <- raster(x)
+    extent(x) <- c(0, ncol(x), 0, nrow(x))
+    crs(x) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+  }
 
   # coordinates and resolution (change in x, y)
   deltax <- res(x)[1]
@@ -82,22 +89,21 @@ flatsa <- function(x) {
   return(sa)
 }
 
-#' Surface Area of a Raster
+#' Surface Area
 #'
-#' Calculates the scaled surface area of a raster.
+#' Calculates the scaled surface area of a raster or matrix.
 #'
-#' This function scales both x and y, as well as the raster value (z),
+#' This function scales both x and y, as well as the surface value (z),
 #' to between 0 and 1 to best match their units. This is done because
 #' most satellite data have units where the x, y units do not equal the
 #' z units. The surface area represents the surface area of the sample
 #' area (N-1, M-1).
 #'
-#' Note that the raster object may have NA values around the edges,
+#' Note that the surface object may have NA values around the edges,
 #' but should not have any missing values within the main area.
 #'
-#' @param x A raster object.
-#' @return A numeric value representing the scaled surface area of
-#'   the raster.
+#' @param x A raster or matrix.
+#' @return A numeric value representing the scaled surface area.
 #' @examples
 #' # import raster image
 #' data(normforest)
@@ -106,11 +112,18 @@ flatsa <- function(x) {
 #' surface_area(normforest)
 #' @export
 surface_area <- function(x) {
-  if(class(x) != 'RasterLayer') {stop('x must be a raster.')}
+  if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
 
   # get dimensions
   N <- dim(x)[1] # rows
   M <- dim(x)[2] # cols
+
+  # convert matrix to raster if necessary (equal area)
+  if (class(x) == 'matrix') {
+    x <- raster(x)
+    extent(x) <- c(0, ncol(x), 0, nrow(x))
+    crs(x) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+  }
 
   # coordinates and resolution (change in x, y)
   deltax <- res(x)[1]
@@ -156,15 +169,15 @@ surface_area <- function(x) {
 
 #' Surface Area Ratio
 #'
-#' Calculates the surface area ratio of a raster. This is the
+#' Calculates the surface area ratio of a raster or matrix. This is the
 #' ratio of a flat surface to the actual surface.
 #'
-#' This function scales both x and y, as well as the raster value (z),
+#' This function scales both x and y, as well as the surface value (z),
 #' to between 0 and 1 to best match their units. This is done because
 #' most satellite data have units where the x, y units do not equal the
 #' z units. Surface area is calculated over the sample area (N-1, M-1).
 #'
-#' @param x A raster object.
+#' @param x A raster or matrix.
 #' @return A numeric value representing the surface area ratio.
 #' @examples
 #' # import raster image
@@ -174,7 +187,7 @@ surface_area <- function(x) {
 #' Sdr <- sdr(normforest)
 #' @export
 sdr <- function(x) {
-  if(class(x) != 'RasterLayer') {stop('x must be a raster.')}
+  if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
 
   # get area of flat plane
   flat_area <- flatsa(x)

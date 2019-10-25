@@ -5,10 +5,10 @@
 \title{Calculate Texture Metric for Single Pixel}
 \usage{
 window_metric(x, i, window_type = "square", size = 11,
-  epsg_proj = 5070, coords, rownum, colnum, metric, args)
+  epsg_proj = 5070, coords, rownum, colnum, metric, args = NULL)
 }
 \arguments{
-\item{x}{A raster.}
+\item{x}{A raster or matrix.}
 
 \item{i}{Index of cell at which to calculate the metric.}
 
@@ -20,6 +20,10 @@ center (in meters) for circular windows.}
 
 \item{epsg_proj}{Numeric. Appropriate equal area EPSG code used to
 crop raster to each circular window. Only used for circular windows.}
+
+\item{coords}{Matrix of coordinates for the input raster or matrix.
+x-coordinates should be in the first column, and y-coordinates should
+be in the second column.}
 
 \item{rownum}{Vector of row numbers at which to calculate the metric.}
 
@@ -88,7 +92,14 @@ data(normforest)
 # crop raster to much smaller area if on a smaller computer
 x <- crop(normforest, extent(-123, -122.99, 43, 43.01))
 
+# get coordinates, rownums, cellnums
+ext_x <- pad_edges(x, window_type = 'square', size = 4)
+coords <- data.frame(xyFromCell(x, 1:ncell(x)))
+rownum <- rowFromCell(x, pixlist) + 4
+colnum <- colFromCell(x, pixlist) + 4
+
 # get a surface of root mean square roughness
-sbi_img <- window_metric(x = x, window = 'circle',
-size = 90, epsg_proj = 5070, rownum = 3, colnum = 3, metric = 'sbi')
+sq_img <- window_metric(x = x, i = 40, window = 'square',
+size = 4, epsg_proj = 5070, coords = coords,
+rownum = rownum, colnum = colnum, metric = 'sq')
 }

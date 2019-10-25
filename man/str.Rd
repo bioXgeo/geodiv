@@ -4,7 +4,7 @@
 \alias{str}
 \title{Estimate Texture Aspect Ratio}
 \usage{
-str(x, threshold = c(0.2, 1/exp(1)), ...)
+str(x, threshold = c(0.2, 1/exp(1)))
 }
 \arguments{
 \item{x}{A raster or matrix.}
@@ -39,5 +39,5 @@ strvals <- str(x, threshold = c(0.20, 1 / exp(1)))
 
 # calculate Str20, the texture aspect ratio for
 # autocorrelation value of 0.2 in the AACF
-Str20 <- strvals[[1]]
+Str20 <- strvals[1]
 }

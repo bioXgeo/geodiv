@@ -7,17 +7,17 @@
 sdr(x)
 }
 \arguments{
-\item{x}{A raster object.}
+\item{x}{A raster or matrix.}
 }
 \value{
 A numeric value representing the surface area ratio.
 }
 \description{
-Calculates the surface area ratio of a raster. This is the
+Calculates the surface area ratio of a raster or matrix. This is the
 ratio of a flat surface to the actual surface.
 }
 \details{
-This function scales both x and y, as well as the raster value (z),
+This function scales both x and y, as well as the surface value (z),
 to between 0 and 1 to best match their units. This is done because
 most satellite data have units where the x, y units do not equal the
 z units. Surface area is calculated over the sample area (N-1, M-1).
