@@ -4,18 +4,12 @@
 \alias{pad_edges}
 \title{Extend edges of a raster or matrix.}
 \usage{
-pad_edges(x, window_type = "square", size = 11, epsg_proj = 5070)
+pad_edges(x, size = 11)
 }
 \arguments{
 \item{x}{A raster or matrix.}
 
-\item{window_type}{Character. Type of window, either circular or square.}
-
-\item{size}{Numeric. Size of window, in number of pixels on each
-side. For circular windows, this will be the number of pixels of the radius.}
-
-\item{epsg_proj}{Numeric. Appropriate equal area EPSG code used to
-crop raster to each circular window. Only used for circular windows.}
+\item{size}{Numeric. Number of pixels to add to each side.}
 }
 \value{
 A raster with edges padded \code{size} number of pixels on each edge.
@@ -30,5 +24,5 @@ library(raster)
 data(normforest)
 
 # crop raster to much smaller area
-x <- pad_edges(normforest, 'square', 11)
+x <- pad_edges(normforest, 11)
 }

@@ -91,10 +91,10 @@ data(normforest)
 x <- crop(normforest, extent(-123, -122.99, 43, 43.01))
 
 # get a surface of root mean square roughness
-sq_img <- texture_image(x = x, window = 'square',
-size = 11, metric = 'sq',
-parallel = TRUE, ncores = 2)
+sa_img <- texture_image(x = x, window = 'square',
+size = 11, metric = 'sa',
+parallel = FALSE)
 
 # plot the result
-raster::plot(sq_img)
+plot(sa_img)
 }

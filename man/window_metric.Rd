@@ -4,8 +4,8 @@
 \alias{window_metric}
 \title{Calculate Texture Metric for Single Pixel}
 \usage{
-window_metric(x, i, window_type = "square", size = 11,
-  epsg_proj = 5070, coords, rownum, colnum, metric, args = NULL)
+window_metric(x, i, window_type = "square", size = 11, coords, rownum,
+  colnum, metric, args = NULL)
 }
 \arguments{
 \item{x}{A raster or matrix.}
@@ -14,12 +14,7 @@ window_metric(x, i, window_type = "square", size = 11,
 
 \item{window_type}{Character. Type of window, either circular or square.}
 
-\item{size}{Numeric. Size of window, in number of pixels on each
-side for square windows (must be an odd value), or distance from
-center (in meters) for circular windows.}
-
-\item{epsg_proj}{Numeric. Appropriate equal area EPSG code used to
-crop raster to each circular window. Only used for circular windows.}
+\item{size}{Numeric. Radius of window in number of pixels.}
 
 \item{coords}{Matrix of coordinates for the input raster or matrix.
 x-coordinates should be in the first column, and y-coordinates should
@@ -100,7 +95,7 @@ rownum <- rowFromCell(x, pixlist) + 4
 colnum <- colFromCell(x, pixlist) + 4
 
 # get a surface of root mean square roughness
-sq_img <- window_metric(x = x, i = 40, window = 'square',
-size = 4, epsg_proj = 5070, coords = coords,
+sq_val <- window_metric(x = x, i = 40, window = 'square',
+size = 4, coords = coords,
 rownum = rownum, colnum = colnum, metric = 'sq')
 }
