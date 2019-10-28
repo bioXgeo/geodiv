@@ -21,7 +21,7 @@
 #' # calculate the fractal dimension
 #' Sfd <- sfd(x)
 #' @export
-sfd <- function(x) {
-    .Call(`_geodiv_sfd`, x)
+sfd <- function(mat) {
+    .Call(`_geodiv_sfd`, mat)
 }
 

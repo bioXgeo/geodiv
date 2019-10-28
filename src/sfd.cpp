@@ -154,7 +154,8 @@ double sfd(NumericMatrix mat){
     areaavg += area[n];
   }
   if (steps < 3) {
-    perror("Error: Matrix is too small.");
+    errno = 5;
+    perror("Error: Matrix is too small");
   }
   resavg /= (double) (steps);
   areaavg /= (double) (steps);

@@ -4,7 +4,7 @@
 \alias{sfd}
 \title{Calculate the fractal dimension of a raster.}
 \usage{
-sfd(x)
+sfd(mat)
 }
 \arguments{
 \item{x}{A matrix.}
