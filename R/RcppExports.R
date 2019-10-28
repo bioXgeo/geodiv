@@ -14,6 +14,7 @@
 #' # import raster image
 #' data(normforest)
 #'
+#'
 #' # convert to matrix
 #' x <- raster::as.matrix(normforest)
 #'

@@ -96,5 +96,5 @@ size = 11, metric = 'sq',
 parallel = TRUE, ncores = 2)
 
 # plot the result
-plot(sq_img)
+raster::plot(sq_img)
 }

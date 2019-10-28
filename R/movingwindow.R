@@ -73,7 +73,7 @@
 #' parallel = TRUE, ncores = 2)
 #'
 #' # plot the result
-#' plot(sq_img)
+#' raster::plot(sq_img)
 #' @export
 texture_image <- function(x, window_type = 'square', size = 11, epsg_proj = 5070,
                           metric, args = NULL, parallel = TRUE, ncores = NULL, nclumps = 100){
@@ -224,6 +224,10 @@ texture_image <- function(x, window_type = 'square', size = 11, epsg_proj = 5070
     outfinal[[i]] <- setValues(out, temp)
   }
 
+  if (length(outfinal) == 1) {
+    outfinal <- outfinal[[1]]
+  }
+
   return(outfinal)
 }
 
@@ -297,6 +301,7 @@ texture_image <- function(x, window_type = 'square', size = 11, epsg_proj = 5070
 #' x <- crop(normforest, extent(-123, -122.99, 43, 43.01))
 #'
 #' # get coordinates, rownums, cellnums
+#' pixlist <- seq(1, length(x), 1)
 #' ext_x <- pad_edges(x, window_type = 'square', size = 4)
 #' coords <- data.frame(xyFromCell(x, 1:ncell(x)))
 #' rownum <- rowFromCell(x, pixlist) + 4

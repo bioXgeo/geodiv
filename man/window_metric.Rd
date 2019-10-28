@@ -93,6 +93,7 @@ data(normforest)
 x <- crop(normforest, extent(-123, -122.99, 43, 43.01))
 
 # get coordinates, rownums, cellnums
+pixlist <- seq(1, length(x), 1)
 ext_x <- pad_edges(x, window_type = 'square', size = 4)
 coords <- data.frame(xyFromCell(x, 1:ncell(x)))
 rownum <- rowFromCell(x, pixlist) + 4
