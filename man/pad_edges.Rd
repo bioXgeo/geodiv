@@ -4,12 +4,15 @@
 \alias{pad_edges}
 \title{Extend edges of a raster or matrix.}
 \usage{
-pad_edges(x, size = 11)
+pad_edges(x, size = 11, val = NULL)
 }
 \arguments{
 \item{x}{A raster or matrix.}
 
 \item{size}{Numeric. Number of pixels to add to each side.}
+
+\item{val}{Numeric. If NULL (default), this extends the edge values
+out. If not null, this value will be used for the extended cells.}
 }
 \value{
 A raster with edges padded \code{size} number of pixels on each edge.

@@ -4,17 +4,20 @@
 \alias{texture_image}
 \title{Calculate Texture Metrics per Pixel}
 \usage{
-texture_image(x, window_type = "square", size = 11, epsg_proj = 5070,
-  metric, args = NULL, parallel = TRUE, ncores = NULL,
-  nclumps = 100)
+texture_image(x, window_type = "square", size = 5, in_meters = FALSE,
+  epsg_proj = 5070, metric, args = NULL, parallel = TRUE,
+  ncores = NULL, nclumps = 100)
 }
 \arguments{
-\item{x}{A raster or matrix.}
+\item{x}{A raster or matrix. If a raster is given, it will be projected to
+an equal area projection (given by \code{epsg_proj} argument).}
 
 \item{window_type}{Character. Type of window, either circular or square.}
 
 \item{size}{Numeric. Size of window, in number of pixels extra on each side,
-or distance from center (in meters) for circular windows.}
+or radius (in meters).}
+
+\item{in_meters}{Logical. Is the size given in meters?}
 
 \item{epsg_proj}{Numeric. Appropriate equal area EPSG code used to
 crop raster to each circular window.}
@@ -36,7 +39,9 @@ run the calculations. Defaults to all available, minus 1.}
 \value{
 A raster or list of rasters (if function results in multiple outputs)
 with pixel values representative of the metric value for the window
-surrounding that pixel.
+surrounding that pixel. Note that the raster will always be projected to an
+equal area projection because calculations are done on matrices with a
+radius of number of pixels.
 }
 \description{
 Calculates the various texture metrics over windows centered

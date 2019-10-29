@@ -4,8 +4,8 @@
 \alias{window_metric}
 \title{Calculate Texture Metric for Single Pixel}
 \usage{
-window_metric(x, i, window_type = "square", size = 11, coords, rownum,
-  colnum, metric, args = NULL)
+window_metric(x, i, window_type = "square", size = 11, rownum, colnum,
+  metric, args = NULL)
 }
 \arguments{
 \item{x}{A raster or matrix.}
@@ -15,10 +15,6 @@ window_metric(x, i, window_type = "square", size = 11, coords, rownum,
 \item{window_type}{Character. Type of window, either circular or square.}
 
 \item{size}{Numeric. Radius of window in number of pixels.}
-
-\item{coords}{Matrix of coordinates for the input raster or matrix.
-x-coordinates should be in the first column, and y-coordinates should
-be in the second column.}
 
 \item{rownum}{Vector of row numbers at which to calculate the metric.}
 
@@ -90,7 +86,6 @@ x <- crop(normforest, extent(-123, -122.99, 43, 43.01))
 # get coordinates, rownums, cellnums
 pixlist <- seq(1, length(x), 1)
 ext_x <- pad_edges(x, window_type = 'square', size = 4)
-coords <- data.frame(xyFromCell(x, 1:ncell(x)))
 rownum <- rowFromCell(x, pixlist) + 4
 colnum <- colFromCell(x, pixlist) + 4
 

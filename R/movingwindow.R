@@ -6,10 +6,12 @@
 #' on individual pixels. This creates a continuous surface of the
 #' texture metric.
 #'
-#' @param x A raster or matrix.
+#' @param x A raster or matrix. If a raster is given, it will be projected to
+#' an equal area projection (given by \code{epsg_proj} argument).
 #' @param window_type Character. Type of window, either circular or square.
 #' @param size Numeric. Size of window, in number of pixels extra on each side,
-#' or distance from center (in meters) for circular windows.
+#' or radius (in meters).
+#' @param in_meters Logical. Is the size given in meters?
 #' @param epsg_proj Numeric. Appropriate equal area EPSG code used to
 #' crop raster to each circular window.
 #' @param metric Character. Metric to calculate for each window. Metrics
@@ -23,7 +25,9 @@
 #' @param nclumps Numeric. Number of clumps to split the raster or matrix into.
 #' @return A raster or list of rasters (if function results in multiple outputs)
 #' with pixel values representative of the metric value for the window
-#' surrounding that pixel.
+#' surrounding that pixel. Note that the raster will always be projected to an
+#' equal area projection because calculations are done on matrices with a
+#' radius of number of pixels.
 #' @note The total window size for square windows will be (size * 2) + 1.
 #' @details Metrics available from geodiv package:
 #' \enumerate{
@@ -75,7 +79,7 @@
 #' # plot the result
 #' plot(sa_img)
 #' @export
-texture_image <- function(x, window_type = 'square', size = 11, epsg_proj = 5070,
+texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE, epsg_proj = 5070,
                           metric, args = NULL, parallel = TRUE, ncores = NULL, nclumps = 100){
 
   if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
@@ -103,20 +107,55 @@ texture_image <- function(x, window_type = 'square', size = 11, epsg_proj = 5070
     x <- raster(x)
     extent(x) <- c(0, ncol(x), 0, nrow(x))
     crs(x) <- st_crs(epsg_proj)$proj4string
+  } else {
+    # tell users that this will always reproject to equal area
+    print('Warning: This function will reproject rasters to equal area! Make sure that the epsg_code argument contains an appropriate projection for your data.')
   }
 
+  # reset size so it's a common variable (always number pixels)
+  if (in_meters == TRUE) {
+    # convert to new proj
+    tempproj <- projectRaster(x, crs = sp::CRS(sf::st_crs(epsg_proj)$proj4string))
+
+
+    # get equivalent # pixels of size
+    size <- ceiling(size / res(tempproj))[1]
+  }
+
+  # add padding to raster
+  ext_x <- pad_edges(x, size = (size * 2), val = NULL)
+  dummy_ext_x <- pad_edges(x, size = (size * 2), val = -99999)
+
+  # convert to new proj
+  projx <- projectRaster(ext_x, crs = sp::CRS(sf::st_crs(epsg_proj)$proj4string))
+
+  # get projected unpadded raster and coordinates
+  noext_projx <- projectRaster(from = dummy_ext_x, to = projx)
+  noext_coords <- data.frame(xyFromCell(noext_projx, 1:ncell(noext_projx)))
+
+  # remove NA value locations from noext_coords
+  na_ind <- which((is.na(getValues(noext_projx)) | getValues(noext_projx) < -9999))
+  noext_coords <- noext_coords[-na_ind,]
+
+  # data frame of x, y locations
+  coords <- data.frame(xyFromCell(projx, 1:ncell(projx)))
+  coords$ind <- seq(1, nrow(coords))
+  good_coords <- dplyr::inner_join(coords, noext_coords, by = c('x', 'y'))$ind
+
   # get list of # total pixels, break up into smaller lists (by number of cores available)
-  pixlist <- seq(1, length(x), 1)
-  seg_length <- ceiling(length(x) / nclumps)
-  segment <- ceiling(length(x) / seg_length)
+  pixlist <- good_coords
+  seg_length <- ceiling(length(pixlist) / nclumps)
+  segment <- ceiling(length(pixlist) / seg_length)
   new_pixlist <- vector('list', segment)
   i <- 1
   while(i <= segment) {
-    newi <- ceiling(seq(1, length(x), seg_length))[i]
+    newi <- ceiling(seq(pixlist[1], max(pixlist), seg_length))[i]
     if (i < segment) {
       new_pixlist[[i]] <- seq(newi, (newi - 1) + seg_length, 1)
+      new_pixlist[[i]] <- new_pixlist[[i]][new_pixlist[[i]] %in% pixlist]
     } else {
-      new_pixlist[[i]] <- seq(newi, length(x), 1)
+      new_pixlist[[i]] <- seq(newi, max(pixlist), 1)
+      new_pixlist[[i]] <- new_pixlist[[i]][new_pixlist[[i]] %in% pixlist]
     }
     i <- i + 1
   }
@@ -125,28 +164,8 @@ texture_image <- function(x, window_type = 'square', size = 11, epsg_proj = 5070
     cat('There are ', segment, ' clumps to analyze.', '\n', sep = '')
   }
 
-  # output raster
-  out <- x
-
-  # reset size so it's a common variable (whether square or circular)
-  if (window_type == 'square') {
-    # change size to distance out from center
-    size <- size
-  } else {
-    # convert to new proj
-    projx <- projectRaster(x, crs = sp::CRS(sf::st_crs(epsg_proj)$proj4string))
-
-    # get equivalent # pixels of size
-    size <- ceiling(size / res(projx))[1]
-  }
-
-  # add padding to raster
-  ext_x <- pad_edges(x, size = size)
-
-  # data frame of x, y locations
-  coords <- data.frame(xyFromCell(x, 1:ncell(x)))
-  rownum <- rowFromCell(x, pixlist) + size
-  colnum <- colFromCell(x, pixlist) + size
+  rownum <- rowFromCell(projx, seq(1, length(projx)))
+  colnum <- colFromCell(projx, seq(1, length(projx)))
 
   # collect arguments
   if (!is.null(args)) {
@@ -156,14 +175,14 @@ texture_image <- function(x, window_type = 'square', size = 11, epsg_proj = 5070
   }
 
   # matrices are faster for window_metric, so convert to matrix
-  ext_mat <- as.matrix(ext_x, nrow = nrow(ext_x), ncol = ncol(ext_x), byrow = TRUE)
+  ext_mat <- as.matrix(projx, nrow = nrow(projx), ncol = ncol(projx), byrow = TRUE)
 
   if (parallel == FALSE) {
     print('Beginning calculation of metrics over windows...')
     start <- Sys.time()
     result <- lapply(pixlist, FUN = function(i) {window_metric(x = ext_mat, i = i,
                                                                window_type = window_type,
-                                                               size = size, coords = coords,
+                                                               size = size,
                                                                rownum = rownum,
                                                                colnum = colnum,
                                                                metric = metric,
@@ -177,7 +196,7 @@ texture_image <- function(x, window_type = 'square', size = 11, epsg_proj = 5070
     result <- parallel::mclapply(new_pixlist, FUN = function(l) {
       lapply(l, FUN = function(i) {window_metric(x = ext_mat, i = i, window_type = window_type,
                                                  size = size,
-                                                 coords = coords, rownum = rownum,
+                                                 rownum = rownum,
                                                  colnum = colnum, metric = metric,
                                                  args = input_args)})
     }, mc.cores = ncores, mc.cleanup = TRUE)
@@ -201,7 +220,7 @@ texture_image <- function(x, window_type = 'square', size = 11, epsg_proj = 5070
     result <- snow::parLapply(cl, new_pixlist, fun = function(l) {
       lapply(l, FUN = function(i) {geodiv::window_metric(x = ext_mat, i = i, window_type = window_type,
                                                  size = size,
-                                                 coords = coords, rownum = rownum,
+                                                 rownum = rownum,
                                                  colnum = colnum, metric = metric,
                                                  args = input_args)})
     })
@@ -212,13 +231,18 @@ texture_image <- function(x, window_type = 'square', size = 11, epsg_proj = 5070
     result <- do.call(unlist, args = list(result, recursive = TRUE))
   }
 
+  # create clean out raster
+  out <- noext_projx
+  out[na_ind] <- NA
+
   # deal with functions that have multiple outputs
   outfinal <- list()
-  nresult <- length(result) / length(x)
+  nresult <- length(result) / length(good_coords)
   for (i in 1:nresult) {
-    temp <- result[seq(i, length(result), nresult)]
-    tempmat <- matrix(temp, nrow = nrow(out), ncol = ncol(out), byrow = FALSE)
-    outfinal[[i]] <- setValues(out, tempmat)
+    temp <- data.frame(newvals = result[seq(i, length(result), nresult)], ind = pixlist)
+    temprast <- out
+    temprast[temp$ind] <- temp$newvals
+    outfinal[[i]] <- temprast
   }
 
   if (length(outfinal) == 1) {
@@ -237,9 +261,6 @@ texture_image <- function(x, window_type = 'square', size = 11, epsg_proj = 5070
 #' @param i Index of cell at which to calculate the metric.
 #' @param window_type Character. Type of window, either circular or square.
 #' @param size Numeric. Radius of window in number of pixels.
-#' @param coords Matrix of coordinates for the input raster or matrix.
-#' x-coordinates should be in the first column, and y-coordinates should
-#' be in the second column.
 #' @param rownum Vector of row numbers at which to calculate the metric.
 #' @param colnum Vector of column numbers at which to calculate the metric.
 #' @param metric Character. Metric to calculate for each window. Metrics
@@ -296,7 +317,6 @@ texture_image <- function(x, window_type = 'square', size = 11, epsg_proj = 5070
 #' # get coordinates, rownums, cellnums
 #' pixlist <- seq(1, length(x), 1)
 #' ext_x <- pad_edges(x, window_type = 'square', size = 4)
-#' coords <- data.frame(xyFromCell(x, 1:ncell(x)))
 #' rownum <- rowFromCell(x, pixlist) + 4
 #' colnum <- colFromCell(x, pixlist) + 4
 #'
@@ -306,12 +326,11 @@ texture_image <- function(x, window_type = 'square', size = 11, epsg_proj = 5070
 #' rownum = rownum, colnum = colnum, metric = 'sq')
 #' @export
 window_metric <- function(x, i, window_type = 'square', size = 11,
-                          coords, rownum, colnum, metric, args = NULL) {
+                          rownum, colnum, metric, args = NULL) {
 
   # row and column number
   rownum <- rownum[i]
   colnum <- colnum[i]
-  coords <- coords[i, ]
 
   if (class(x) == 'RasterLayer') {
     # convert to equal area raster
@@ -319,10 +338,10 @@ window_metric <- function(x, i, window_type = 'square', size = 11,
   }
 
   # crop to square
-  y1 <- rownum - size
-  y2 <- rownum + size
-  x1 <- colnum - size
-  x2 <- colnum + size
+  x1 <- rownum - size
+  x2 <- rownum + size
+  y1 <- colnum - size
+  y2 <- colnum + size
   cropped_x <- matrix(x[x1:x2, y1:y2], nrow = (size * 2) + 1, ncol = (size * 2) + 1)
 
   # crop to circle if necessary
@@ -353,6 +372,8 @@ window_metric <- function(x, i, window_type = 'square', size = 11,
 #'
 #' @param x A raster or matrix.
 #' @param size Numeric. Number of pixels to add to each side.
+#' @param val Numeric. If NULL (default), this extends the edge values
+#' out. If not null, this value will be used for the extended cells.
 #' @return A raster with edges padded \code{size} number of pixels on each edge.
 #' @examples
 #' library(raster)
@@ -363,7 +384,7 @@ window_metric <- function(x, i, window_type = 'square', size = 11,
 #' # crop raster to much smaller area
 #' x <- pad_edges(normforest, 11)
 #' @export
-pad_edges <- function(x, size = 11) {
+pad_edges <- function(x, size = 11, val = NULL) {
   if (class(x) == 'matrix') {
     # convert to equal area raster
     x <- raster(x)
@@ -374,11 +395,19 @@ pad_edges <- function(x, size = 11) {
   # add padding to raster or matrix
     # continue values to edges to account for edge effect (# pixels radius/edge)
 
-  # first, get edge values that will be extended
-  firstrow_vals <- x[1, ]
-  firstcol_vals <- x[, 1]
-  lastrow_vals <- x[nrow(x), ]
-  lastcol_vals <- x[, ncol(x)]
+  if (is.null(val)) {
+    # first, get edge values that will be extended
+    firstrow_vals <- x[1, ]
+    firstcol_vals <- x[, 1]
+    lastrow_vals <- x[nrow(x), ]
+    lastcol_vals <- x[, ncol(x)]
+  } else {
+    # first, get edge values that will be extended
+    firstrow_vals <- val
+    firstcol_vals <- val
+    lastrow_vals <- val
+    lastcol_vals <- val
+  }
 
   # add pixels on all sides, increasing the extent of the raster as well
   ext_x <- x
