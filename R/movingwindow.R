@@ -316,14 +316,13 @@ texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE
 #'
 #' # get coordinates, rownums, cellnums
 #' pixlist <- seq(1, length(x), 1)
-#' ext_x <- pad_edges(x, window_type = 'square', size = 4)
+#' ext_x <- pad_edges(x, size = 4)
 #' rownum <- rowFromCell(x, pixlist) + 4
 #' colnum <- colFromCell(x, pixlist) + 4
 #'
 #' # get a surface of root mean square roughness
 #' sq_val <- window_metric(x = x, i = 40, window = 'square',
-#' size = 4, coords = coords,
-#' rownum = rownum, colnum = colnum, metric = 'sq')
+#' size = 4, rownum = rownum, colnum = colnum, metric = 'sq')
 #' @export
 window_metric <- function(x, i, window_type = 'square', size = 11,
                           rownum, colnum, metric, args = NULL) {
@@ -333,7 +332,10 @@ window_metric <- function(x, i, window_type = 'square', size = 11,
   colnum <- colnum[i]
 
   if (class(x) == 'RasterLayer') {
-    # convert to equal area raster
+    # tell users that this will always reproject to equal area
+    print('Warning: This function assumes an equal area raster!')
+
+    # convert to matrix
     x <- as.matrix(x, nrow = nrow(x), ncol = ncol(x), byrow = TRUE)
   }
 
@@ -357,8 +359,10 @@ window_metric <- function(x, i, window_type = 'square', size = 11,
     cropped_x[mat_dists > size] <- NA
   }
 
-  # append cropped_x to args
-  args$x <- cropped_x
+  args[[length(args) + 1]] <- cropped_x
+
+  # make sure that the matrix is assigned the name of the first function argument
+  names(args)[[length(args)]] <- names(as.list(args(metric)))[1]
 
   # calculate metric
   out_val <- do.call(metric, args)

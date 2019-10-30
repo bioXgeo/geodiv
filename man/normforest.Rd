@@ -8,7 +8,7 @@
 \describe{
   \item{range}{-0.5854638 -- 0.1585918}
   \item{bounds}{-123, -122.9, 43.0002, 43.1}
-  \item{resolution}{30m x 30m}
+  \item{resolution}{30m x 30m (0.002694946 degrees)}
   \item{projection}{WGS84}
   \item{scalar}{1}
   ...

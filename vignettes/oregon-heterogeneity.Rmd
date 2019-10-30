@@ -1,7 +1,7 @@
 ---
 title: "Assessing landscape heterogeneity in Oregon State"
 author: "Annie C. Smith"
-date: "September 5, 2019"
+date: "October 28, 2019"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{oregon-heterogeneity}
@@ -31,44 +31,37 @@ library(ggplot2)
 
 ```
 
-Now, open and plot rasters of the Enhanced Vegetation Index (EVI) and
-SRTM elevation for Oregon State. 
+Now, open and plot rasters of the Normalized Difference Vegetation Index (NDVI) and
+SRTM elevation for a portion of southwestern Oregon.
 
 First, we want to open the data.
 ```{r data1}
 
-# import EVI and elevation rasters into R
-data(oregonEVI)
-data(oregonElev)
+# import NDVI and elevation rasters into R
+data(orforest)
+data(orelevation)
 
 ```
 
-Next, we want to take a look at what those datasets include. As the EVI data include a scalar, we apply that value.
+Next, we want to take a look at what those datasets include. 
 
 ```{r data2}
 
 # look up scalar and apply to data
-?oregonElev
-?oregonEVI
-oregonEVI <- oregonEVI * 0.0001
+?orelevation
+?orforest
 
 ```
 
-Now, we can make maps, masking any values outside of the Oregon state bounds.
+Now, we can make maps to see what the rasters look like.
 
 ```{r data3}
 
-# mask any values that are outside of the state bounds
-oregon <- map(database = 'state', regions = 'oregon', fill = TRUE, plot = FALSE)
-oregonPoly <- map2SpatialPolygons(oregon, IDs = oregon$names, proj4string = CRS(proj4string(oregonEVI)))
-oregonEVI <- mask(x = oregonEVI, mask = oregonPoly)
-oregonElev <- mask(x = oregonElev, mask = oregonPoly)
-
 # plot maximum growing season EVI for Oregon
-plot(oregonEVI, xlab = 'Longitude', ylab = 'Latitude', main = 'Maximum Growing Season EVI')
+plot(orforest, xlab = 'Longitude', ylab = 'Latitude', main = 'Growing Season NDVI')
 
 # plot elevation (in meters) for Oregon
-plot(oregonElev, xlab = 'Longitude', ylab = 'Latitude', main = 'Elevation (m)')
+plot(orelevation, xlab = 'Longitude', ylab = 'Latitude', main = 'Elevation (m)')
 
 ```
 
@@ -76,83 +69,36 @@ plot(oregonElev, xlab = 'Longitude', ylab = 'Latitude', main = 'Elevation (m)')
 
 ##Removing the Best Fit Plane
 
-For surface metrics, we don't really care about the actual values so much as their contrast. Because of this, we now want to remove any trends that there may be over the rasters. This is made easy by a function included in *geodiv*, 'remove_plane.'
+For surface metrics, we don't really care about the actual values so much as their contrast. Because of this, we now want to remove any trends that there may be over the rasters. This is made easy by a function included in *geodiv*, 'remove_plane.' Even if no trend is located (polynomial plane of order 0), we remove the mean value from the raster.
+
+Note that this returned the order of polynomial that best fits any trend in the data. This is process is automated and considers polynomials of orders of 0 -- 3. If you want a custom order of polynomial, you can use the 'fitplane' function to calculate the best fit plane of that order polynomial.
 
 ```{r remove trend}
 
 # remove overall trends in values over rasters (this removes the best-fit polynomial plane)
-evi <- remove_plane(oregonEVI)
-elev <- remove_plane(oregonElev)
+ndvi <- remove_plane(orforest)
+elev <- remove_plane(orelevation)
+
+# plot the new rasters
+plot(ndvi, xlab = 'Longitude', ylab = 'Latitude', main = 'Growing Season NDVI - no trend')
+plot(elev, xlab = 'Longitude', ylab = 'Latitude', main = 'Elevation (m) - no trend')
 
 ```
 
-Note that this returned the order of polynomial that best fits any trend in the data. This is process is automated and considers polynomials of orders of 1 -- 3. If you want a custom order of polynomial, you can use the 'fitplane' function to calculate the best fit plane of that order polynomial.
+By plotting the new rasters, we see that the NDVI image was not changed, except for the actual values. However, the elevation raster now looks quite different now, with heterogeneity more pronounced.
 
 For now, let's keep the results of the 'remove_plane' function and take a look at the results.
 
-```{r plot new evi}
-
-# plot again to see what the new raster looks like
-plot(evi, xlab = 'Longitude', ylab = 'Latitude', main = 'EVI without Trend')
-plot(elev, xlab = 'Longitude', ylab = 'Latitude', main = 'Elevation without Trend')
-
-```
-
 ## Sampling Locations
 
-Now that we have clean rasters, we need to sample locations at which to calculate metrics. We will select uniformly-distributed points across the state to get a good representation of all ecosystems.
+We now have clean rasters. With these rasters, we want to do two tasks:
 
-First, we create a grid with a cell size of 0.5 degrees over the state. We then convert the grid to spatial points so that they may be plotted.
+(1) Determine the overall value of metrics over the entire image.
+(2) Create a texture image of several metrics to observe patterns of heterogeneity over the landscape.
 
-``` {r sample1, include = FALSE}
+First, we will calculate metrics using the entire image.
 
-# create a grid of points across the state with 1/2 degree spacing
-pt_grid <- makegrid(oregonPoly, cellsize = 0.5)
-pt_grid <- SpatialPoints(pt_grid, proj4string = CRS(proj4string(evi)))
-
-```
-
-We expect that some points will fall outside of the state bounds. This is because the 'makegrid' function uses the extent of the input polygon, not the exact bounds. We clip (intersect) the points to the state bounds and convert those points into a dataframe. Finally, let's take a look at the results.
-
-```{r sample2}
-
-# cut to state outline
-pt_grid <- gIntersection(pt_grid, oregonPoly)
-points <- st_as_sf(as.data.frame(coordinates(pt_grid)), coords = c(1, 2), crs = 4326)
-
-# convert to sample data frame
-samp_pts <- as.data.frame(coordinates(pt_grid))
-
-# let's take a look in table form
-head(samp_pts)
-
-```
-
-Let's also plot the resulting points to make sure they look correct.
-
-```{r sample3}
-
-# where are the points located on the map?
-plot(elev, xlab = 'Longitude', ylab = 'Latitude', main = 'Sample Locations')
-points(x = samp_pts$x, y = samp_pts$y, pch = 19)
-
-or_map = get_map(location = c(lon = -120.688800, lat = 43.929687), zoom = 6)
-ggmap
-
-```
-
-Finally, determine the resulting sample size.
-
-```{r sample4}
-
-# how many points?
-nrow(samp_pts)
-
-```
-
-This results in 108 sample points. At each of these points, we will calculate all surface metrics. First, we'll do this for a single point.
-
-## Calculating metrics at sample locations
+## Calculating metrics for a single image
 
 We run all the functions using a wrapper function that will print the metric being calculated and the result.
 
@@ -347,169 +293,53 @@ run_all <- function(r){
 
 ```
 
-Once we have the function written, we apply it to a single point.
-
-Because the metrics are calculated on an area around each point, we have to clip the raster first. We'll use a box 0.25 degrees from the point in all directions.
-
-We want to see where the sample location is, so we plot that against the entire state.
-
-```{r single point1}
-# select a point
-samp_pt <- samp_pts[10,]
-
-# calculate smaller extent surrounding point (0.25 degrees on from center to all sides)
-bound_box <- extent(samp_pt$x - 0.25, samp_pt$x + 0.25, samp_pt$y - 0.25, samp_pt$y + 0.25)
-bound_box <- as(bound_box, 'SpatialPolygons')
-
-# crop the rasters
-samp_evi <- crop(evi, bound_box)
-samp_elev <- crop(elev, bound_box)
-
-# plot the box
-plot(elev, xlab = 'Longitude', ylab = 'Latitude', main = 'Sample Location for Test')
-plot(bound_box, add = TRUE)
-
-```
-
-We then want to know what the variables represent, so we look at the sample location in more detail.
-
-```{r single point2}
-
-# look at the cropped area
-plot(samp_elev, xlab = 'Longitude', ylab = 'Latitude', main = 'Sample Location for Test')
-
-```
-
-Finally, we run the function to calculate each metric and look at the results.
+Once we have the function written, we apply it to the entire image.
 
 ```{r single point3}
 
-# run all functions on this test area for elevation
-run_all(samp_elev)
+# run all functions on the images
+run_all(ndvi)
+run_all(elev)
 
 ```
 
-This can take a while, primarily due to the Srw (radial wavelength), Scl (correlation lengths), and Str (texture aspect ratio) functions.
 
-These functions take longer because they are extracting raster values over several lines. We can see this functionality using the plotting option in the 'srw' and 'std' functions. Str is the ratio between the fastest and slowest decay lengths to specified autocorrelation values along the lines visualized with the 'std' function.
+Note that several of these functions (Srw, Std, Str, Scl) returned warnings. This is fine, and is due to the fact that they include summaries over certain portions of Fourier transform images. We can see what the Srw and Std functions are doing by using the plotting option. Values are derived by summarizing the displayed raster over the lines in the figures. Str and Scl use the autocorrelation image, which is similar to those used for the Srw and Std functions.
 
 ```{r plot extraction functions}
 
-srwvals <- srw(samp_elev, plot = TRUE) 
-stdvals <- std(samp_elev, plot = TRUE)
+srwvals <- srw(elev, plot = TRUE) 
+stdvals <- std(elev, plot = TRUE)
 
 ```
 
-While these functions take awhile, we want to know how all functions are useful for distinguishing ecosystems, so we'll leave them in for now.
+Now we want to run the functions over windows surrounding each pixel to create a texture image. Once the texture images are created, we can add the results to a dataframe.
 
-Now we want to run the functions over all points and output the results to a dataframe. This will require re-writing the *run_all* function slightly and looping over all sampled points.
+For this example, we will only use a few of the functions, as some may take a while on a laptop. For more complex functions (e.g., Str, S10z, Srw, etc.), it is suggested that users run this type of analysis on larger computers or clusters with many cores.
 
 ``` {r all points}
 
-# create modified run_all function that outputs results to dataframe
-run_all <- function(r){
+# Sa (average surface roughness)
+ndvi_sa_img <- texture_image(ndvi, 'square', 5, in_meters = FALSE, 5070, 'sa', NULL, TRUE, 2, 6)
+elev_sa_img <- texture_image(elev, 'square', 5, in_meters = FALSE, 5070, 'sa', NULL, TRUE, 2, 6)
 
-  # run all functions
-  sa <- sa(r)
-  sq <- sq(r)
-  s10z <-s10z(r)
-  sdq <- sdq(r)
-  sdq6 <- sdq6(r)
-  sdr <- sdr(r)
-  sbi <- sbi(r)
-  sci <- sci(r)
-  ssk_adj <- ssk(r, adj = TRUE)
-  sku_excess <- sku(r, excess = TRUE)
-  sds <- sds(r)
-  sfd <- sfd(as.matrix(r))
-  srwvals <- srw(r, plot = FALSE)
-  srw <- srwvals[[1]]
-  srwi <- srwvals[[2]]
-  shw <- srwvals[[3]]
-  stdvals <- std(r, plot = FALSE)
-  std <- stdvals[[1]]
-  stdi <- stdvals[[2]]
-  svi <- svi(r)
-  strvals <- str(r, threshold = c(0.2, 1 / exp(1)))
-  str20 <- strvals[[1]]
-  str37 <- strvals[[2]]
-  ssc <- ssc(r)
-  sv <- sv(r)
-  sp <- sph(r)
-  sk <- sk(r)
-  smean <- smean(r)
-  spk <- spk(r)
-  svk <- svk(r)
-  sclvals <- scl(r, threshold = c(0.2, 1 / exp(1)), plot = FALSE)
-  scl20 <- sclvals[[1]]
-  scl37 <- sclvals[[2]]
-  sdc0_5 <- sdc(r, 0, 0.05)
-  sdc50_55 <- sdc(r, 0.50, 0.55)
-  sdc80_85 <- sdc(r, 0.80, 0.85)
+# Smean (mean peak height)
+ndvi_smean_img <- texture_image(ndvi, 'square', 5, in_meters = FALSE, 5070, 'smean', NULL, TRUE, 2, 6)
+elev_smean_img <- texture_image(elev, 'square', 5, in_meters = FALSE, 5070, 'smean', NULL, TRUE, 2, 6)
 
-  result_df <- data.frame(x = mean(coordinates(r)[, 1]), y = mean(coordinates(r)[, 2]),
-                          metric = c('sa', 'sq', 's10z', 'sdq', 'sdq6', 'sdr', 'sbi', 'sci',
-                                     'ssk', 'sku', 'sds', 'sfd', 'srw', 'srwi', 'shw',
-                                     'std', 'stdi', 'svi', 'str20', 'str37', 'ssc', 'sv',
-                                     'sp', 'sk', 'smean', 'spk', 'svk', 'scl20', 'scl37',
-                                     'sdc0_5', 'sdc50_55', 'sdc80_85'),
-                          value = c(sa, sq, s10z, sdq, sdq6, sdr, sbi, sci, ssk_adj,
-                                    sku_excess, sds, sfd, srw, srwi, shw, std, stdi, svi,
-                                    str20, str37, ssc, sv, sp, sk, smean, spk, svk, scl20,
-                                    scl37, sdc0_5, sdc50_55, sdc80_85))
-  return(result_df)
-}
+# Sfd (3d fractal dimension)
+ndvi_sfd_img <- texture_image(ndvi, 'square', 5, in_meters = FALSE, 5070, 'sfd', NULL, TRUE, 2, 6)
+elev_sfd_img <- texture_image(elev, 'square', 5, in_meters = FALSE, 5070, 'sfd', NULL, TRUE, 2, 6)
 
-# loop over all points, cropping raster and running all functions for each
-# for (i in seq(65, nrow(samp_pts))){
-#   # write out what we're doing
-#   cat('Calculating metrics for point: ', i, '\n')
-# 
-#   # select point
-#   samp_pt <- samp_pts[i,]
-# 
-#   # calculate smaller extent surrounding point (0.25 degrees on from center to all sides)
-#   bound_box <- extent(samp_pt$x - 0.25, samp_pt$x + 0.25, samp_pt$y - 0.25, samp_pt$y + 0.25)
-#   bound_box <- as(bound_box, 'SpatialPolygons')
-# 
-#   # crop the raster
-#   samp_elev <- crop(elev, bound_box)
-# 
-#   # if irregular, remove rows with NA vals
-#   # get rows/cols with nas
-#   na_col <- which(colSums(is.na(samp_elev)) > 0)
-#   na_row <- which(rowSums(is.na(samp_elev)) > 0)
-#   if (length(na_col) + length(na_row) != 0) {
-#       # list only good rows/cols
-#     good_cols <- seq(1, ncol(samp_elev))[-na_col]
-#     good_rows <- seq(1, nrow(samp_elev))[-na_row]
-#     # crop raster
-#     new_ext <- extent(samp_elev, min(good_rows), max(good_rows), min(good_cols), max(good_cols))
-#     samp_elev <- crop(samp_elev, new_ext)
-#   }
-# 
-#   # calculate metrics
-#   out <- run_all(samp_elev)
-#   out$point <- i
-# 
-#   # add dataframes (or create if first point)
-#   if (i == 1){
-#     result <- out
-#   } else {
-#     result <- rbind(result, out)
-#   }
-# 
-#   # remove data
-#   rm(samp_pt, bound_box, samp_elev, out)
-# }
-# 
-# # write out result
-# write.csv(result, '~/Documents/surface_metrics/oregon_metric_results_elev.csv', row.names = F)
+# Sku (kurtosis)
+ndvi_sku_img <- texture_image(ndvi, 'square', 5, in_meters = FALSE, 5070, 'sku', NULL, TRUE, 2, 6)
+elev_sku_img <- texture_image(elev, 'square', 5, in_meters = FALSE, 5070, 'sku', NULL, TRUE, 2, 6)
 
-# read in the future, because the above takes a while
-data_evi <- read.csv('~/Documents/surface_metrics/oregon_metric_results.csv')
-data_elev <- read.csv('~/Documents/surface_metrics/oregon_metric_results_elev.csv')
+# Str (texture aspect ratio)
+ndvi_sdc_img <- texture_image(ndvi, 'square', 5, in_meters = FALSE, 5070, 'sdc', list(low = 0, high = 0.2), TRUE, 2, 6)
+elev_sdc_img <- texture_image(elev, 'square', 5, in_meters = FALSE, 5070, 'sdc', list(low = 0, high = 0.2), TRUE, 2, 6)
 
+# STILL EDITING FROM HERE DOWN
 ```
 
 ## Visualization

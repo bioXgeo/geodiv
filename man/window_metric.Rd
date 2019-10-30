@@ -85,12 +85,11 @@ x <- crop(normforest, extent(-123, -122.99, 43, 43.01))
 
 # get coordinates, rownums, cellnums
 pixlist <- seq(1, length(x), 1)
-ext_x <- pad_edges(x, window_type = 'square', size = 4)
+ext_x <- pad_edges(x, size = 4)
 rownum <- rowFromCell(x, pixlist) + 4
 colnum <- colFromCell(x, pixlist) + 4
 
 # get a surface of root mean square roughness
 sq_val <- window_metric(x = x, i = 40, window = 'square',
-size = 4, coords = coords,
-rownum = rownum, colnum = colnum, metric = 'sq')
+size = 4, rownum = rownum, colnum = colnum, metric = 'sq')
 }
