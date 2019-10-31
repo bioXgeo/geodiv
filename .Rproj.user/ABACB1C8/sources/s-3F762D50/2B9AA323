@@ -7,13 +7,13 @@
     "folds" : "",
     "hash" : "0",
     "id" : "2B9AA323",
-    "lastKnownWriteTime" : 1558458464,
-    "last_content_update" : 1558458464053,
+    "lastKnownWriteTime" : 1572534325,
+    "last_content_update" : 1572534325,
     "path" : "~/Documents/geodiv/R/movingwindow.R",
     "project_path" : "R/movingwindow.R",
     "properties" : {
-        "cursorPosition" : "134,16",
-        "scrollLine" : "0"
+        "cursorPosition" : "200,69",
+        "scrollLine" : "183"
     },
     "relative_order" : 4,
     "source_on_save" : false,

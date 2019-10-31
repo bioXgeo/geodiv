@@ -3,11 +3,10 @@ Type: Package
 Title: Methods for Calculating Gradient Surface Metrics
 Version: 0.1.0
 Author: Annie C. Smith
-Maintainer: Annie C. Smith <coope378@msu.edu>
+Maintainer: Annie C. Smith <coope378@msu.com>
 Description: Methods for calculating gradient surface metrics for
     continuous analysis of landscape features as found in McGarigal
-    et al. (2009), Kedron et al. (2018), and Dahlin et al. (in 
-    prep). Options for plotting are included.
+    et al. (2009) and Kedron et al. (2018). 
 Depends: R (>= 3.5)
 Imports: 
     dplyr (>= 0.7.8),
@@ -33,7 +32,10 @@ RoxygenNote: 6.1.1
 Suggests: 
     testthat,
     knitr,
-    rmarkdown
+    rmarkdown,
+    ggplot2,
+    ggpubr,
+    viridis
 LinkingTo: 
     Rcpp, RcppArmadillo
 VignetteBuilder: knitr
