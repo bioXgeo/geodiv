@@ -310,13 +310,13 @@ scl <- function(x, threshold = c(0.20, 1 / exp(1)), plot = FALSE) {
 #'
 #' # estimate the texture aspect ratio for autocorrelation
 #' # thresholds of 0.20 and 0.37 (1/e)
-#' strvals <- str(x, threshold = c(0.20, 1 / exp(1)))
+#' strvals <- stxr(x, threshold = c(0.20, 1 / exp(1)))
 #'
 #' # calculate Str20, the texture aspect ratio for
 #' # autocorrelation value of 0.2 in the AACF
 #' Str20 <- strvals[1]
 #' @export
-str <- function(x, threshold = c(0.20, 1 / exp(1))) {
+stxr <- function(x, threshold = c(0.20, 1 / exp(1))) {
   if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
   if(class(threshold) != 'numeric') {stop('threshold must be numeric.')}
   if(sum(threshold < 0) >= 1) {stop('threshold values cannot be less than 0.')}

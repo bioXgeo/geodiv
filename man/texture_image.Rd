@@ -71,7 +71,7 @@ Metrics available from geodiv package:
    \item{\code{'std'}: angle of dominating texture}
    \item{\code{'stdi'}: texture direction index}
    \item{\code{'svi'}: valley fluid retention index}
-   \item{\code{'str'}: texture aspect ratio}
+   \item{\code{'stxr'}: texture aspect ratio}
    \item{\code{'ssc'}: mean summit curvature}
    \item{\code{'sv'}: maximum valley depth}
    \item{\code{'sph'}: maximum peak height}

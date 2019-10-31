@@ -51,7 +51,7 @@
 #'    \item{\code{'std'}: angle of dominating texture}
 #'    \item{\code{'stdi'}: texture direction index}
 #'    \item{\code{'svi'}: valley fluid retention index}
-#'    \item{\code{'str'}: texture aspect ratio}
+#'    \item{\code{'stxr'}: texture aspect ratio}
 #'    \item{\code{'ssc'}: mean summit curvature}
 #'    \item{\code{'sv'}: maximum valley depth}
 #'    \item{\code{'sph'}: maximum peak height}
@@ -294,7 +294,7 @@ texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE
 #'    \item{\code{'std'}: angle of dominating texture}
 #'    \item{\code{'stdi'}: texture direction index}
 #'    \item{\code{'svi'}: valley fluid retention index}
-#'    \item{\code{'str'}: texture aspect ratio}
+#'    \item{\code{'stxr'}: texture aspect ratio}
 #'    \item{\code{'ssc'}: mean summit curvature}
 #'    \item{\code{'sv'}: maximum valley depth}
 #'    \item{\code{'sph'}: maximum peak height}

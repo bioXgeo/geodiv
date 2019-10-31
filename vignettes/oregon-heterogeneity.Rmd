@@ -1,7 +1,7 @@
 ---
 title: "Basic geodiv Applications"
 author: "Annie C. Smith"
-date: "October 30, 2019"
+date: "October 31, 2019"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{oregon-heterogeneity}
@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 
 First, import *geodiv* and any other necessary packages (for this example).
 
-```{r setup, include = FALSE}
+```{r setup}
 
 library(geodiv)
 library(raster)
@@ -88,7 +88,7 @@ plot(elev, xlab = 'Longitude', ylab = 'Latitude', main = 'Elevation (m) - no tre
 
 ```
 
-By plotting the new rasters, we see that the NDVI image was not changed (polynomial of order 0), except for the actual values. However, the elevation raster now looks quite different now that a linear plane (order 1) was removed, with heterogeneity more pronounced.
+By plotting the new rasters, we see that the NDVI image was not changed (polynomial of order 0), except for the actual values. However, the elevation raster looks quite different now that a linear plane (order 1) was removed, and heterogeneity is now more pronounced.
 
 # Calculating Metrics
 
@@ -105,7 +105,7 @@ We can run all the functions using a wrapper function that will print the metric
 
 Almost all of the surface metric functions take either a raster or matrix, and return a vector of numeric values. Sfd (3D fractal dimension) does not accept rasters, only matrices. While most functions return single values, several functions calculate multiple, highly related, values at once. These functions return a vector, with the order of returned values described in the function help files.
 
-The functions returning multiple values are Std (texture direction metrics), Str (texture aspect ratio), Srw (radial wavelength metrics), and Scl (correlation lengths). Both Std and Srw return values representing different metrics. For example, Std returns values for Std (angle of dominating texture) as well as Stdi (texture direction index). Str and Scl return one or more values of the same metric, for different input values. For example, Scl returns the correlation distance to various thresholds of autocorrelation (e.g., 20% or 37%).
+The functions returning multiple values are Std (texture direction metrics), Stxr (texture aspect ratio), Srw (radial wavelength metrics), and Scl (correlation lengths). Both Std and Srw return values representing different metrics. For example, Std returns values for Std (angle of dominating texture) as well as Stdi (texture direction index). Stxr and Scl return one or more values of the same metric, for different input values. For example, Scl returns the correlation distance to various thresholds of autocorrelation (e.g., 20% or 37%).
 
 Currently, functions only accept single-band, or single-layer rasters and matrices. 
 
@@ -163,7 +163,7 @@ run_all <- function(r){
   svi <- svi(r)
   cat('Svi: ', svi, '\n')
 
-  strvals <- str(r, threshold = c(0.2, 1 / exp(1)))
+  strvals <- stxr(r, threshold = c(0.2, 1 / exp(1)))
   cat('Str (20%): ', strvals[1], '\n')
   cat('Str (37%): ', strvals[2], '\n')
 
@@ -210,7 +210,7 @@ run_all(elev)
 
 ```
 
-Note that several of these functions (Srw, Std, Str, Scl) returned warnings. This is fine, and is due to the fact that they include summaries over certain portions of Fourier transform images. We can see what the Srw and Std functions are doing by using the plotting option. Values are derived by summarizing the displayed raster over the lines in the figures. Str and Scl use the autocorrelation image, which is similar to those used for the Srw and Std functions.
+We can see what the Srw and Std functions are doing by using the plotting option. Values are derived by summarizing the displayed raster over the lines in the figures. Stxr and Scl use the autocorrelation image, which is similar to those used for the Srw and Std functions.
 
 ```{r plot extraction functions}
 
@@ -223,13 +223,13 @@ stdvals <- std(elev, plot = TRUE)
 
 Another common use for *geodiv* is to run the surface metric functions over windows surrounding each pixel to create texture images. 
 
-For this example, we will only use a few of the functions, as some may take a while on a laptop. For more complex functions (e.g., Str, S10z, Srw, etc.), it is suggested that users run this type of analysis on larger computers or clusters with many cores.
+For this example, we will only use a few of the functions, as some may take a while on a personal computer. For more complex functions (e.g., Stxr, S10z, Srw, etc.), it is suggested that users run this type of analysis on larger computers or clusters with many cores.
 
 The 'texture_image' function is a wrapper for the 'window_metric' function, which allows users to extract metrics for portions of a raster. The 'texture_image' function applies the selected function to windows around every pixel or cell within a raster or matrix.
 
 The arguments to 'texture_image' include the window shape (square or circular), the size of the window in pixels or meters, an equal area projection code, the metric name, and several parallel options (number of cores, number of clumps into which to group pixels). The function may be run serially or in parallel. It uses the 'mclapply' function from the *parallel* package to parallelize functions on Linux and Mac systems, and 'parLapply' on Windows systems. If window size is given in meters, it is converted to an approximate size in number of pixels, so it is usually preferred to give a pixel number to the size argument.
 
-One important aspect of the 'texture_image' function is that it always converts rasters to an equal area projection so that the 'window_metric' function can work with matrices. Users will need to identify an appropriate equal area projection for their study, rather than using the default, in order for this function to return unbiased results.
+One important aspect of the 'texture_image' function is that it always converts rasters to an equal area projection so that the 'window_metric' function can work with matrices. Users will need to identify an appropriate equal area projection for their study, rather than using the default, in order for this function to return unbiased results. You can see the function will warn you anytime a raster is used for input.
 
 ``` {r all points}
 
