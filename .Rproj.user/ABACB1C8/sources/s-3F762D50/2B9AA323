@@ -5,11 +5,11 @@
     "dirty" : false,
     "encoding" : "UTF-8",
     "folds" : "",
-    "hash" : "2944919131",
+    "hash" : "0",
     "id" : "2B9AA323",
     "lastKnownWriteTime" : 1558458464,
     "last_content_update" : 1558458464053,
-    "path" : "~/Documents/SyntheticLandscape/surface_metrics/geodiv/R/movingwindow.R",
+    "path" : "~/Documents/geodiv/R/movingwindow.R",
     "project_path" : "R/movingwindow.R",
     "properties" : {
         "cursorPosition" : "134,16",

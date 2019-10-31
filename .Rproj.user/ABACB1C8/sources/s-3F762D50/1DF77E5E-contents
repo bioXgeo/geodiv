@@ -1,21 +1,20 @@
+
 # Test script for geodiv R package ----------------------------------------
 
 # This tests all functions associated with the geodiv package and writes
 # errors to a log file.
 
-# Instructions (duplicated from README, steps 3-5 are coded out below):
-# 1: Load geodiv: clone git repository onto local machine
-#    git repo: https://github.com/bioXgeo/SyntheticLandscape
-# 2: open the geodiv R project (geodiv.Rproj) in the geodiv folder
-# 3: Run geodiv using both the 'normforest' and 'orforest' rasters included
+# Instructions (steps 2-4 are coded below):
+# 1: Load geodiv.Rproj
+# 2: Run geodiv using both the 'normforest' and 'orforest' rasters included
 #    in the package.
-# 4: Run geodiv with a test raster of your choosing (make sure that it's
+# 3: Run geodiv with a test raster of your choosing (make sure that it's
 #    fairly small).
-# 5: Run the r cmd check
-# 6: Add resulting log file (geodiv_logfile.txt) to the geodiv Google Drive directory.
-# 7: If you have any ideas for extra components for this or the next release,
+# 4: Run the r cmd check
+# 5: Add resulting log file (geodiv_logfile.txt) to the geodiv Google Drive directory.
+# 6: If you have any ideas for extra components for this or the next release,
 #    add those to the ideas doc on Google Drive.
-# 8: If you try anything else out and find an issue, add it to the issues doc on
+# 7: If you try anything else out and find an issue, add it to the issues doc on
 #    Google Drive.
 
 # change paths ------------------------------------------------------------
@@ -23,14 +22,26 @@
 logfile_path <- '/home/annie/Desktop/geodiv_logfile_ACS.txt' # change path and end initials
 otherrast_path <- # insert path to new (small) raster here
 
-# load geodiv -------------------------------------------------------------
+  # load geodiv -------------------------------------------------------------
 
 sink(logfile_path, split = TRUE)
 
-library(devtools)
-library(roxygen2)
+requiredPackages <- c('devtools', 'roxygen2', 'raster') #The packages I need
+# install/load required packages:
+if (exists("requiredPackages")) {
+  # install required packages that are not installed yet:
+  new.packages <- requiredPackages[!(requiredPackages %in%
+                                       installed.packages()[, "Package"])]
+  if(length(new.packages)) {
+    install.packages(new.packages)
+  }
 
-devtools::load_all()
+  # load required packages:
+  lapply(requiredPackages, library, character.only = T)
+}
+
+devtools::install_github('bioXgeo/geodiv', force = TRUE)
+library(geodiv)
 
 # write system information ------------------------------------------------
 
@@ -109,7 +120,7 @@ run_all <- function(r){
   cat('\n')
 
   cat('Sfd: ', '\n')
-  sfd <- sfd(r)
+  sfd <- sfd(as.matrix(r))
   print(sfd)
   cat('\n')
 
@@ -163,8 +174,8 @@ run_all <- function(r){
   print(svi)
   cat('\n')
 
-  cat('Str function: ', '\n')
-  strvals <- str(r, threshold = c(0.2, 1 / exp(1)))
+  cat('Stxr function: ', '\n')
+  strvals <- stxr(r, threshold = c(0.2, 1 / exp(1)))
   print(strvals)
   cat('\n')
 
@@ -263,8 +274,8 @@ run_all(orforest)
 # create a texture image for a small portion of the raster
 cat('texture image: ', '\n')
 small_orforest <- crop(orforest, extent(-123, -122.99, 43, 43.01))
-sbi_teximg <- texture_image(x = small_orforest, window_type = 'square', size = 11,
-                          metric = 'sbi', parallel = TRUE)
+std_teximg <- texture_image(x = small_orforest, window_type = 'square', size = 4,
+                          metric = 'std', parallel = TRUE)
 
 # run everything for normforest -------------------------------------------
 

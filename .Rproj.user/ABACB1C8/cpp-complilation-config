@@ -3,15 +3,17 @@
         "-I/usr/lib/rstudio/resources/libclang/builtin-headers/3.5",
         "-I/usr/lib/rstudio/resources/libclang/builtin-headers/libc++/3.5",
         "-I/home/annie/R/x86_64-pc-linux-gnu-library/3.6/Rcpp/include",
+        "-I/home/annie/R/x86_64-pc-linux-gnu-library/3.6/RcppArmadillo/include",
         "-std=gnu++11",
         "-I/usr/share/R/include",
         "-DNDEBUG",
+        "-fopenmp",
         "-fpic",
-        "-fdebug-prefix-map=/build/r-base-VAQCff/r-base-3.6.0=.",
+        "-fdebug-prefix-map=/build/r-base-uuRxut/r-base-3.6.1=.",
         "-fstack-protector-strong",
         "-D_FORTIFY_SOURCE=2"
     ],
-    "hash" : "1558549992",
+    "hash" : "157253432515725343251572534325",
     "is_cpp" : true,
     "pch" : "Rcpp"
 }

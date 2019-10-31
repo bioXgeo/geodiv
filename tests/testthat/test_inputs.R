@@ -6,12 +6,12 @@ ba_func <- bearing_area(normforest)
 test_that("incorrect inputs return errors in aacf", {
   expect_error(aacf('a'), 'x must be a raster or matrix.')
   expect_error(scl('a'), 'x must be a raster or matrix.')
-  expect_error(str('a'), 'x must be a raster or matrix.')
+  expect_error(stxr('a'), 'x must be a raster or matrix.')
   expect_error(scl(normforest, threshold = -0.1, plot = FALSE), 'threshold values cannot be less than 0.')
   expect_error(scl(normforest, threshold = 'a', plot = FALSE), 'threshold must be numeric.')
   expect_error(scl(normforest, plot = 'a'), 'plot argument must be TRUE/FALSE.')
-  expect_error(str(normforest, threshold = -0.1), 'threshold values cannot be less than 0.')
-  expect_error(str(normforest, threshold = 'a'), 'threshold must be numeric.')
+  expect_error(stxr(normforest, threshold = -0.1), 'threshold values cannot be less than 0.')
+  expect_error(stxr(normforest, threshold = 'a'), 'threshold must be numeric.')
 })
 
 test_that("incorrect inputs return errors in basics", {
