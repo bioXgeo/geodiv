@@ -21,7 +21,6 @@
 #' Sfd <- sfd(mat)
 #' @export
 sfd <- function(mat) {
-  if(class(mat) != 'matrix') {stop('mat must be a matrix.')}
-  .Call(`_geodiv_sfd`, mat)
+    .Call(`_geodiv_sfd`, mat)
 }
 

@@ -3,3 +3,4 @@
 inst/doc
 *.so
 
+.Rproj.user
