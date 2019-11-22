@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1574443596512.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "4283538120",
+    "id" : "C7597A27",
+    "lastKnownWriteTime" : 1574443667,
+    "last_content_update" : 1574443667122,
+    "path" : "~/Documents/geodiv/R/RcppExports.R",
+    "project_path" : "R/RcppExports.R",
+    "properties" : {
+        "cursorPosition" : "23,50",
+        "scrollLine" : "5"
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
