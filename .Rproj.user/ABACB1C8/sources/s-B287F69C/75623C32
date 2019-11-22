@@ -5,14 +5,14 @@
     "dirty" : false,
     "encoding" : "UTF-8",
     "folds" : "",
-    "hash" : "3171158927",
+    "hash" : "3312014052",
     "id" : "75623C32",
-    "lastKnownWriteTime" : 1574439394,
-    "last_content_update" : 1574439394689,
+    "lastKnownWriteTime" : 1574445742,
+    "last_content_update" : 1574445742653,
     "path" : "~/Documents/geodiv/cran-comments.md",
     "project_path" : "cran-comments.md",
     "properties" : {
-        "cursorPosition" : "12,29",
+        "cursorPosition" : "12,28",
         "scrollLine" : "0",
         "tempName" : "Untitled1"
     },

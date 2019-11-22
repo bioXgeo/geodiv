@@ -20,13 +20,13 @@
                 "column" : 8,
                 "file" : "/home/annie/Documents/geodiv/src/sfd.cpp",
                 "kind" : 6,
-                "line" : 50,
+                "line" : 49,
                 "name" : "sfd(NumericMatrix)",
                 "parent_name" : "",
                 "usr" : "c:@F@sfd#$@N@Rcpp@C@Matrix>#VI14#@N@Rcpp@CT>1#T@PreserveStorage#"
             }
         ],
         "file" : "/home/annie/Documents/geodiv/src/sfd.cpp",
-        "file_last_write" : 1572534325
+        "file_last_write" : 1574442444
     }
 ]
