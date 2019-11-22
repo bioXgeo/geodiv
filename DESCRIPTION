@@ -1,12 +1,11 @@
 Package: geodiv
 Type: Package
 Title: Methods for Calculating Gradient Surface Metrics
-Version: 0.1.0
+Version: 1.0.0
 Author: Annie C. Smith
-Maintainer: Annie C. Smith <coope378@msu.com>
+Maintainer: Annie C. Smith <annie.smith@dnr.wa.gov>
 Description: Methods for calculating gradient surface metrics for
-    continuous analysis of landscape features as found in McGarigal
-    et al. (2009) and Kedron et al. (2018). 
+    continuous analysis of landscape features. 
 Depends: R (>= 3.5)
 Imports: 
     dplyr (>= 0.7.8),

@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1558372859631.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "470E32AD",
+    "lastKnownWriteTime" : 1572534325,
+    "last_content_update" : 1572534325,
+    "path" : "~/Documents/geodiv/R/aacf.R",
+    "project_path" : "R/aacf.R",
+    "properties" : {
+        "cursorPosition" : "112,2",
+        "scrollLine" : "0"
+    },
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
