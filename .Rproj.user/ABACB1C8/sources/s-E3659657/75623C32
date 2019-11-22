@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1574439015305.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3171158927",
+    "id" : "75623C32",
+    "lastKnownWriteTime" : 1574439394,
+    "last_content_update" : 1574439394689,
+    "path" : "~/Documents/geodiv/cran-comments.md",
+    "project_path" : "cran-comments.md",
+    "properties" : {
+        "cursorPosition" : "12,29",
+        "scrollLine" : "0",
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 8,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "markdown"
+}

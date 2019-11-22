@@ -1,7 +1,7 @@
 Package: geodiv
 Type: Package
 Title: Methods for Calculating Gradient Surface Metrics
-Version: 1.0.0
+Version: 0.1.0
 Author: Annie C. Smith
 Maintainer: Annie C. Smith <annie.smith@dnr.wa.gov>
 Description: Methods for calculating gradient surface metrics for

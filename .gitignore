@@ -1,3 +1,4 @@
 /data-raw
 /.DS_Store
 inst/doc
+*.o
