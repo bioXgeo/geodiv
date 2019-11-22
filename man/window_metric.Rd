@@ -4,8 +4,16 @@
 \alias{window_metric}
 \title{Calculate Texture Metric for Single Pixel}
 \usage{
-window_metric(x, i, window_type = "square", size = 11, rownum, colnum,
-  metric, args = NULL)
+window_metric(
+  x,
+  i,
+  window_type = "square",
+  size = 11,
+  rownum,
+  colnum,
+  metric,
+  args = NULL
+)
 }
 \arguments{
 \item{x}{A raster or matrix.}
