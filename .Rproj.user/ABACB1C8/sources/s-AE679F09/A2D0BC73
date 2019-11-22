@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1574444525440.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1029591339",
+    "id" : "A2D0BC73",
+    "lastKnownWriteTime" : 1574445358,
+    "last_content_update" : 1574445358800,
+    "path" : "~/Documents/geodiv/README.Rmd",
+    "project_path" : "README.Rmd",
+    "properties" : {
+        "cursorPosition" : "25,5",
+        "scrollLine" : "14"
+    },
+    "relative_order" : 6,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

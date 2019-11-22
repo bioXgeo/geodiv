@@ -14,4 +14,9 @@ knitr::opts_chunk$set(echo = TRUE)
 * win-builder (devel and release)
 
 ## R CMD check results
-There were no ERRORs, WARNINGs, or NOTES. 
+There were no ERRORs, WARNINGs, or NOTES.
+
+This is the initial submission of this package.
+
+## Downstream dependencies
+There are currently no downstream dependencies for this package.
