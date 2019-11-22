@@ -7,7 +7,7 @@
 sfd(mat)
 }
 \arguments{
-\item{mat}{A matrix.}
+\item{x}{A matrix.}
 }
 \value{
 A numeric value representing the fractal dimension of
