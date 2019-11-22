@@ -33,6 +33,10 @@ And the development version from [GitHub](https://github.com/) with:
 # install.packages("devtools")
 devtools::install_github("bioXgeo/geodiv")
 ```
+On Mac OS X, you may need to install the development tools here to get the package to install:
+
+<https://cran.r-project.org/bin/macosx/tools/>
+
 ## Example
 
 This is a basic example which shows you how to calculate several metrics over an entire image. *geodiv* may also be applied with moving windows over an entire image using the 'texture_image' function.

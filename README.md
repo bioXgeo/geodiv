@@ -23,6 +23,10 @@ And the development version from [GitHub](https://github.com/) with:
 devtools::install_github("bioXgeo/geodiv")
 ```
 
+On Mac OS X, you may need to install the development tools here to get the package to install:
+
+<https://cran.r-project.org/bin/macosx/tools/>
+
 Example
 -------
 
