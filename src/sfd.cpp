@@ -176,6 +176,3 @@ double sfd(NumericMatrix mat){
   fd = 2.0 - beta;
   return fd;
 }
-
-/* STILL NEED TO NORMALIZE RASTER SO THAT CHANGING MAGNITUDES DOESN'T MATTER. ALSO NEED TO CONNECT
-/* INTO R PACKAGE. */
