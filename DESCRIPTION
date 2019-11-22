@@ -31,10 +31,7 @@ RoxygenNote: 6.1.1
 Suggests: 
     testthat,
     knitr,
-    rmarkdown,
-    ggplot2,
-    ggpubr,
-    viridis
+    ggplot2
 LinkingTo: 
     Rcpp, RcppArmadillo
 VignetteBuilder: knitr
