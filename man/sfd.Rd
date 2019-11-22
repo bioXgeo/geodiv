@@ -7,7 +7,7 @@
 sfd(mat)
 }
 \arguments{
-\item{x}{A matrix.}
+\item{mat}{A matrix.}
 }
 \value{
 A numeric value representing the fractal dimension of
@@ -27,5 +27,5 @@ data(normforest)
 x <- raster::as.matrix(normforest)
 
 # calculate the fractal dimension
-Sfd <- sfd(x)
+Sfd <- sfd(mat)
 }

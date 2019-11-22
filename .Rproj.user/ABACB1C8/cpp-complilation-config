@@ -7,13 +7,12 @@
         "-std=gnu++11",
         "-I/usr/share/R/include",
         "-DNDEBUG",
-        "-fopenmp",
         "-fpic",
         "-fdebug-prefix-map=/build/r-base-uuRxut/r-base-3.6.1=.",
         "-fstack-protector-strong",
         "-D_FORTIFY_SOURCE=2"
     ],
-    "hash" : "157253432515725343251572534325",
+    "hash" : "157443877915744414301574441437",
     "is_cpp" : true,
     "pch" : "Rcpp"
 }

@@ -6,7 +6,7 @@
 #' Calculates the 3D fractal dimension of a raster using the
 #' triangular prism surface area method.
 #'
-#' @param x A matrix.
+#' @param mat A matrix.
 #' @return A numeric value representing the fractal dimension of
 #' the image.
 #' @examples
@@ -19,7 +19,7 @@
 #' x <- raster::as.matrix(normforest)
 #'
 #' # calculate the fractal dimension
-#' Sfd <- sfd(x)
+#' Sfd <- sfd(mat)
 #' @export
 sfd <- function(mat) {
     .Call(`_geodiv_sfd`, mat)
