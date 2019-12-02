@@ -142,5 +142,5 @@ test_that("incorrect inputs return errors in zshift", {
 })
 
 test_that("incorrect inputs return errors in sfd", {
-  expect_error(sfd(1), 'mat must be a matrix.')
+  expect_error(sfd(1), 'x must be a raster or matrix.')
 })

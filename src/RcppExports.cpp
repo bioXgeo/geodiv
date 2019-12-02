@@ -6,20 +6,20 @@
 
 using namespace Rcpp;
 
-// sfd
-double sfd(NumericMatrix mat);
-RcppExport SEXP _geodiv_sfd(SEXP matSEXP) {
+// sfd_
+double sfd_(NumericMatrix mat);
+RcppExport SEXP _geodiv_sfd_(SEXP matSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericMatrix >::type mat(matSEXP);
-    rcpp_result_gen = Rcpp::wrap(sfd(mat));
+    rcpp_result_gen = Rcpp::wrap(sfd_(mat));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_geodiv_sfd", (DL_FUNC) &_geodiv_sfd, 1},
+    {"_geodiv_sfd_", (DL_FUNC) &_geodiv_sfd_, 1},
     {NULL, NULL, 0}
 };
 
