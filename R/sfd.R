@@ -4,6 +4,8 @@
 #' triangular prism surface area method.
 #'
 #' @param x A raster or matrix.
+#' @param silent Logical. If \code{FALSE} (default), the function will
+#' print warning messages.
 #' @return A numeric value representing the fractal dimension of
 #' the image.
 #' @examples
@@ -14,7 +16,7 @@
 #' # calculate the fractal dimension
 #' Sfd <- sfd(normforest)
 #' @export
-sfd <- function(x, epsg_proj = 5070, silent = FALSE) {
+sfd <- function(x, silent = FALSE) {
   # check type
   if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
 

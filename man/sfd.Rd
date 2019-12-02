@@ -4,10 +4,13 @@
 \alias{sfd}
 \title{Calculate the fractal dimension of a raster.}
 \usage{
-sfd(x, epsg_proj = 5070, silent = FALSE)
+sfd(x, silent = FALSE)
 }
 \arguments{
 \item{x}{A raster or matrix.}
+
+\item{silent}{Logical. If \code{FALSE} (default), the function will
+print warning messages.}
 }
 \value{
 A numeric value representing the fractal dimension of
