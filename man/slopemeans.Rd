@@ -34,7 +34,7 @@ data(normforest)
 # find the average slope of segments of the bearing area
 # curve.
 ba <- bearing_area(normforest)
-x <- seq(0, 1, length.out = 100000)
+x <- seq(0, 1, length.out = 10000)
 slopes <- slopecalc(x = x, h = 0.01, f = ba)
 slopes_forty <- slopemeans(slopes = slopes, l = 0.4)
 }
