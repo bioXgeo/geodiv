@@ -1,7 +1,3 @@
-# function to calculate surface area, surface area ratio
-# from https://www.ntmdt-si.ru/data/media/files/manuals/image_analisys_p9_nov12.e.pdf
-# diagram for actual equations used: file:///home/annie/Downloads/9783642364570-c2%20(1).pdf, page 17/30
-
 #' Flattened Surface Area
 #'
 #' Calculates the surface area of a flat raster or matrix with the

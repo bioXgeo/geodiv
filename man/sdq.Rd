@@ -16,9 +16,7 @@ A numeric value representing the two-point root
 }
 \description{
 Calculates the root mean square slope of a raster or matrix
-surface using the two-point method. This function is based
-on the equations found at
-https://www.ntmdt-si.ru/data/media/files/manuals/image_analisys_p9_nov12.e.pdf.
+surface using the two-point method.
 }
 \examples{
 # import raster image
@@ -26,4 +24,9 @@ data(normforest)
 
 # calculate root mean square slope
 Sdq <- sdq(normforest)
+}
+\references{
+This function is based
+on the equations found at
+https://www.ntmdt-si.ru/data/media/files/manuals/image_analisys_p9_nov12.e.pdf.
 }

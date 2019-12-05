@@ -280,7 +280,7 @@ sds <- function(x) {
 
 #' Ten-Point Height
 #'
-#' Calculates the average height abover the mean surface for the five highest local maxima
+#' Calculates the average height above the mean surface for the five highest local maxima
 #' plus the average height below the mean surface for the five lowest local minima.
 #'
 #' @param x A raster or matrix.

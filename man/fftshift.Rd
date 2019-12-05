@@ -17,9 +17,7 @@ An n x n matrix with the zero-frequency component of
   the Fourier transform in the center.
 }
 \description{
-This function was created from code posted by rayryeng at:
-https://stackoverflow.com/questions/38230794/how-to-write-fftshift-and-ifftshift-in-r.
-It serves to shift the zero-frequency component of the
+This function serves to shift the zero-frequency component of the
 Fourier transform to the center of the matrix.
 }
 \examples{
@@ -40,4 +38,8 @@ ftshift <- fftshift(ftmat)
 # plot real component
 r <- setValues(normforest, Re(ftshift))
 plot(r)
+}
+\references{
+#' This function was created from code posted by rayryeng at:
+https://stackoverflow.com/questions/38230794/how-to-write-fftshift-and-ifftshift-in-r.
 }

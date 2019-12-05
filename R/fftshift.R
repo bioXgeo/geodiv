@@ -1,8 +1,6 @@
 #' Fourier Transform Shift
 #'
-#' This function was created from code posted by rayryeng at:
-#' https://stackoverflow.com/questions/38230794/how-to-write-fftshift-and-ifftshift-in-r.
-#' It serves to shift the zero-frequency component of the
+#' This function serves to shift the zero-frequency component of the
 #' Fourier transform to the center of the matrix.
 #'
 #' @param x An n x n Fourier transform matrix.
@@ -10,6 +8,8 @@
 #' left/right. 1 swaps up/down. 2 swaps left/right.
 #' @return An n x n matrix with the zero-frequency component of
 #'   the Fourier transform in the center.
+#' @references #' This function was created from code posted by rayryeng at:
+#' https://stackoverflow.com/questions/38230794/how-to-write-fftshift-and-ifftshift-in-r.
 #' @examples
 #' library(raster)
 #'

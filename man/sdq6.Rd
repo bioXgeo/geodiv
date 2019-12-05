@@ -16,9 +16,7 @@ A numeric value representing the seven-point root
 }
 \description{
 Calculates the area root mean square slope of a raster or matrix
-surface using the seven-point method. This function is based
-on the equations found at
-https://www.ntmdt-si.ru/data/media/files/manuals/image_analisys_p9_nov12.e.pdf.
+surface using the seven-point method.
 }
 \examples{
 # import raster image
@@ -26,4 +24,9 @@ data(normforest)
 
 # calculate area root mean square slope
 Sdq6 <- sdq6(normforest)
+}
+\references{
+This function is based
+on the equations found at
+https://www.ntmdt-si.ru/data/media/files/manuals/image_analisys_p9_nov12.e.pdf.
 }

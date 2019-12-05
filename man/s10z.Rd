@@ -13,7 +13,7 @@ s10z(x)
 A numeric value representing the ten-point height.
 }
 \description{
-Calculates the average height abover the mean surface for the five highest local maxima
+Calculates the average height above the mean surface for the five highest local maxima
 plus the average height below the mean surface for the five lowest local minima.
 }
 \examples{
