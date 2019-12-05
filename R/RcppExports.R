@@ -9,6 +9,9 @@
 #' @param mat A matrix.
 #' @return A numeric value representing the fractal dimension of
 #' the image.
+#' @references Clarke, K.C., 1986. Computation of the fractal dimension of topographic
+#' surfaces using the triangular prism surface area method. Computers & Geosciences,
+#' 12(5), pp.713-722.
 #' @examples
 #'
 #' # import raster image

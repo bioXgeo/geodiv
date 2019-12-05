@@ -28,3 +28,8 @@ mat <- raster::as.matrix(normforest)
 # calculate the fractal dimension
 Sfd <- sfd_(mat)
 }
+\references{
+Clarke, K.C., 1986. Computation of the fractal dimension of topographic
+surfaces using the triangular prism surface area method. Computers & Geosciences,
+12(5), pp.713-722.
+}

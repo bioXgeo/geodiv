@@ -12,7 +12,7 @@
         "-fstack-protector-strong",
         "-D_FORTIFY_SOURCE=2"
     ],
-    "hash" : "157558015315744438791574443877",
+    "hash" : "157558047015744438791574443877",
     "is_cpp" : true,
     "pch" : "Rcpp"
 }

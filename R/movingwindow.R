@@ -1,5 +1,3 @@
-#### !!!! srw and the like should not be done on very small windows (e.g., size = 3)
-
 #' Calculate Texture Metrics per Pixel
 #'
 #' Calculates the various texture metrics over windows centered
