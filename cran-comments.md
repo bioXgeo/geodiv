@@ -14,9 +14,9 @@ knitr::opts_chunk$set(echo = TRUE)
 * local Windows 10, R 3.6.1
 
 ## R CMD check results
-There were no ERRORs, or WARNINGS.
+There were no ERRORs or WARNINGS.
 
-With the check_rhub() function, there was one NOTE (below).
+From the check_rhub() function, there was one NOTE (below).
 
 Found the following files/directories:
     'examples_i386' 'examples_x64' 'geodiv-Ex_i386.Rout'
