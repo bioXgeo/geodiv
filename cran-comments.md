@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Test environments
 * local Ubuntu 18.04.3 install, R 3.6.1
 * local OS X 10.14.6 install, R 3.6.1
-* win-builder (devel and release)
+* local Windows 10, R 3.6.1
 
 ## R CMD check results
 There were no ERRORs, WARNINGs, or NOTES.

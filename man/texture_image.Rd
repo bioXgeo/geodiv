@@ -4,18 +4,9 @@
 \alias{texture_image}
 \title{Calculate Texture Metrics per Pixel}
 \usage{
-texture_image(
-  x,
-  window_type = "square",
-  size = 5,
-  in_meters = FALSE,
-  epsg_proj = 5070,
-  metric,
-  args = NULL,
-  parallel = TRUE,
-  ncores = NULL,
-  nclumps = 100
-)
+texture_image(x, window_type = "square", size = 5, in_meters = FALSE,
+  epsg_proj = 5070, metric, args = NULL, parallel = TRUE,
+  ncores = NULL, nclumps = 100)
 }
 \arguments{
 \item{x}{A raster or matrix. If a raster is given, it will be projected to

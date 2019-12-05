@@ -12,6 +12,7 @@ Imports:
     phonTools (>= 0.2-2.1),
     pracma (>= 2.2.2),
     raster (>= 2.8-4),
+    rgdal (>= 1.4),
     spatial (>= 7.3-11),
     spatstat (>= 1.57-1),
     tibble (>= 1.4.2),
