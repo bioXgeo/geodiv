@@ -1,7 +1,7 @@
 ---
 title: "cran-comments.md"
 author: "Annie C. Smith"
-date: "November 22, 2019"
+date: "December 6, 2019"
 output: html_document
 ---
 
@@ -12,6 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 * local Ubuntu 18.04.3 install, R 3.6.1
 * local OS X 10.14.6 install, R 3.6.1
 * local Windows 10, R 3.6.1
+* local Windows 10, R development (4.0.0)
 
 ## R CMD check results
 There were no ERRORs or WARNINGS.
