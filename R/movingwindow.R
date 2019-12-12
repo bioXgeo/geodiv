@@ -104,7 +104,7 @@ texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE
     # convert to equal area raster
     x <- raster(x)
     extent(x) <- c(0, ncol(x), 0, nrow(x))
-    crs(x) <- st_crs(epsg_proj)$proj4string
+    crs(x) <- paste0('+init=EPSG:', epsg_proj)
   } else {
     # tell users that this will always reproject to equal area
     print('Warning: This function will reproject rasters to equal area! Make sure that the epsg_code argument contains an appropriate projection for your data.')
