@@ -431,7 +431,9 @@ pad_edges <- function(x, size = 11, val = NULL) {
   ext_x[(size + 1):(nrow(ext_x) - size), (size + 1):(ncol(ext_x) - size)] <- getValues(x)
   # fill in corners with nearest point value (always the same)
   ext_x_mat <- zoo::na.approx(matrix(ext_x, nrow = nrow(ext_x), ncol = ncol(ext_x)), rule = 2)
-  ext_x <- setValues(ext_x, t(ext_x_mat))
+  vals <- c(ext_x_mat)
+  ext_x_mat <- matrix(data = vals, nrow = dim(ext_x)[1], ncol = dim(ext_x)[2], byrow = TRUE)
+  ext_x <- setValues(ext_x, ext_x_mat)
 
   if (class(x) == 'matrix') {
     return(as.matrix(ext_x))
