@@ -181,7 +181,7 @@ texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE
   if (parallel == FALSE) {
     print('Beginning calculation of metrics over windows...')
     start <- Sys.time()
-    result <- lapply(new_pixlist, FUN = function(i) {window_metric(x = ext_mat, i = i,
+    result <- lapply(pixlist, FUN = function(i) {window_metric(x = ext_mat, i = i,
                                                                window_type = window_type,
                                                                size = size,
                                                                rownum = rownum,
