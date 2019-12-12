@@ -94,7 +94,7 @@ texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE
   if(missing(ncores)) {ncores <- parallel::detectCores() - 1}
 
   if(Sys.info()['sysname'][[1]] == 'Windows') {
-    print('mclapply is not supported on Windows, using parLapply instead (much slower).')
+    print('mclapply is not supported on Windows, using parLapply instead.')
     os_type = 'windows'
   } else {
     os_type = 'other'
