@@ -125,7 +125,7 @@ texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE
   dummy_ext_x <- pad_edges(x, size = (size * 2), val = -88888)
   
   # make sure that internal na values are substituted until later
-  dummy_ext_x[is.na(dummy_ext_x)] <- -99999
+  dummy_ext_x[is.na(dummy_ext_x)] <- Inf
   
   # convert to new proj
   projx <- projectRaster(ext_x, crs = sp::CRS(sf::st_crs(epsg_proj)$proj4string))
@@ -135,7 +135,7 @@ texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE
   noext_coords <- data.frame(xyFromCell(noext_projx, 1:ncell(noext_projx)))
 
   # remove NA value locations from noext_coords
-  na_ind <- which((is.na(getValues(noext_projx)) | getValues(noext_projx) == -88888))
+  na_ind <- which((is.na(getValues(noext_projx)) | getValues(noext_projx) < -9999))
   noext_coords <- noext_coords[-na_ind,]
 
   # data frame of x, y locations
