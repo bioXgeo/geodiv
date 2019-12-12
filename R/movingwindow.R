@@ -128,10 +128,14 @@ texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE
   dummy_ext_x[is.na(dummy_ext_x)] <- Inf
   
   # convert to new proj
-  projx <- projectRaster(ext_x, crs = sp::CRS(sf::st_crs(epsg_proj)$proj4string))
-
-  # get projected unpadded raster and coordinates
-  noext_projx <- projectRaster(from = dummy_ext_x, to = projx)
+  if (st_crs(x)$epsg != epsg_proj) {
+    projx <- projectRaster(ext_x, crs = sp::CRS(sf::st_crs(epsg_proj)$proj4string))
+    noext_projx <- projectRaster(from = dummy_ext_x, to = projx)
+  } else {
+    projx <- ext_x
+    noext_projx <- dummy_ext_x
+  }
+  # get projected unpadded raster coordinates
   noext_coords <- data.frame(xyFromCell(noext_projx, 1:ncell(noext_projx)))
 
   # remove NA value locations from noext_coords
@@ -244,6 +248,7 @@ texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE
     temprast <- out
     temprast[temp$ind] <- temp$newvals
     outfinal[[i]] <- temprast
+    outfinal[[i]] <- trim(outfinal[[i]])
   }
 
   if (length(outfinal) == 1) {
