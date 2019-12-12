@@ -396,6 +396,7 @@ pad_edges <- function(x, size = 11, val = NULL) {
 
   # add padding to raster or matrix
     # continue values to edges to account for edge effect (# pixels radius/edge)
+  x[is.na(x)] <- -9999999 # change NA values for now
 
   if (is.null(val)) {
     # first, get edge values that will be extended
@@ -432,6 +433,7 @@ pad_edges <- function(x, size = 11, val = NULL) {
   # fill in corners with nearest point value (always the same)
   ext_x_mat <- zoo::na.approx(matrix(ext_x, nrow = nrow(ext_x), ncol = ncol(ext_x)), rule = 2)
   vals <- c(ext_x_mat)
+  vals[vals == -9999999] <- NA
   ext_x_mat <- matrix(data = vals, nrow = dim(ext_x)[1], ncol = dim(ext_x)[2], byrow = TRUE)
   ext_x <- setValues(ext_x, ext_x_mat)
 
