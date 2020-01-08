@@ -129,7 +129,7 @@ texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE
   dummy_ext_x[is.na(dummy_ext_x)] <- Inf
   
   # convert to new proj
-  if (st_crs(x)$epsg != epsg_proj) {
+  if (st_crs(x)$proj4string != st_crs(epsg_proj)$proj4string) {
     projx <- projectRaster(ext_x, crs = sp::CRS(sf::st_crs(epsg_proj)$proj4string))
     noext_projx <- projectRaster(from = dummy_ext_x, to = projx)
   } else {
