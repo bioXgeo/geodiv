@@ -1,7 +1,7 @@
 ---
 title: "cran-comments.md"
 author: "Annie C. Smith"
-date: "December 6, 2019"
+date: "January 8, 2020"
 output: html_document
 ---
 
@@ -17,16 +17,11 @@ knitr::opts_chunk$set(echo = TRUE)
 ## R CMD check results
 There were no ERRORs or WARNINGS.
 
-From the check_rhub() function, there was one NOTE (below).
-
-Found the following files/directories:
-    'examples_i386' 'examples_x64' 'geodiv-Ex_i386.Rout'
-    'geodiv-Ex_x64.Rout' 'tests_i386' 'tests_x64'
-    
-These files are not included in the R package, and this note
-does not appear with the devtools::check() function in any environment.
-
 This is the initial submission of this package.
+
+Using the devtools::check_win_devel() function, the package
+returns errors. However, I am unable to replicate these errors
+on any system, with any configuration of R. 
 
 ## Downstream dependencies
 There are currently no downstream dependencies for this package.

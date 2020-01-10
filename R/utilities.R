@@ -39,11 +39,11 @@
 #' @export
 fitplane <- function(x, order) {
   if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
+  if(length(order) > 1) {stop('too many values supplied to order.')}
   if(class(order) != 'integer' & class(order) != 'numeric') {stop('order must be numeric or integer.')}
   if(order %% 1 > 0) {
     warning('order will be rounded to the nearest integer.')
     order <- as.integer(floor(order))}
-  if(length(order) > 1) {stop('too many values supplied to order.')}
   if(order < 0) {stop('order must be >= 0.')}
 
   order <- as.integer(order)

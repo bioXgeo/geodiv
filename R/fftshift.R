@@ -31,8 +31,8 @@
 #' @export
 fftshift <- function(x, dim = -1) {
   if(class(x) != 'matrix') {stop('x must be a matrix.')}
-  if(class(dim) != 'numeric') {stop('dim must be numeric.')}
   if(length(dim) > 1) {stop('too many values provided for dim.')}
+  if(class(dim) != 'numeric') {stop('dim must be numeric.')}
   if(dim != -1 & dim != 1 & dim != 2) {stop('invalid value for dim -- must be -1, 1, or 2.')}
 
   rows <- dim(x)[1]
