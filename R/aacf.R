@@ -87,8 +87,8 @@ aacf <- function(x) {
   ps <- (abs(ft) ^ 2) / (M * N)
 
   # autocorrelation function
-  af <- Re(stats::fft(ps, inverse = TRUE) / (M * N))
-  af_shift <- fftshift(af) # this should be symmetric!
+  af <- base::as.matrix(base::Re(stats::fft(ps, inverse = TRUE) / (M * N)))
+  af_shift <- geodiv::fftshift(af) # this should be symmetric!
 
   # normalize to max 1
   af_norm <- af_shift / max(as.numeric(af_shift), na.rm = TRUE)

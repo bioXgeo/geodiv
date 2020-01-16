@@ -14,6 +14,10 @@ test_that("incorrect inputs return errors in aacf", {
   expect_error(stxr(normforest, threshold = 'a'), 'threshold must be numeric.')
 })
 
+test_that("aacf returns correct value", {
+  expect_that(dim(aacf(normforest)), equals(c(371, 371, 1)))
+})
+
 test_that("incorrect inputs return errors in basics", {
   expect_error(sa('a'), 'x must be a raster or matrix.')
   expect_error(sq('a'), 'x must be a raster or matrix.')
@@ -69,9 +73,9 @@ test_that("incorrect inputs return errors in bestfit", {
 
 test_that("incorrect inputs return errors in fftshift", {
   expect_error(fftshift('a', dim = -1), 'x must be a matrix.')
-  expect_error(fftshift(fft(as.matrix(normforest)), dim = 'a'), 'dim must be numeric.')
-  expect_error(fftshift(fft(as.matrix(normforest)), dim = c(-1, 1)), 'too many values provided for dim.')
-  expect_error(fftshift(fft(as.matrix(normforest)), dim = 8), 'invalid value for dim -- must be -1, 1, or 2.')
+  expect_error(fftshift(fft(raster::as.matrix(normforest)), dim = 'a'), 'dim must be numeric.')
+  expect_error(fftshift(fft(raster::as.matrix(normforest)), dim = c(-1, 1)), 'too many values provided for dim.')
+  expect_error(fftshift(base::Re(stats::fft(raster::as.matrix(normforest))), dim = 8), 'invalid value for dim -- must be -1, 1, or 2.')
 })
 
 test_that("incorrect inputs return errors in fourier", {

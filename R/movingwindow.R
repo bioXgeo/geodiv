@@ -100,7 +100,8 @@ texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE
     os_type = 'other'
   }
 
-  if (class(x) == 'matrix') {
+
+  if ('matrix' %in% base::class(x)) {
     # convert to equal area raster
     x <- raster(x)
     extent(x) <- c(0, ncol(x), 0, nrow(x))
@@ -124,10 +125,10 @@ texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE
   # add padding to raster
   ext_x <- pad_edges(x, size = (size * 2), val = NULL)
   dummy_ext_x <- pad_edges(x, size = (size * 2), val = -88888)
-  
+
   # make sure that internal na values are substituted until later
   dummy_ext_x[is.na(dummy_ext_x)] <- Inf
-  
+
   # convert to new proj
   if (st_crs(x)$proj4string != st_crs(epsg_proj)$proj4string) {
     projx <- projectRaster(ext_x, crs = sp::CRS(sf::st_crs(epsg_proj)$proj4string))
@@ -338,12 +339,12 @@ window_metric <- function(x, i, window_type = 'square', size = 11,
   rownum <- rownum[i]
   colnum <- colnum[i]
 
-  if (class(x) == 'RasterLayer') {
+  if ('RasterLayer' %in% base::class(x)) {
     # tell users that this will always reproject to equal area
     print('Warning: This function assumes an equal area raster!')
 
     # convert to matrix
-    x <- as.matrix(x, nrow = nrow(x), ncol = ncol(x), byrow = TRUE)
+    x <- raster::as.matrix(x, nrow = nrow(x), ncol = ncol(x), byrow = TRUE)
   }
 
   # crop to square

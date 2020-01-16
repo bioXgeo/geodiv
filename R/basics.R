@@ -16,9 +16,9 @@
 #' roughness <- sa(normforest)
 #' @export
 sa <- function(x) {
-  if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
+  if(!('RasterLayer' %in% class(x)) & !('matrix' %in% class(x))) {stop('x must be a raster or matrix.')}
 
-  if (class(x) == 'RasterLayer') {
+  if ('RasterLayer' %in% class(x)) {
     z <- getValues(x)
   } else {
     z <- x
@@ -51,9 +51,9 @@ sa <- function(x) {
 #' roughness <- sq(normforest)
 #' @export
 sq <- function(x) {
-  if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
+  if(!('RasterLayer' %in% class(x)) & !('matrix' %in% class(x))) {stop('x must be a raster or matrix.')}
 
-  if (class(x) == 'RasterLayer') {
+  if ('RasterLayer' %in% class(x)) {
     z <- getValues(x)
   } else {
     z <- x
