@@ -217,14 +217,14 @@ texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE
     # make and start cluster
     try(stopCluster(cl), silent = TRUE)
     cl <- makeCluster(ncores, type = 'SOCK')
-    doSNOW::registerDoSNOW(cl)
-    snow::clusterExport(cl = cl, list = list('ext_mat', 'coords', 'size',
+    # doSNOW::registerDoSNOW(cl)
+    parallel::clusterExport(cl = cl, list = list('ext_mat', 'coords', 'size',
                                              'window_type',
                                              'rownum', 'colnum',
                                              'new_pixlist', 'metric', 'input_args'),
                         envir = environment())
     # for each list in new_pixlist, run lapply
-    result <- snow::parLapply(cl, new_pixlist, fun = function(l) {
+    result <- parallel::parLapply(cl, new_pixlist, fun = function(l) {
       lapply(l, FUN = function(i) {geodiv::window_metric(x = ext_mat, i = i, window_type = window_type,
                                                  size = size,
                                                  rownum = rownum,
