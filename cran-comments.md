@@ -19,9 +19,5 @@ There were no ERRORs or WARNINGS.
 
 This is the initial submission of this package.
 
-Using the devtools::check_win_devel() function, the package
-returns errors. However, I am unable to replicate these errors
-on any system, with any configuration of R. 
-
 ## Downstream dependencies
 There are currently no downstream dependencies for this package.
