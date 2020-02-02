@@ -1,7 +1,7 @@
 ---
 title: "cran-comments.md"
 author: "Annie C. Smith"
-date: "January 21, 2020"
+date: "February 1, 2020"
 output: html_document
 ---
 
@@ -15,9 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 * local Windows 10, R development (4.0.0)
 
 ## R CMD check results
-There were no ERRORs or WARNINGS.
-
-This is the initial submission of this package.
+There were no ERRORs, WARNINGS, or NOTES.
 
 ## Downstream dependencies
 There are currently no downstream dependencies for this package.
