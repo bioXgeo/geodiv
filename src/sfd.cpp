@@ -55,7 +55,6 @@ double sfd_(NumericMatrix mat){
   int begin_col = 1;
   int rowmax =  mat.nrow();
   int colmax = mat.ncol();
-  double floor (double);
   double area[25], resolution[25];
   double crossr;
   /* normalize matrix values */
@@ -90,10 +89,10 @@ double sfd_(NumericMatrix mat){
   n /= 2;
   steps--;
   /* Calculate begin and end rows & cols for processing */
-  slop = floor((rowmax - n) / 2.);
+  slop = std::floor((rowmax - n) / 2.);
   begin_row = slop + 1;
   int end_row = n + slop + 1;
-  slop = floor((colmax - n) / 2.);
+  slop = std::floor((colmax - n) / 2.);
   begin_col = slop + 1;
   int end_col = n + slop + 1;
   /* compute the fractal dimension for each step out from center */
