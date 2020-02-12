@@ -9,17 +9,13 @@ Description: Methods for calculating gradient surface metrics for
 Depends: R (>= 3.5)
 Imports: 
     dplyr (>= 0.7.8),
-    phonTools (>= 0.2-2.1),
     pracma (>= 2.2.2),
     raster (>= 2.8-4),
-    rgdal (>= 1.4),
     spatial (>= 7.3-11),
-    spatstat (>= 1.57-1),
     tibble (>= 1.4.2),
     e1071 (>= 1.7-0),
     sp (>= 1.3-1),
-    rgeos (>= 0.4-3),
-    parallel (>= 3.6.0),
+    parallel (>= 3.5.0),
     sf (>= 0.7-4),
     zoo (>= 1.8-5),
     Rcpp (>= 1.0.1)

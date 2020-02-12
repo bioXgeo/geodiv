@@ -115,7 +115,7 @@ texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE
   # reset size so it's a common variable (always number pixels)
   if (in_meters == TRUE) {
     # convert to new proj
-    tempproj <- projectRaster(x, crs = sp::CRS(sf::st_crs(epsg_proj)$proj4string))
+    tempproj <- raster::projectRaster(x, crs = sp::CRS(sf::st_crs(epsg_proj)$proj4string))
 
 
     # get equivalent # pixels of size
@@ -131,8 +131,8 @@ texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE
 
   # convert to new proj
   if (st_crs(x)$proj4string != st_crs(epsg_proj)$proj4string) {
-    projx <- projectRaster(ext_x, crs = sp::CRS(sf::st_crs(epsg_proj)$proj4string))
-    noext_projx <- projectRaster(from = dummy_ext_x, to = projx)
+    projx <- raster::projectRaster(ext_x, crs = sp::CRS(sf::st_crs(epsg_proj)$proj4string))
+    noext_projx <- raster::projectRaster(from = dummy_ext_x, to = projx)
   } else {
     projx <- ext_x
     noext_projx <- dummy_ext_x

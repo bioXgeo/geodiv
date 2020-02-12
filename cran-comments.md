@@ -17,7 +17,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ## R CMD check results
 There were no ERRORs, WARNINGS, or NOTES.
 
-This update fixes an installation bug brought to my attention by Brian Ripley.
+This update fixes several installation bugs.
 
 ## Downstream dependencies
 There are currently no downstream dependencies for this package.
