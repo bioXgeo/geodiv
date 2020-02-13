@@ -1,7 +1,7 @@
 ---
 title: "NEWS.md"
 author: "Annie C. Smith"
-date: "February 13, 2020"
+date: "February 1, 2020"
 output: html_document
 ---
 
@@ -15,4 +15,3 @@ Initial release of geodiv to CRAN.
 ## geodiv 0.1.1
 
 Updated sfd.cpp to fix an installation issue. Changed to use 'std::floor()' instead of 'double floor(double).'
-Decreased version requirement for parallel.
