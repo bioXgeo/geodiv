@@ -131,7 +131,7 @@ find_flat <- function(x, perc = 0.4) {
   means <- slopemeans(slopes) # calculate averages for each 40% segment
 
   # x value of start of 40% section with smallest decline
-  slope_min <- means[means$slope == min(means$slope),]
+  slope_min <- means[means$slope == min(means$slope),][1,] # if more than one match with minimum, grab 1st (earliest)
 
   # calculate least-squares line for 40% of curve with smallest decline (lowest slope)
   lm_data <- data.frame(x = xval[xval >= slope_min$xstart & xval <= slope_min$xend],
