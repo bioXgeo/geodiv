@@ -218,7 +218,7 @@ texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE
     try(stopCluster(cl), silent = TRUE)
     cl <- makeCluster(ncores, type = 'SOCK')
     # doSNOW::registerDoSNOW(cl)
-    parallel::clusterExport(cl = cl, list = list('ext_mat', 'coords', 'size',
+    parallel::clusterExport(cl = cl, list('ext_mat', 'coords', 'size',
                                              'window_type',
                                              'rownum', 'colnum',
                                              'new_pixlist', 'metric', 'input_args'),
