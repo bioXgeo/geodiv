@@ -127,7 +127,7 @@ find_flat <- function(x, perc = 0.4) {
   f <- bearing_area(x)
   
   if (is.na(f)) {
-    return (list(rep(NA, 6)))
+    return (list(NA, NA, NA, NA, NA, NA))
   } else if (!is.na(f)) {
     xval <- environment(f)$y
     yval <- (1 - environment(f)$x)
