@@ -36,7 +36,7 @@ bearing_area <- function(x) {
   if (sum(!is.na(z) > 0)) {
       f <- stats::ecdf(1 - z)
   } else {
-    cat('No non-NA values.')
+    cat('No non-NA values.', '\n', sep = '')
     f <- NA
   }
   
@@ -74,7 +74,7 @@ plot_ba_curve <- function(x, divisions = FALSE) {
 
   if (is.na(f)) {
     cat('Cannot plot bearing area curve. All values are NA.')
-  } else {
+  } else if (!is.na(f)) {
       xval <- environment(f)$y
       yval <- (1 - environment(f)$x)
 
@@ -128,7 +128,7 @@ find_flat <- function(x, perc = 0.4) {
   
   if (is.na(f)) {
     return (list(rep(NA, 6)))
-  } else {
+  } else if (!is.na(f)) {
     xval <- environment(f)$y
     yval <- (1 - environment(f)$x)
 
@@ -163,7 +163,7 @@ find_flat <- function(x, perc = 0.4) {
     Smr2 <- f(1 - ls_int_low)
 
     return(list(ls_line, pred_data, ls_int_high, ls_int_low, Smr1, Smr2))
-   }
+  }
 }
 
 #' Value of the Bearing Area Curve at a Specified Value
@@ -193,7 +193,7 @@ height_ba <- function(x, xval) {
 
   if (is.na(f)) {
     return(NA)
-  } else {
+  } else if (!is.na(f)) {
     val <- (1 - stats::quantile(f, probs = c(xval))[[1]])
     return(val)
   }
@@ -263,7 +263,7 @@ sbi <- function(x) {
 
   if (is.na(z05)) {
     return(NA)
-  } else {
+  } else if (!is.na(z05)){
     val <- Sq / z05
     return(val)
   }
@@ -293,7 +293,7 @@ svi <- function(x) {
 
   if (is.na(f)) {
     return(NA)
-  } else {
+  } else if (!is.na(f)) {
     val <- area_above(f = f, b = 1, a = 0.8, n = 500)
     return(val)
   }
@@ -323,7 +323,7 @@ sci <- function(x) {
 
   if (is.na(f)) {
     return(NA)
-  } else {
+  } else if (!is.na(f)) {
     core_above <- area_above(f = f, b = 1, a = 0.05, n = 1000)
 
     # remove the valley zone to get the core zone
@@ -391,7 +391,7 @@ svk <- function(x) {
 
   if (is.na(f)) {
     return(NA)
-  } else {
+  } else if (!is.na(f)) {
     # find the flattest 40% of the bearing area curve
     line_info <- find_flat(x, perc = 0.4)
 
@@ -429,7 +429,7 @@ spk <- function(x) {
 
   if (is.na(f)) {
     return(NA)
-  } else {
+  } else if (!is.na(f)) {
     # find the flattest 40% of bearing area curve
     line_info <- find_flat(x, perc = 0.4)
 
