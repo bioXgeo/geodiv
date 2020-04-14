@@ -33,8 +33,13 @@ bearing_area <- function(x) {
   s <- stats::sd(z)
   zbar <- mean(z, na.rm = TRUE)
 
-  f <- stats::ecdf(1 - z)
-
+  if (sum(!is.na(z) > 0) {
+      f <- stats::ecdf(1 - z)
+  } else {
+    cat('No non-NA values.')
+    f <- NA
+  }
+  
   return(f)
 }
 
