@@ -72,20 +72,24 @@ plot_ba_curve <- function(x, divisions = FALSE) {
 
   f <- bearing_area(x)
 
-  xval <- environment(f)$y
-  yval <- (1 - environment(f)$x)
+  if (is.na(f)) {
+    cat('Cannot plot bearing area curve. All values are NA.')
+  } else {
+      xval <- environment(f)$y
+      yval <- (1 - environment(f)$x)
 
-  plot(yval ~ xval)
+      plot(yval ~ xval)
 
-  if (divisions == TRUE) {
-    line_fit <- find_flat(x, perc = 0.4)
+      if (divisions == TRUE) {
+        line_fit <- find_flat(x, perc = 0.4)
 
-    graphics::abline(line_fit[[1]]$coefficients[[1]], line_fit[[1]]$coefficients[[2]], col = 'blue')
-    graphics::abline(h = line_fit[[3]], col = 'red')
-    graphics::abline(h = line_fit[[4]], col = 'red')
-    graphics::abline(v = line_fit[[5]], col = 'green')
-    graphics::abline(v = line_fit[[6]], col = 'green')
-  }
+        graphics::abline(line_fit[[1]]$coefficients[[1]], line_fit[[1]]$coefficients[[2]], col = 'blue')
+        graphics::abline(h = line_fit[[3]], col = 'red')
+        graphics::abline(h = line_fit[[4]], col = 'red')
+        graphics::abline(v = line_fit[[5]], col = 'green')
+        graphics::abline(v = line_fit[[6]], col = 'green')
+      }
+   }
 }
 
 #' Finds the Flattest Part of the Bearing Area Curve
@@ -121,41 +125,45 @@ find_flat <- function(x, perc = 0.4) {
   if(perc > 1 | perc < 0) {stop('perc must be between 0 and 1.')}
 
   f <- bearing_area(x)
+  
+  if (is.na(f)) {
+    return (list(rep(NA, 6)))
+  } else {
+    xval <- environment(f)$y
+    yval <- (1 - environment(f)$x)
 
-  xval <- environment(f)$y
-  yval <- (1 - environment(f)$x)
+    # find 40% of curve with least decline
+    # use symmetric difference quotient to estimate the derivative at evenly spaced points
+    # then find 40% consecutive section with lowest mean slope
+    even_x <- seq(0, 1, length.out = 10000)
+    even_y <- (1 - stats::quantile(f, probs = even_x))
+    forty_length <- perc * length(even_x)
+    h <- 0.001
+    slopes <- slopecalc(even_x, h, f = f) # calculate slope at every point
+    means <- slopemeans(slopes) # calculate averages for each 40% segment
 
-  # find 40% of curve with least decline
-  # use symmetric difference quotient to estimate the derivative at evenly spaced points
-  # then find 40% consecutive section with lowest mean slope
-  even_x <- seq(0, 1, length.out = 10000)
-  even_y <- (1 - stats::quantile(f, probs = even_x))
-  forty_length <- perc * length(even_x)
-  h <- 0.001
-  slopes <- slopecalc(even_x, h, f = f) # calculate slope at every point
-  means <- slopemeans(slopes) # calculate averages for each 40% segment
+    # x value of start of 40% section with smallest decline
+    slope_min <- means[means$slope == min(means$slope),][1,] # if more than one match with minimum, grab 1st (earliest)
 
-  # x value of start of 40% section with smallest decline
-  slope_min <- means[means$slope == min(means$slope),][1,] # if more than one match with minimum, grab 1st (earliest)
-
-  # calculate least-squares line for 40% of curve with smallest decline (lowest slope)
-  lm_data <- data.frame(x = xval[xval >= slope_min$xstart & xval <= slope_min$xend],
+    # calculate least-squares line for 40% of curve with smallest decline (lowest slope)
+    lm_data <- data.frame(x = xval[xval >= slope_min$xstart & xval <= slope_min$xend],
                         y = yval[xval >= slope_min$xstart & xval <= slope_min$xend])
-  ls_line <- stats::lm(y ~ x, data = lm_data)
+    ls_line <- stats::lm(y ~ x, data = lm_data)
 
-  # get value of ls line between 0 and 1
-  pred_data <- tibble::remove_rownames(data.frame(x = even_x, y = even_y))
-  pred_data$y <- stats::predict(ls_line, newdata = pred_data)
+    # get value of ls line between 0 and 1
+    pred_data <- tibble::remove_rownames(data.frame(x = even_x, y = even_y))
+    pred_data$y <- stats::predict(ls_line, newdata = pred_data)
 
-  # what is the ls line y-value at x = 0, x = 1?
-  ls_int_high <- pred_data$y[pred_data$x == 0]
-  ls_int_low <- pred_data$y[pred_data$x == 1]
+    # what is the ls line y-value at x = 0, x = 1?
+    ls_int_high <- pred_data$y[pred_data$x == 0]
+    ls_int_low <- pred_data$y[pred_data$x == 1]
 
-  # Smr1/Smr2 = x values that correspond to cdf y values at ls_int_high/low
-  Smr1 <- f(1 - ls_int_high)
-  Smr2 <- f(1 - ls_int_low)
+    # Smr1/Smr2 = x values that correspond to cdf y values at ls_int_high/low
+    Smr1 <- f(1 - ls_int_high)
+    Smr2 <- f(1 - ls_int_low)
 
-  return(list(ls_line, pred_data, ls_int_high, ls_int_low, Smr1, Smr2))
+    return(list(ls_line, pred_data, ls_int_high, ls_int_low, Smr1, Smr2))
+   }
 }
 
 #' Value of the Bearing Area Curve at a Specified Value
@@ -183,9 +191,12 @@ height_ba <- function(x, xval) {
 
   f <- bearing_area(x)
 
-  val <- (1 - stats::quantile(f, probs = c(xval))[[1]])
-
-  return(val)
+  if (is.na(f)) {
+    return(NA)
+  } else {
+    val <- (1 - stats::quantile(f, probs = c(xval))[[1]])
+    return(val)
+  }
 }
 
 #' Height Intervals of the Bearing Area Curve
@@ -250,9 +261,12 @@ sbi <- function(x) {
   Sq <- sq(x)
   z05 <- height_ba(x, 0.05)
 
-  val <- Sq / z05
-
-  return(val)
+  if (is.na(z05)) {
+    return(NA)
+  } else {
+    val <- Sq / z05
+    return(val)
+  }
 }
 
 #' Valley Fluid Retention Index
@@ -277,9 +291,12 @@ svi <- function(x) {
 
   f <- bearing_area(x)
 
-  val <- area_above(f = f, b = 1, a = 0.8, n = 500)
-
-  return(val)
+  if (is.na(f)) {
+    return(NA)
+  } else {
+    val <- area_above(f = f, b = 1, a = 0.8, n = 500)
+    return(val)
+  }
 }
 
 #' Core Fluid Retention Index
@@ -304,13 +321,17 @@ sci <- function(x) {
 
   f <- bearing_area(x)
 
-  core_above <- area_above(f = f, b = 1, a = 0.05, n = 1000)
+  if (is.na(f)) {
+    return(NA)
+  } else {
+    core_above <- area_above(f = f, b = 1, a = 0.05, n = 1000)
 
-  # remove the valley zone to get the core zone
-  Svi <- svi(x)
-  val <- core_above - Svi
+    # remove the valley zone to get the core zone
+    Svi <- svi(x)
+    val <- core_above - Svi
 
-  return(val)
+    return(val)
+  }
 }
 
 #' Core Roughness Depth
@@ -368,14 +389,18 @@ svk <- function(x) {
   # find the bearing area curve
   f <- bearing_area(x)
 
-  # find the flattest 40% of the bearing area curve
-  line_info <- find_flat(x, perc = 0.4)
+  if (is.na(f)) {
+    return(NA)
+  } else {
+    # find the flattest 40% of the bearing area curve
+    line_info <- find_flat(x, perc = 0.4)
 
-  smr2 <- line_info[[6]]
+    smr2 <- line_info[[6]]
 
-  val <- abs((1 - stats::quantile(f, probs = 1)) - (1 - stats::quantile(f, probs = smr2)))[[1]]
+    val <- abs((1 - stats::quantile(f, probs = 1)) - (1 - stats::quantile(f, probs = smr2)))[[1]]
 
-  return(val)
+    return(val)
+   }
 }
 
 #' Reduced Peak Height
@@ -402,12 +427,16 @@ spk <- function(x) {
   # find the bearing area curve
   f <- bearing_area(x)
 
-  # find the flattest 40% of bearing area curve
-  line_info <- find_flat(x, perc = 0.4)
+  if (is.na(f)) {
+    return(NA)
+  } else {
+    # find the flattest 40% of bearing area curve
+    line_info <- find_flat(x, perc = 0.4)
 
-  smr1 <- line_info[[5]]
+    smr1 <- line_info[[5]]
 
-  val <- abs((1 - stats::quantile(f, probs = 0)) - (1 - stats::quantile(f, probs = smr1)))[[1]]
+    val <- abs((1 - stats::quantile(f, probs = 0)) - (1 - stats::quantile(f, probs = smr1)))[[1]]
 
-  return(val)
+    return(val)
+  }
 }
