@@ -148,21 +148,25 @@ find_flat <- function(x, perc = 0.4) {
     # calculate least-squares line for 40% of curve with smallest decline (lowest slope)
     lm_data <- data.frame(x = xval[xval >= slope_min$xstart & xval <= slope_min$xend],
                         y = yval[xval >= slope_min$xstart & xval <= slope_min$xend])
-    ls_line <- stats::lm(y ~ x, data = lm_data)
+    if (nrow(lm_data) < 1) {
+      return(NA)
+    } else if (nrow(lm_data) >= 1) {
+      ls_line <- stats::lm(y ~ x, data = lm_data)
 
-    # get value of ls line between 0 and 1
-    pred_data <- tibble::remove_rownames(data.frame(x = even_x, y = even_y))
-    pred_data$y <- stats::predict(ls_line, newdata = pred_data)
+      # get value of ls line between 0 and 1
+      pred_data <- tibble::remove_rownames(data.frame(x = even_x, y = even_y))
+      pred_data$y <- stats::predict(ls_line, newdata = pred_data)
 
-    # what is the ls line y-value at x = 0, x = 1?
-    ls_int_high <- pred_data$y[pred_data$x == 0]
-    ls_int_low <- pred_data$y[pred_data$x == 1]
+      # what is the ls line y-value at x = 0, x = 1?
+      ls_int_high <- pred_data$y[pred_data$x == 0]
+      ls_int_low <- pred_data$y[pred_data$x == 1]
 
-    # Smr1/Smr2 = x values that correspond to cdf y values at ls_int_high/low
-    Smr1 <- f(1 - ls_int_high)
-    Smr2 <- f(1 - ls_int_low)
+      # Smr1/Smr2 = x values that correspond to cdf y values at ls_int_high/low
+      Smr1 <- f(1 - ls_int_high)
+      Smr2 <- f(1 - ls_int_low)
 
-    return(list(ls_line, pred_data, ls_int_high, ls_int_low, Smr1, Smr2))
+      return(list(ls_line, pred_data, ls_int_high, ls_int_low, Smr1, Smr2))
+    }
   }
 }
 
