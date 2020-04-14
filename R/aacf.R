@@ -53,52 +53,61 @@ aacf <- function(x) {
 
     potentials$na <- sapply(seq(1, nrow(potentials)), FUN = function(i) {
       xmin <-
-        newrast <- crop(x, extent(potentials$xmin[i], potentials$xmax[i], potentials$ymin[i], potentials$ymax[i]))
+      newrast <- crop(x, extent(potentials$xmin[i], potentials$xmax[i], potentials$ymin[i], potentials$ymax[i]))
       return(sum(is.na(getValues(newrast))))
     })
 
     max_dim <- potentials[max(which(potentials$na <= 0)),]
 
-    x <- crop(x, extent(max_dim$xmin, max_dim$xmax, max_dim$ymin, max_dim$ymax))
+    if (sum(is.na(max_dim$xmin)) != 0) {
+      zmat <- zmat
+    } else if (sum(is.na(max_dim$xmin)) == 0) {
+      x <- crop(x, extent(max_dim$xmin, max_dim$xmax, max_dim$ymin, max_dim$ymax))
 
-    # get raster dimensions
-    M <- ncol(x)
-    N <- nrow(x)
+      # get raster dimensions
+      M <- ncol(x)
+      N <- nrow(x)
 
-    # get matrix of values
-    zmat <- matrix(getValues(x), ncol = M, nrow = N, byrow = TRUE)
+      # get matrix of values
+      zmat <- matrix(getValues(x), ncol = M, nrow = N, byrow = TRUE)
+    }
   }
+  
+  if (sum(is.na(zmat)) == length(zmat)) {
+    return(NA)
+  } else if (sum(is.na(zmat)) != length(zmat)) {
 
-  # create windows to prevent leakage
-  wc <- e1071::hanning.window(M)
-  wr <- e1071::hanning.window(N)
+    # create windows to prevent leakage
+    wc <- e1071::hanning.window(M)
+    wr <- e1071::hanning.window(N)
 
-  # create matrix of weights
-  w <- pracma::meshgrid(wc, wr)
-  w <- w[[1]] * w[[2]]
+    # create matrix of weights
+    w <- pracma::meshgrid(wc, wr)
+    w <- w[[1]] * w[[2]]
 
-  # apply window weights
-  zmatw <- zmat * w
+    # apply window weights
+    zmatw <- zmat * w
 
-  # perform Fourier transform
-  ft <- stats::fft(zmatw)
+    # perform Fourier transform
+    ft <- stats::fft(zmatw)
 
-  # calculate power spectrum
-  ps <- (abs(ft) ^ 2) / (M * N)
+    # calculate power spectrum
+    ps <- (abs(ft) ^ 2) / (M * N)
 
-  # autocorrelation function
-  af <- base::as.matrix(base::Re(stats::fft(ps, inverse = TRUE) / (M * N)))
-  af_shift <- geodiv::fftshift(af) # this should be symmetric!
+    # autocorrelation function
+    af <- base::as.matrix(base::Re(stats::fft(ps, inverse = TRUE) / (M * N)))
+    af_shift <- geodiv::fftshift(af) # this should be symmetric!
 
-  # normalize to max 1
-  af_norm <- af_shift / max(as.numeric(af_shift), na.rm = TRUE)
+    # normalize to max 1
+    af_norm <- af_shift / max(as.numeric(af_shift), na.rm = TRUE)
 
-  if (data_type == 'RasterLayer') {
-    # set values of new raster
-    af_img <- setValues(x, af_norm)
-    return(af_img)
-  } else {
-    return(af_norm)
+    if (data_type == 'RasterLayer') {
+      # set values of new raster
+      af_img <- setValues(x, af_norm)
+      return(af_img)
+    } else {
+      return(af_norm)
+    }
   }
 }
 
@@ -145,78 +154,83 @@ scl <- function(x, threshold = c(0.20, 1 / exp(1)), plot = FALSE) {
 
   # get aacf img
   aacfimg <- aacf(x)
+  
+  if (is.na(aacfimg)) {
+    return(c(NA, NA, NA, NA))
+  } else if (!is.na(aacfimg)) {
 
-  data_type <- if(class(x) == 'matrix') {'matrix'} else {'RasterLayer'}
+    data_type <- if(class(x) == 'matrix') {'matrix'} else {'RasterLayer'}
 
-  if (class(aacfimg) == 'RasterLayer') {
-    # take amplitude image, cut in half (y direction)
-    half_dist <- (ymax(aacfimg) - ymin(aacfimg)) / 2
-    ymin <- ymax(aacfimg) - half_dist
-    aacfimg <- crop(aacfimg, c(xmin(aacfimg), xmax(aacfimg), ymin, ymax(aacfimg)))
+    if (class(aacfimg) == 'RasterLayer') {
+      # take amplitude image, cut in half (y direction)
+      half_dist <- (ymax(aacfimg) - ymin(aacfimg)) / 2
+      ymin <- ymax(aacfimg) - half_dist
+      aacfimg <- crop(aacfimg, c(xmin(aacfimg), xmax(aacfimg), ymin, ymax(aacfimg)))
 
-    # get origin of image (actually bottom center)
-    origin <- c(mean(sp::coordinates(aacfimg)[, 1]), ymin(aacfimg))
+      # get origin of image (actually bottom center)
+      origin <- c(mean(sp::coordinates(aacfimg)[, 1]), ymin(aacfimg))
 
-  } else {
-    # take amplitude image, cut in half (y direction)
-    half_dist <- nrow(aacfimg) / 2
-    ymin <- round(half_dist)
-    aacfimg <- aacfimg[0:ymin, 0:ncol(aacfimg)]
+    } else {
+      # take amplitude image, cut in half (y direction)
+      half_dist <- nrow(aacfimg) / 2
+      ymin <- round(half_dist)
+      aacfimg <- aacfimg[0:ymin, 0:ncol(aacfimg)]
 
-    # get origin of image (actually bottom center)
-    origin <- c(nrow(aacfimg), round(ncol(aacfimg) / 2))
-  }
-
-  ### line calculations are taken from the plotrix function draw.radial.line
-  # calculate rays extending from origin
-  if (plot == TRUE) {
-    if (data_type == 'matrix') {
-      print("cannot draw lines for object of class 'matrix.'")
+      # get origin of image (actually bottom center)
+      origin <- c(nrow(aacfimg), round(ncol(aacfimg) / 2))
     }
-    M <- 180
-    j <- seq(0, (M - 1))
-    alpha <- (pi * j) / M # angles
-    px <- c(0, half_dist) # line length
-    linex <- unlist(lapply(seq(1, length(alpha)), function(x) origin[1] + px * cos(alpha[x])))
-    liney <- unlist(lapply(seq(1, length(alpha)), function(x) origin[2] + px * sin(alpha[x])))
-    linelist <- lapply(seq(1, length(linex), 2),
-                      FUN = function(i) sp::Lines(sp::Line(cbind(linex[i:(i + 1)], liney[i:(i + 1)])),
-                                               ID = paste('l', i, sep = '')))
-    lines <- sp::SpatialLines(linelist, proj4string = sp::CRS(sp::proj4string(aacfimg)))
 
-    # plot and calculate amplitude sums along rays
-    plot(aacfimg)
-    lines(lines)
+    ### line calculations are taken from the plotrix function draw.radial.line
+    # calculate rays extending from origin
+    if (plot == TRUE) {
+      if (data_type == 'matrix') {
+        print("cannot draw lines for object of class 'matrix.'")
+      }
+      M <- 180
+      j <- seq(0, (M - 1))
+      alpha <- (pi * j) / M # angles
+      px <- c(0, half_dist) # line length
+      linex <- unlist(lapply(seq(1, length(alpha)), function(x) origin[1] + px * cos(alpha[x])))
+      liney <- unlist(lapply(seq(1, length(alpha)), function(x) origin[2] + px * sin(alpha[x])))
+      linelist <- lapply(seq(1, length(linex), 2),
+                        FUN = function(i) sp::Lines(sp::Line(cbind(linex[i:(i + 1)], liney[i:(i + 1)])),
+                                                ID = paste('l', i, sep = '')))
+      lines <- sp::SpatialLines(linelist, proj4string = sp::CRS(sp::proj4string(aacfimg)))
+
+      # plot and calculate amplitude sums along rays
+      plot(aacfimg)
+      lines(lines)
+    }
+
+    # convert matrix to raster if necessary
+    if (data_type == 'matrix') {
+      aacf_rast <- raster(aacfimg)
+      extent(aacf_rast) <- c(0, ncol(aacfimg), 0, nrow(aacfimg))
+      crs(aacf_rast) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+      aacfimg <- aacf_rast
+    }
+
+    # calculate distances from center to all other points
+    dist_rast <- aacfimg
+    values(dist_rast) <- NA
+    center <- ceiling(dim(x) / 2)
+    nce <- ifelse(ncol(aacfimg) / 2 == round(ncol(aacfimg) / 2), 1, 0)
+    dist_rast[nrow(aacfimg), center[2] + nce] <- 1
+    dist_rast <- distance(dist_rast)
+
+    # each line has length = half_dist, with each point approx. 1 pixel apart
+    fast_dists <- list()
+    for (i in 1:length(threshold)) {
+      fast_dists[[i]] <- suppressWarnings(.mindist(threshold[i], aacfimg, dist_rast))
+    }
+
+    slow_dists <- list()
+    for (i in 1:length(threshold)) {
+      slow_dists[[i]] <- suppressWarnings(.maxdist(threshold[i], aacfimg, dist_rast))
+    }
+
+    return(c(unlist(fast_dists), unlist(slow_dists)))
   }
-
-  # convert matrix to raster if necessary
-  if (data_type == 'matrix') {
-    aacf_rast <- raster(aacfimg)
-    extent(aacf_rast) <- c(0, ncol(aacfimg), 0, nrow(aacfimg))
-    crs(aacf_rast) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
-    aacfimg <- aacf_rast
-  }
-
-  # calculate distances from center to all other points
-  dist_rast <- aacfimg
-  values(dist_rast) <- NA
-  center <- ceiling(dim(x) / 2)
-  nce <- ifelse(ncol(aacfimg) / 2 == round(ncol(aacfimg) / 2), 1, 0)
-  dist_rast[nrow(aacfimg), center[2] + nce] <- 1
-  dist_rast <- distance(dist_rast)
-
-  # each line has length = half_dist, with each point approx. 1 pixel apart
-  fast_dists <- list()
-  for (i in 1:length(threshold)) {
-    fast_dists[[i]] <- suppressWarnings(.mindist(threshold[i], aacfimg, dist_rast))
-  }
-
-  slow_dists <- list()
-  for (i in 1:length(threshold)) {
-    slow_dists[[i]] <- suppressWarnings(.maxdist(threshold[i], aacfimg, dist_rast))
-  }
-
-  return(c(unlist(fast_dists), unlist(slow_dists)))
 }
 
 #' Estimate Minimum Correlation Length
