@@ -149,7 +149,7 @@ find_flat <- function(x, perc = 0.4) {
     lm_data <- data.frame(x = xval[xval >= slope_min$xstart & xval <= slope_min$xend],
                         y = yval[xval >= slope_min$xstart & xval <= slope_min$xend])
     if (nrow(lm_data) < 1) {
-      return(NA)
+      return(list(NA, NA, NA, NA, NA, NA))
     } else if (nrow(lm_data) >= 1) {
       ls_line <- stats::lm(y ~ x, data = lm_data)
 
