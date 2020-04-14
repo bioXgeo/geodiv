@@ -64,14 +64,18 @@ std <- function(x, plot = FALSE) {
 
     max_dim <- potentials[max(which(potentials$na <= 0)),]
 
-    x <- crop(x, extent(max_dim$xmin, max_dim$xmax, max_dim$ymin, max_dim$ymax))
+    if (sum(is.na(max_dim$xmin)) != 0) {
+      zmat <- zmat
+    } else if (sum(is.na(max_dim$xmin)) == 0) {
+      x <- crop(x, extent(max_dim$xmin, max_dim$xmax, max_dim$ymin, max_dim$ymax))
 
-    # get raster dimensions
-    M <- ncol(x)
-    N <- nrow(x)
+      # get raster dimensions
+      M <- ncol(x)
+      N <- nrow(x)
 
-    # get matrix of values
-    zmat <- matrix(getValues(x), ncol = M, nrow = N, byrow = TRUE)
+      # get matrix of values
+      zmat <- matrix(getValues(x), ncol = M, nrow = N, byrow = TRUE)
+    }
   }
   
   if (sum(is.na(zmat)) == length(zmat)) {
@@ -232,14 +236,18 @@ srw <- function(x, plot = FALSE) {
 
     max_dim <- potentials[max(which(potentials$na <= 0)),]
 
-    x <- crop(x, extent(max_dim$xmin, max_dim$xmax, max_dim$ymin, max_dim$ymax))
+    if (sum(is.na(max_dim$xmin)) != 0) {
+      zmat <- zmat
+    } else if (sum(is.na(max_dim$xmin)) == 0) {
+      x <- crop(x, extent(max_dim$xmin, max_dim$xmax, max_dim$ymin, max_dim$ymax))
 
-    # get raster dimensions
-    M <- ncol(x)
-    N <- nrow(x)
+      # get raster dimensions
+      M <- ncol(x)
+      N <- nrow(x)
 
-    # get matrix of values
-    zmat <- matrix(getValues(x), ncol = M, nrow = N, byrow = TRUE)
+      # get matrix of values
+      zmat <- matrix(getValues(x), ncol = M, nrow = N, byrow = TRUE)
+    }
   }
   
   if (sum(is.na(zmat)) == length(zmat)) {
