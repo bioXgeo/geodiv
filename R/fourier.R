@@ -334,6 +334,16 @@ srw <- function(x, plot = FALSE) {
     shw_ind <- vals - half_val
     Shw <- radius[which(abs(shw_ind) == min(abs(shw_ind), na.rm = TRUE))]
 
+    # break for tiny matrices that this can't be calculated for
+    if (length(Srw) > 1) {
+      Srw <- NA
+    }
+    if (length(Srwi) > 1) {
+      Srwi <- NA
+    }
+    if (length(Shw) > 1) {
+      Shw <- NA
+    }
     return(c(Srw, Srwi, Shw))
   }
 }
