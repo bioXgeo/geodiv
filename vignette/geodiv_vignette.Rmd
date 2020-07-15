@@ -84,7 +84,7 @@ Let's also plot the raw satellite image (as opposed to the NDVI extracted from t
 # Plot actual satellite image.
 lon <- mean(coordinates(orforest)[,1], na.rm = TRUE)
 lat <- mean(coordinates(orforest)[,2], na.rm = TRUE)
-api_key <- 'AIzaSyCl4iI4N35PgbbHW2lZxt0DgjppbmiPizc'
+api_key <- # ADD API KEY HERE -- do not make public
 register_google(api_key)
 img <- get_map(c(lon, lat), zoom = 13, maptype = 'satellite', source = "google")
 bbpoly <- data.frame(x = c(-122.9, -122.9, -123.00002, -123.00002), y = c(43.00002, 43.1, 43.1, 43.00002))
