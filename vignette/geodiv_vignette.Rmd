@@ -113,7 +113,7 @@ lat <- mean(coordinates(orforest)[,2], na.rm = TRUE)
 api_key <- NA # ADD AN API KEY HERE
 ```
 ```{r private API key, echo = FALSE}
-api_key <- 'AIzaSyBvwV6yxkyvD-rlb90JyZ5xxnJYcNQIdKM'# PRIVATE API KEY FOR VIGNETTE
+api_key <- # PRIVATE API KEY FOR VIGNETTE
 ```
 ```{r remainder of mapping, echo = TRUE}
 register_google(api_key)
