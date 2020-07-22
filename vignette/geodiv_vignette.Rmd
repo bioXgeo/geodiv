@@ -2,7 +2,7 @@
 title: "Geodiv Vignette"
 author: Sydne Record, Annie Smith, Phoebe Zarnetske, Kyla Dahlin, Jennifer Costanza,
   and Adam Wilson
-date: "July 9, 2020"
+date: "July 22, 2020"
 output:
   word_document: default
   html_document:
@@ -35,7 +35,7 @@ https://cran.r-project.org/bin/macosx/tools/
 
 To begin, let's load the necessary packages for the examples that follow.
 
-```{r, echo=FALSE, messages=FALSE}
+```{r package code for show, eval = FALSE}
 library(geodiv)
 library(raster)
 library(mapdata)
@@ -51,6 +51,27 @@ library(corrplot)
 library(gridExtra)
 library(cowplot)
 library(factoextra)
+library(cluster)
+```
+
+```{r run packages, results='asis', echo=FALSE, include=FALSE,}
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE)
+library(geodiv)
+library(raster)
+library(mapdata)
+library(maptools)
+library(rgeos)
+library(ggplot2)
+library(tidyverse)
+library(parallel)
+library(sf)
+library(rasterVis)
+library(ggmap)
+library(corrplot)
+library(gridExtra)
+library(cowplot)
+library(factoextra)
+library(cluster)
 ```
 # Example 1: Simple workflow with Landsat NDVI
 
@@ -65,6 +86,7 @@ orforest
 ```
 
 Let's first plot the data without any trends removed.
+
 ```{r, echo=TRUE}
 # plot without trend removed
 eviCols <- colorRampPalette(c('lightyellow1', 'darkgreen'))(100)
@@ -72,19 +94,28 @@ eviTheme <- rasterTheme(region = eviCols)
 orig_ndvi <- levelplot(orforest, margin = F, par.settings = eviTheme, xlab = 'Longitude', ylab = 'Latitude', main='orforest original')
 orig_ndvi
 ```
+
 Use the 'remove_plane' function of geodiv to remove the best fit polynomial plane from the image.
+
 ```{r, echo=TRUE}
 # plot with trend removed 
 orfor_rem <- remove_plane(orforest)
 orig_rem_plot <- levelplot(orfor_rem, margin = F, par.settings = eviTheme, xlab = 'Longitude', ylab = 'Latitude', main='orforest trend removed')
 orig_rem_plot
 ```
+
 Let's also plot the raw satellite image (as opposed to the NDVI extracted from the Landsat image).
+
 ```{r, echo=TRUE}
 # Plot actual satellite image.
 lon <- mean(coordinates(orforest)[,1], na.rm = TRUE)
 lat <- mean(coordinates(orforest)[,2], na.rm = TRUE)
-api_key <- # ADD API KEY HERE -- do not make public
+api_key <- NA # ADD AN API KEY HERE
+```
+```{r private API key, echo = FALSE}
+api_key <- 'AIzaSyBvwV6yxkyvD-rlb90JyZ5xxnJYcNQIdKM'# PRIVATE API KEY FOR VIGNETTE
+```
+```{r remainder of mapping, echo = TRUE}
 register_google(api_key)
 img <- get_map(c(lon, lat), zoom = 13, maptype = 'satellite', source = "google")
 bbpoly <- data.frame(x = c(-122.9, -122.9, -123.00002, -123.00002), y = c(43.00002, 43.1, 43.1, 43.00002))
@@ -96,7 +127,7 @@ satimg <- ggmap(img) + coord_fixed(1.7) + xlab('Longitude') + ylab('Latitude') +
 plot_grid(satimg, orig_ndvi, ncol = 2, nrow = 1, scale = c(0.84, 1))
 ```
 
-###Calculate some surface gradient metrics for the orforest raster image.###
+### Calculate some surface gradient metrics for the orforest raster image.
 The 'sa' function calculates the average roughness of a surface as the absolute deviation of surface heights from the mean surface height. The 'sbi' function calculates the surface bearing index, which is the ratio of the root mean square roughness (Sq) to height at 5% of bearing area (z05). The 'std' function calculates texture direction metrics (i.e., the angle of dominating texture and the texture direction of the Fourier spectrum image calculated from the orforest image). The 'sfd' function calculates the fractal dimension of the raster (i.e., the 3D fractal dimension using the triangular prism surface method).  
 
 ```{r, echo=TRUE}
@@ -106,30 +137,28 @@ std <- std(orforest, plot = FALSE)[[1]]
 sfd <- sfd(orforest)
 ```
 
-###Generate texture images for the orforest raster image.###
+### Generate texture images for the orforest raster image.
 Note that this step can be computationally intensive, so there is an option for running the code in parallel. Also, below this chunk we provide some code to read in files that contain the output rasters of these lines of code in case it is helpful for you.
-```{r, echo=TRUE}
-#sa_img <- texture_image(orforest, window_type = 'square', size = 7, in_meters = FALSE, epsg_proj = 5070, metric = 'sa', args = NULL, parallel=FALSE)
-#sbi_img <- texture_image(orforest, window_type = 'square', size = 7, in_meters = FALSE, epsg_proj = 5070, metric = 'sbi', args = NULL)
-#std_img <- texture_image(orforest, window_type = 'square', size = 7, in_meters = FALSE, epsg_proj = 5070, metric = 'std', args = NULL)
-#sfd_img <- texture_image(orforest, window_type = 'square', size = 7, in_meters = FALSE, epsg_proj = 5070, metric = 'sfd', args = NULL)
+
+```{r, eval = FALSE}
+sa_img <- texture_image(orforest, window_type = 'square', size = 7, in_meters = FALSE, epsg_proj = 5070, metric = 'sa', args = NULL, parallel=FALSE)
+sbi_img <- texture_image(orforest, window_type = 'square', size = 7, in_meters = FALSE, epsg_proj = 5070, metric = 'sbi', args = NULL)
+std_img <- texture_image(orforest, window_type = 'square', size = 7, in_meters = FALSE, epsg_proj = 5070, metric = 'std', args = NULL)
+sfd_img <- texture_image(orforest, window_type = 'square', size = 7, in_meters = FALSE, epsg_proj = 5070, metric = 'sfd', args = NULL)
 ```
+
 Note that generating the texture images can take a while on a single processor, so we have provided the rasters generated for the following objects in case that is helpful: sa_img, sbi_img, std_img, and sfd_img. The code below reads these provided rasters into your R session. Note that you will need to ensure that the working directory for your session is set to the same directory where you have put these downloaded files if you do not run the texture image code yourself.
 
 ```{r, echo=TRUE, warning=FALSE}
 # The below line of code will need to be modified to match the directory on the user's machine that contains the vignette files if the texture_image function has not been run in completion during the user's current session.
-sa_img <- raster('C:/Users/srecord/Dropbox/NASA/working_group/geodiv/data_and_code/sa_img_450m.TIF')
-sbi_img <- raster('C:/Users/srecord/Dropbox/NASA/working_group/geodiv/data_and_code/sbi_img_450m.TIF')
-std_img <- raster('C:/Users/srecord/Dropbox/NASA/working_group/geodiv/data_and_code/std_img_450m.TIF')
-sfd_img <- raster('C:/Users/srecord/Dropbox/NASA/working_group/geodiv/data_and_code/sfd_img_450m.TIF')
+sa_img <- raster('C:/Users/lsth490/Box/Smith, Annie/papers/geodiv_paper/data/sa_img_450m.TIF')
+sbi_img <- raster('C:/Users/lsth490/Box/Smith, Annie/papers/geodiv_paper/data/sbi_img_450m.TIF')
+std_img <- raster('C:/Users/lsth490/Box/Smith, Annie/papers/geodiv_paper/data/std_img_450m.TIF')
+sfd_img <- raster('C:/Users/lsth490/Box/Smith, Annie/papers/geodiv_paper/data/sfd_img_450m.TIF')
 ```
-**Annie** each of the above lines of code generates this message: Warning message:
-In showSRID(uprojargs, format = "PROJ", multiline = "NO") :
-  Discarded datum Unknown based on GRS80 ellipsoid in CRS definition,
- but +towgs84= values preserved
-Perhaps this is what leads to the errors below. Note that I've written up the rest of the vignette for this example, but cannot run any code that relies on the above objects. 
  
-Now reproject the rasters back to their orginal projection
+Now reproject the rasters back to their original projection.
+
 ```{r, warning=FALSE}
 # reproject back to original
 sa_reproj <- projectRaster(sa_img, orforest)
@@ -137,22 +166,9 @@ sbi_reproj <- projectRaster(sbi_img, orforest)
 std_reproj <- projectRaster(std_img[[1]], orforest)
 sfd_reproj <- projectRaster(sfd_img, orforest)
 ```
-**Annie:** I tried the above code for just sa_reproj from the image you provided, and it gives the following errors:
-
-> sa_reproj <- projectRaster(sa_img, orforest)
-Error in rgdal::rawTransform(projto_int, projfrom, nrow(xy), xy[, 1],  : 
-  STRING_ELT() can only be applied to a 'character vector', not a 'NULL'
-In addition: Warning messages:
-1: In rgdal::compare_CRS(projto, projfrom) :
-  NULL source CRS comment, falling back to PROJ string
-2: In wkt(pto) : CRS object has no comment
-3: In rgdal::rawTransform(projfrom, projto, nrow(xy), xy[, 1], xy[,  :
-  Using PROJ not WKT2 strings
-4: In wkt(projto) : CRS object has no comment
-
-Any thoughts as to how to correct this?
 
 Plot the reprojected texture image rasters.
+
 ```{r, eval=FALSE}
 # plots
 sa_plt <- levelplot(sa_reproj, margin = F, par.settings = eviTheme, ylab = NULL, xlab = NULL, main = 'Sa')
@@ -162,31 +178,32 @@ sfd_plt <- levelplot(sfd_reproj, margin = F, par.settings = eviTheme, ylab = NUL
 
 # export as one
 grid.arrange(sa_plt, sbi_plt, std_plt, sfd_plt, nrow = 2)
-
-# just sa and sfd
-grid.arrange(sa_plt, sfd_plt, nrow = 1)
 ```
-##Example 2: Applying all surface metrics across the entire state of Oregon, USA##
+## Example 2: Applying all surface metrics across the entire state of Oregon, USA
 
-###Motivation###
+### Motivation
 By assessing heterogeneity using a variety of metrics, researchers can gain a more complete picture of heterogeneity than they would with a single metric (Dahlin, 2016). To demonstrate the utility of geodiv for this common application, in Example 2 we apply all surface metric functions to images across Oregon, USA and examine the patterns of, and relationships among, metrics. We will calculate metrics for both elevation data from the Shuttle Radar Topography Mission (SRTM) and a commonly-used measure of canopy greenness, Enhanced Vegetation Index (EVI) from NASA's Moderate Resolution Imaging Spectroradiometer (MODIS). We then examine the correlations among metrics along a transect crossing the state, and determined how the metrics cluster using two methods, hierarchical clustering and Principal Components Analysis (PCA).
 
-###Elevation and EVI Data###
+### Elevation and EVI Data
 Elevation and EVI data that are available to use along with this vignette were prepared in Google Earth Engine (Gorelick et al., 2017) and analyzed in R. Void-filled SRTM data (Farr et al., 2007) and quality-filtered, maximum growing season, MODIS EVI data (Didan, 2015) were downloaded in Fall 2019.  The code chunk below loads these data into the current R session.
+
 ```{r, warning=FALSE}
 # The below line of code will need to be modified to match the directory on the user's machine that contains the vignette files for this code chunk to run.
-elev <- raster('C:/Users/srecord/Dropbox/NASA/working_group/geodiv/data_and_code/oregon_SRTM_elevation_2000.tif')
-evi <- raster('C:/Users/srecord/Dropbox/NASA/working_group/geodiv/data_and_code/oregon_max_growing_season_EVI_2000_2019.tif') * 0.0001
+elev <- raster('C:/Users/lsth490/Box/Smith, Annie/papers/geodiv/oregon_SRTM_elevation_2000.tif')
+evi <- raster('C:/Users/lsth490/Box/Smith, Annie/papers/geodiv/oregon_max_growing_season_EVI_2000_2019.tif') * 0.0001
 ```
+
 Aggregate both datasets to ~2km resolution for comparison between datasets and to reduce computational time. 
+
 ```{r, warning=FALSE}
 elev <- aggregate(elev, fact = 8)
 evi <- aggregate(evi, fact = 8)
 ```
 
-### Pre-processing of rasters###
+### Pre-processing of rasters
 
 Begin by masking any values that are outside of the boundaries for the state of Oregon.
+
 ```{r, warning=FALSE}
 state <- maps::map(database = 'state', regions = 'oregon', fill = TRUE, plot = FALSE)
 statePoly <- map2SpatialPolygons(state, IDs = state$names, proj4string = CRS(proj4string(evi)))
@@ -195,6 +212,7 @@ elev <- mask(x = elev, mask = statePoly)
 ```
 
 Generate some plots to get a sense for the spatial patterns in the data.
+
 ```{r, warning=FALSE}
 # plot maximum growing season EVI for Oregon
 levelplot(evi, margin = F, par.settings = eviTheme, ylab = NULL, xlab = NULL, main = 'Maximum Growing Season EVI')
@@ -204,6 +222,7 @@ elevCols <- colorRampPalette(c('grey7', 'grey93'))(100)
 elevTheme <- rasterTheme(region = elevCols)
 levelplot(elev, margin = F, par.settings = elevTheme, ylab = NULL, xlab = NULL, main = 'Elevation (m)')
 ```
+
 Remove any trends in the data with the 'remove_plane' function and take a look at the plots of the images with the trends removed.
 
 ```{r, warning=FALSE}
@@ -215,35 +234,37 @@ levelplot(evi, margin = F, par.settings = eviTheme, ylab = NULL, xlab = NULL, ma
 levelplot(elev, margin = F, par.settings = elevTheme, ylab = NULL, xlab = NULL, main = 'Elevation without Trend')
 ```
 
-### Generate texture images of the state of Oregon###
+### Generate texture images of the state of Oregon
 
 Below we generate a texture image for the state of Oregon using the sa metric for elevation. Note that the following step is computationally intensive and may take some time. We provide the output dataframe files along with this vignette for all metrics included in geodiv for elevation and EVI over ~30km x 30km square moving windows and scaled following calculation for the subsequent analyses in this vignette.
 
 ```{r, eval=FALSE}
 # Calculate elevation sa texture image for state of Oregon
-outrast <- texture_image(elev, window_type = 'square', size = 7, in_meters = FALSE, epsg_proj = 5070, metric = 'sa', args = list(low = 0, high = 0.05)) 
+outrast <- texture_image(elev, window_type = 'square', size = 7, in_meters = FALSE, epsg_proj = 5070, metric = 'sa') 
 ```
 
 The code below illustrates how to convert the raster generated by the texture_image function (i.e., outrast) to a dataframe for subsequent analyses.
 
 ```{r, eval=FALSE}
+# get raster values
+vals <- outrast[]
+
 # Convert output raster of sa metrics (outrast) to a dataframe for easier use in subsequent analyses
 sa_data_elev <- data.frame(x = coordinates(outrast)[,1], y = coordinates(outrast)[,2], v = vals)
-
-# # write out dataframes as .csv files
-write.csv(sa_data_elev, 'sa_elevation.csv', row.names = F)
 ```
 
-# Generating these data frames can take a while, so we have provided .csv files for all gradient surface metrics calculated for elevation and EVI in case you find them useful for working with this vignette. The below code reads in these provided .csv files.
+Generating these data frames can take a while, so we have provided .csv files for all gradient surface metrics calculated for elevation and EVI in case you find them useful for working with this vignette. The below code reads in these provided .csv files.
+
 ```{r, warning=FALSE}
 # Read in dataframes containing state of Oregon texture image outputs for EVI and elevation.
-data_evi <- read.csv('C:/Users/srecord/Dropbox/NASA/working_group/geodiv/data_and_code/evi_variables.csv', stringsAsFactors = FALSE)
-data_elev <- read.csv('C:/Users/srecord/Dropbox/NASA/working_group/geodiv/data_and_code/elevation_variables.csv', stringsAsFactors = FALSE)
+data_evi <- read.csv('C:/Users/lsth490/Box/Smith, Annie/papers/geodiv_paper/data/evi_variables.csv', stringsAsFactors = FALSE)
+data_elev <- read.csv('C:/Users/lsth490/Box/Smith, Annie/papers/geodiv_paper/data/elevation_variables.csv', stringsAsFactors = FALSE)
 ```
 
-###Visualization of texture image outputs for elevation and EVI for the state of Oregon###
+### Visualization of texture image outputs for elevation and EVI for the state of Oregon
 
-Distributions of a few elevation variables
+Distributions of a few elevation variables:
+
 ```{r, warning=FALSE}
 # Histogram of average roughness of a surface (Sa) of elevation
 hist(data_elev$sa, breaks = 30, xlab='Elevation Average Surface Roughness (Sa)', main='')
@@ -254,7 +275,9 @@ hist(data_elev$sfd, breaks = 30, xlab='Fractal Dimension of Elevation', main='')
 # Histogram of texture dimension of elevation
 hist(data_elev$std, breaks = 30, xlab='Texture Dimension of Elevation', main='')
 ```
+
 The code below visualizes metrics over the entire state in order to capture different aspects of landscape heterogeneity. Individual metrics primarily distinguished mountainous versus flat terrain, and managed versus more natural areas; however, some metrics are difficult to interpret, or do not show very much variation over the region. The difficulty of interpreting metrics is a known complicating factor for their use. Others have addressed this issue and linked metrics with known ecosystem features or patch metrics (McGarigal et al., 2009; Kedron et al., 2018).
+
 ```{r, warning=FALSE}
 # Create plots of all possible surface gradient metrics that geodiv calculates for elevation and EVI.
 elev_maps <- list()
@@ -305,13 +328,14 @@ grid.arrange(grobs = evi_maps[c(seq(8, 11), 13, 14, 15, 16, 17, 18, 21, 22)], nr
 grid.arrange(grobs = evi_maps[c(25, 26, 27)], nrow = 4, ncol = 3) # 850x800
 ```
 
-###Transect analysis###
+## Transect analysis
 In the code below, We examine an example of local correlation and clustering among the surface gradient metrics by extracting values over a horizontal transect across central Oregon. 
 
 First we convert the raw elevation and EVI data from the NASA's SRTM and MODIS mission, respectively, to a dataframe and add those raw values to the dataframes for EVI and elevation containing the gradient surface metrics we've calculated across the state of Oregon.
+
 ```{r, warning=FALSE}
-elev <- raster('C:/Users/srecord/Dropbox/NASA/working_group/geodiv/data_and_code/oregon_SRTM_elevation_2000.tif')
-evi <- raster('C:/Users/srecord/Dropbox/NASA/working_group/geodiv/data_and_code/oregon_max_growing_season_EVI_2000_2019.tif') * 0.0001
+elev <- raster('C:/Users/lsth490/Box/Smith, Annie/papers/geodiv/oregon_SRTM_elevation_2000.tif')
+evi <- raster('C:/Users/lsth490/Box/Smith, Annie/papers/geodiv/oregon_max_growing_season_EVI_2000_2019.tif') * 0.0001
 
 # Coarsen resolution to 2km
 elev <- aggregate(elev, fact = 8)
@@ -331,6 +355,7 @@ data_elev$elev <- elev_df$value
 ```
 
 Now let's extract the data along a latitudinal transect going across the state of Oregon.
+
 ```{r, warning=FALSE}
 # Calculate the closest y value to the mean and then select all pixels along that line.
 evi_crop <- crop(evi, extent(evi, round(nrow(evi) / 2) - 7, round(nrow(evi) / 2) + 7, 1, ncol(evi)))
@@ -354,6 +379,7 @@ transect_elev$elev <- elev_means
 ```
 
 The code below places standardizes all metrics by placing them on the same scale from 0-1.
+
 ```{r, warning=FALSE}
 # Get all metrics on same scale (0-1)
 for (i in 3:ncol(transect_evi)) {
@@ -365,6 +391,7 @@ for (i in 3:ncol(transect_elev)) {
 ```
 
 Final data wrangling to take data from wide to long version for the clustering analysis.
+
 ```{r, warning=FALSE}
 # save full spread out (i.e., wide) version of dataframe
 spread_evi <- transect_evi
@@ -381,8 +408,10 @@ transect_evi <- transect_evi[order(transect_evi$var),]
 transect_elev <- transect_elev[order(transect_elev$var),]
 ```
 
-####Clustering Analysis####
+#### Clustering Analysis
+
 For the transect analysis, we will perform hierarchical clustering on metric values using the function ‘eclust’ in the package factoextra (Kassambara & Mundt, 2020). But, first some additional data wrangling to prepare the data for the clustering analysis below.
+
 ```{r, warning=FALSE}
 # Remove NA values
 sapply(spread_evi[, c(3:ncol(spread_evi))], function(x) sum(is.na(x)))
@@ -399,6 +428,7 @@ sapply(spread_evi[, c(3:ncol(spread_evi))], function(x) length(unique(x)))
 sapply(spread_elev[, c(3:ncol(spread_elev))], function(x) length(unique(x)))
 ```
 The code below performs the clustering analysis on the EVI surface gradient metrics.
+
 ```{r, warning=FALSE}
 ### EVI
 # Compute dissimilarity matrix
@@ -409,12 +439,12 @@ res.hc_evi <- hclust(t(res.dist_evi), method = "ward.D2")
 plot(res.hc_evi, cex = 0.5)
 
 # Enhanced k-means clustering
-res.km_evi <- eclust(t(spread_evi)[3:(ncol(spread_evi) - 1),], "kmeans", nstart = 25)
+res.km_evi <- clusGap(t(spread_evi)[3:(ncol(spread_evi) - 1),], stats::kmeans, K.max = 10, B = 100, nstart = 25)
 # Gap statistic plot
-fviz_gap_stat(res.km_evi$gap_stat)
+factoextra::fviz_gap_stat(res.km_evi)
 
 # Enhanced hierarchical clustering
-res.hc_evi <- eclust(t(spread_evi)[3:(ncol(spread_evi) - 1),], "hclust") # compute hclust
+res.hc_evi <- factoextra::eclust(t(spread_evi)[3:(ncol(spread_evi) - 1),], "hclust") # compute hclust
 # Dendrogram plot
 fviz_dend(res.hc_evi, rect = FALSE, k_colors = c('lightgoldenrod1', 'lightblue', 'grey'), lwd = 1, label_cols = 'black',
           cex = 0.8, main = "", ylab = "", type = 'rectangle', horiz = TRUE, labels_track_height = 14) +
@@ -423,12 +453,8 @@ fviz_dend(res.hc_evi, rect = FALSE, k_colors = c('lightgoldenrod1', 'lightblue',
 # Scatterplot
 fviz_cluster(res.hc_evi) # scatter plot
 ```
-The code below performs the clustering analysis on the EVI surface gradient metrics.
 
-**Annie:** In the code below, I cannot recreate the gap statistic plot for elevation. I get this error:
->fviz_gap_stat(res.km_elev$gap_stat)
-Error in fviz_gap_stat(res.km_elev$gap_stat) : 
-  Only an object of class clusGap is allowed. (cluster package)
+The code below performs the clustering analysis on the elevation surface gradient metrics.
   
 ```{r, warning=FALSE}
 ### ELEV
@@ -440,12 +466,12 @@ res.hc_elev <- hclust(t(res.dist_elev), method = "ward.D2")
 plot(res.hc_elev, cex = 0.5)
 
 # Enhanced k-means clustering
-res.km_elev <- eclust(t(spread_elev)[3:(ncol(spread_elev) - 1),], "kmeans", nstart = 25, k = 4)
+res.km_elev <- clusGap(t(spread_elev)[3:(ncol(spread_elev) - 1),], stats::kmeans, K.max = 10, B = 100, nstart = 25)
 # Gap statistic plot
-fviz_gap_stat(res.km_elev$gap_stat)
+factoextra::fviz_gap_stat(res.km_elev)
 
 # Enhanced hierarchical clustering
-res.hc_elev <- eclust(t(spread_elev)[3:(ncol(spread_elev) - 1),], "hclust", k = 4) # compute hclust
+res.hc_elev <- factoextra::eclust(t(spread_elev)[3:(ncol(spread_elev) - 1),], "hclust", k = 4) # compute hclust
 # Plot Dendrogram
 fviz_dend(res.hc_elev, rect = FALSE, k_colors = c('lightgoldenrod1', 'lightblue', 'grey', 'lightsteelblue4'), lwd = 1, label_cols = 'black',
           cex = 0.8, main = "", ylab = "", horiz = TRUE, type = 'rectangle', labels_track_height = 8) +
@@ -456,6 +482,7 @@ fviz_cluster(res.hc_elev)
 ```
 
 Now, let's generate plots that show the EVI and elevation surface gradient metrics along the Oregon state transect. 
+
 ```{r, warning=FALSE}
 # EVI clusters
 evi_c1 <- c('sds', 'srw', 'shw', 'ssc', 'srwi', 'sbi', 'stdi')
@@ -510,11 +537,12 @@ ggplot(transect_elev, aes(x = x, y = value)) +
         axis.title.x = element_text(face = 'bold', size = 11))
 ```
 
-####Summary of transect cluster analysis####
+### Summary of transect cluster analysis
 Overall trends along the transect were similar among metrics, with more variation at smaller intervals. Using hierarchical clustering, we found four clusters of metrics for elevation, and three for EVI. The metrics fell into different combinations based on the variable considered (elevation or EVI). For example, Sdq6 and S10z grouped together for both variables, but Std and Srw were in the same group for elevation, and different groups for EVI. 
 
-###Principal Components Analysis (PCA)###
-Next, we will determine the statewide elevation and EVI variance explained by metrics using PCA. First, we need to get the data ready for the PCA. In the code below, we remove several variables due to their large number of NA values, caused either by windows containing too few values, or windows lacking ‘peaks’ or ‘valleys’ (pixels surrounded by lower or higher values, respectively). After cleaning the data, 21 metrics remain in the analysis 
+## Principal Components Analysis (PCA)
+
+Next, we will determine the statewide elevation and EVI variance explained by metrics using PCA. First, we need to get the data ready for the PCA. In the code below, we remove several variables due to their large number of NA values, caused either by windows containing too few values, or windows lacking ‘peaks’ or ‘valleys’ (pixels surrounded by lower or higher values, respectively). After cleaning the data, 21 metrics remain in the analysis. 
 
 ```{r}
 # Get data ready for PCA 
@@ -539,6 +567,7 @@ summary(evi_prc)
 
 Now let's look at some diagnostic plots for the principal components. Scree plots indicate the importance of the principal components with a broken stick criterion. The point at which the
 scree plot curve crosses the broken stick model distribution, which we will plot in red is considered to indicate the maximum number of components to retain.
+
 ```{r}
 # Take a look at the components for elevation using a screeplot
 screeplot(elev_prc, type = "l", npcs = 15, main = "Screeplot of the first 10 PCs")
@@ -551,7 +580,9 @@ abline(h = 1, col = "red", lty = 5)
 legend("topright", legend = c("Eigenvalue = 1"),
        col = c("red"), lty = 5, cex = 0.6)
 ```
+
 We can also take a look at the components for elevation and EVI to see how much variance the surface metrics explain with cumulative variance plots.
+
 ```{r}
 # Elevation Cumulative Variance Plot
 cumpro <- cumsum(elev_prc$sdev ^ 2 / sum(elev_prc$sdev ^ 2))
@@ -568,8 +599,10 @@ abline(h = 0.76640, col = "blue", lty = 5)
 legend("topleft", legend = c("Cut-off @ PC5"),
        col = c("blue"), lty = 5, cex = 0.6)
 ```
+
 For both elevation and EVI, the first 5 principal components explained >70% of the variation.
 Now, let's plot the first components for elevation.
+
 ```{r}
 plot(elev_prc$x[, 1], elev_prc$x[, 2], xlab = "PC1 (30.90%)", ylab = "PC2 (17.61%)", main = "PC1 / PC2 - plot")
 plot(elev_prc$x[, 1], elev_prc$x[, 3], xlab = "PC1 (30.90%)", ylab = "PC3 (16.19%)", main = "PC1 / PC3 - plot")
@@ -577,6 +610,7 @@ plot(elev_prc$x[, 2], elev_prc$x[, 3], xlab = "PC2 (17.61%)", ylab = "PC3 (16.19
 ```
 
 In the code below, let's also map these elevation components to see if there are any spatial patterns.
+
 ```{r}
 data_elev_noNA$prc1 <- elev_prc$x[, 1]
 data_elev_noNA$prc2 <- elev_prc$x[, 2]
@@ -657,7 +691,9 @@ elev_pc5_map$par.settings$layout.heights[
 elev_pc5_map$aspect.fill <- TRUE
 grid.arrange(elev_pc1_map, elev_pc2_map, elev_pc3_map, elev_pc4_map, elev_pc5_map, nrow = 2, ncol = 3) 
 ```
+
 Let's map the EVI components in space, too.
+
 ```{r}
 # EVI plots for first 5 components as indicated by scree plots.
 evi_pc1_map <- levelplot(evi_prc1, margin = F, par.settings = eviTheme, ylab = NULL, xlab = NULL, main = 'PC1')
@@ -710,6 +746,7 @@ grid.arrange(evi_pc1_map, evi_pc2_map, evi_pc3_map, evi_pc4_map, evi_pc5_map, nr
 ```
 
 What are the pc loadings for elevation? 
+
 ```{r}
 # Elevation
 # Rotation
@@ -824,7 +861,9 @@ elev_pc5_plt <- ggplot(elev_rel5, aes(x = PC5, y = var)) +
 grid.arrange(elev_pc1_plt, elev_pc2_plt, elev_pc3_plt, elev_pc4_plt, elev_pc5_plt, nrow = 2, ncol = 3)
 grid.arrange(elev_pc1_plt, elev_pc2_plt, elev_pc3_plt, ncol = 3) # 850x350
 ```
+
 What are the pc loadings for EVI?
+
 ```{r}
 # EVI
 # rotation
@@ -940,8 +979,10 @@ evi_pc5_plt <- ggplot(evi_rel5, aes(x = PC5, y = var)) +
 grid.arrange(evi_pc1_plt, evi_pc2_plt, evi_pc3_plt, evi_pc4_plt, evi_pc5_plt, nrow = 2, ncol = 3)
 grid.arrange(evi_pc1_plt, evi_pc2_plt, evi_pc3_plt, ncol = 3)
 ```
-####Summary of PCA####
+
+### Summary of PCA
+
 Looking at the PCA components and loadings, the first component for both elevation and EVI described general surface heterogeneity, whereas the second was related to the shape of the regional value distribution. The metric groupings observed match previous findings, and the first two components represent the same groupings (roughness and distribution) found by McGarigal et al. (2009). 
 
-###Overall summary###
+## Overall summary
 The contrast in metric groupings between the transect hierarchical clustering analysis and statewide PCA demonstrate that there may be differences in metric information depending on the landscape size and scale. As the PCA results were more in line with previous results in the literature, this suggests that those results show the broader metric grouping habits. The transect results demonstrate that this grouping does not always hold across different regions.
