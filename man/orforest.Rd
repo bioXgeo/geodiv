@@ -4,7 +4,8 @@
 \name{orforest}
 \alias{orforest}
 \title{NDVI for a portion of southwestern Oregon, USA.}
-\format{A raster image with 371 x 371 pixels
+\format{
+A raster image with 371 x 371 pixels
 \describe{
   \item{range}{0 -- 1}
   \item{bounds}{-123, -122.9, 43.0002, 43.1}
@@ -12,7 +13,8 @@
   \item{projection}{WGS84}
   \item{scalar}{1}
   ...
-}}
+}
+}
 \usage{
 orforest
 }

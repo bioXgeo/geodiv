@@ -4,7 +4,8 @@
 \name{orelevation}
 \alias{orelevation}
 \title{SRTM elevation for a portion of southwestern Oregon, USA.}
-\format{A raster image with 371 x 371 pixels
+\format{
+A raster image with 371 x 371 pixels
 \describe{
   \item{range}{433 -- 1390}
   \item{bounds}{-123.0001, -122.9002, 43.00015, 43.10013}
@@ -12,7 +13,8 @@
   \item{projection}{WGS84}
   \item{scalar}{1}
   ...
-}}
+}
+}
 \usage{
 orelevation
 }

@@ -72,7 +72,7 @@ aacf <- function(x) {
       zmat <- matrix(getValues(x), ncol = M, nrow = N, byrow = TRUE)
     }
   }
-  
+
   if (sum(is.na(zmat)) == length(zmat)) {
     return(NA)
   } else if (sum(is.na(zmat)) != length(zmat)) {
@@ -154,10 +154,10 @@ scl <- function(x, threshold = c(0.20, 1 / exp(1)), plot = FALSE) {
 
   # get aacf img
   aacfimg <- aacf(x)
-  
-  if (is.na(aacfimg)) {
+
+  if (!(class(aacfimg) %in% c('matrix', 'RasterLayer'))) {
     return(c(NA, NA, NA, NA))
-  } else if (!is.na(aacfimg)) {
+  } else if (class(aacfimg) %in% c('matrix', 'RasterLayer')) {
 
     data_type <- if(class(x) == 'matrix') {'matrix'} else {'RasterLayer'}
 
