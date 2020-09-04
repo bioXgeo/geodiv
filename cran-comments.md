@@ -18,7 +18,7 @@ There were no ERRORs or WARNINGS.
 
 There was 1 NOTE, "unable to verify current time," which appears to be due to a reference to an outdated website, not the R package.
 
-This update fixes a bug caused by a bad is.na() call, and adds a vignette.
+This update fixes a bug caused by a bad is.na() call as well as some issues with R 4.0 compatibility.
 
 ## Downstream dependencies
 There are currently no downstream dependencies for this package.
