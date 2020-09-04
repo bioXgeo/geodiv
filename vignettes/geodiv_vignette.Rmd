@@ -185,7 +185,7 @@ sfd_reproj <- projectRaster(sfd_img, orforest)
 
 Plot the reprojected texture image rasters.
 
-```{r, eval=TRUE}
+```{r, eval=TRUE, fig.width=7.5, fig.height=6}
 # plots
 sa_plt <- rasterVis::levelplot(sa_reproj, margin = F, par.settings = eviTheme, ylab = NULL, xlab = NULL, main = 'Sa')
 sbi_plt <- rasterVis::levelplot(sbi_reproj, margin = F, par.settings = eviTheme, ylab = NULL, xlab = NULL, main = 'Sbi')
@@ -294,7 +294,7 @@ hist(data_elev$std, breaks = 30, xlab='Texture Dimension of Elevation', main='')
 
 The code below visualizes metrics over the entire state in order to capture different aspects of landscape heterogeneity. Individual metrics primarily distinguished mountainous versus flat terrain, and managed versus more natural areas; however, some metrics are difficult to interpret, or do not show very much variation over the region. The difficulty of interpreting metrics is a known complicating factor for their use. Others have addressed this issue and linked metrics with known ecosystem features or patch metrics (McGarigal et al., 2009; Kedron et al., 2018).
 
-```{r, warning=FALSE}
+```{r, warning=FALSE, fig.width=7.5, fig.height=8}
 # Create plots of all possible surface gradient metrics that geodiv calculates for elevation and EVI.
 elev_maps <- list()
 elev_names <- c('Shw', 'Srw', 'Srwi', 'Std', 'Stdi', 'S10z', 'Sa', 'Sbi', 'Sci', 'Sdc 50-55%', 'Sdc 80-85%', 'Sdc 0-5%', 'Sdq6', 
@@ -499,7 +499,7 @@ fviz_cluster(res.hc_elev)
 
 Now, let's generate plots that show the EVI and elevation surface gradient metrics along the Oregon state transect. 
 
-```{r, warning=FALSE}
+```{r, warning=FALSE, , fig.width=7.5, fig.height=10}
 # EVI clusters
 evi_c1 <- c('sds', 'srw', 'shw', 'ssc', 'srwi', 'sbi', 'stdi')
 evi_c2 <- c('sdc0005', 'sku', 'std', 'sk' , 'svi', 'smean', 'sq', 'sdc05055', 'sdr', 'sdc08085', 'svk')
@@ -584,7 +584,7 @@ summary(evi_prc)
 Now let's look at some diagnostic plots for the principal components. Scree plots indicate the importance of the principal components with a broken stick criterion. The point at which the
 scree plot curve crosses the broken stick model distribution, which we will plot in red is considered to indicate the maximum number of components to retain.
 
-```{r}
+```{r, fig.width=7.5, fig.height=4}
 # Take a look at the components for elevation using a screeplot
 screeplot(elev_prc, type = "l", npcs = 15, main = "Screeplot of the first 10 PCs")
 abline(h = 1, col = "red", lty = 5)
@@ -599,7 +599,7 @@ legend("topright", legend = c("Eigenvalue = 1"),
 
 We can also take a look at the components for elevation and EVI to see how much variance the surface metrics explain with cumulative variance plots.
 
-```{r}
+```{r, , fig.width=7.5, fig.height=4}
 # Elevation Cumulative Variance Plot
 cumpro <- cumsum(elev_prc$sdev ^ 2 / sum(elev_prc$sdev ^ 2))
 plot(cumpro[0:15], xlab = "PC #", ylab = "Amount of explained variance", main = "Cumulative variance plot")
@@ -627,7 +627,7 @@ plot(elev_prc$x[, 2], elev_prc$x[, 3], xlab = "PC2 (17.61%)", ylab = "PC3 (16.19
 
 In the code below, let's also map these elevation components to see if there are any spatial patterns.
 
-```{r}
+```{r, fig.width=7.5, fig.height=4}
 data_elev_noNA$prc1 <- elev_prc$x[, 1]
 data_elev_noNA$prc2 <- elev_prc$x[, 2]
 data_elev_noNA$prc3 <- elev_prc$x[, 3]
@@ -710,7 +710,7 @@ grid.arrange(elev_pc1_map, elev_pc2_map, elev_pc3_map, elev_pc4_map, elev_pc5_ma
 
 Let's map the EVI components in space, too.
 
-```{r}
+```{r, fig.width=7.5, fig.height=4}
 # EVI plots for first 5 components as indicated by scree plots.
 evi_pc1_map <- rasterVis::levelplot(evi_prc1, margin = F, par.settings = eviTheme, ylab = NULL, xlab = NULL, main = 'PC1')
 evi_pc2_map <- rasterVis::levelplot(evi_prc2, margin = F, par.settings = eviTheme, ylab = NULL, xlab = NULL, main = 'PC2')
@@ -763,7 +763,7 @@ grid.arrange(evi_pc1_map, evi_pc2_map, evi_pc3_map, evi_pc4_map, evi_pc5_map, nr
 
 What are the pc loadings for elevation? 
 
-```{r}
+```{r, fig.width=7.5, fig.height=4}
 # Elevation
 # Rotation
 elev_loadings <- elev_prc$rotation[, 1:5]
@@ -880,7 +880,7 @@ grid.arrange(elev_pc1_plt, elev_pc2_plt, elev_pc3_plt, ncol = 3) # 850x350
 
 What are the pc loadings for EVI?
 
-```{r}
+```{r, fig.width=7.5, fig.height=4}
 # EVI
 # rotation
 evi_loadings <- evi_prc$rotation[, 1:5]
