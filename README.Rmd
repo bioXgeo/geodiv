@@ -39,7 +39,7 @@ On Mac OS X, you may need to install the development tools here to get the packa
 
 ## Example
 
-This is a basic example which shows you how to calculate several metrics over an entire image. *geodiv* may also be applied with moving windows over an entire image using the 'texture_image' function.
+This is a basic example which shows you how to calculate several metrics over an entire image. *geodiv* may also be applied with moving windows over an entire image using the 'texture_image' function. For a more complex example, see the vignette.
 
 ```{r example}
 library(geodiv)
