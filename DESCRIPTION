@@ -28,7 +28,6 @@ LazyData: true
 RoxygenNote: 7.1.1
 Suggests: 
     testthat,
-    knitr,
     ggplot2,
     rmarkdown,
     rasterVis,
@@ -45,4 +44,3 @@ Suggests:
     cluster
 LinkingTo: 
     Rcpp, RcppArmadillo
-VignetteBuilder: knitr

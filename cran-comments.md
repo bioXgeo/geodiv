@@ -1,7 +1,7 @@
 ---
 title: "cran-comments.md"
 author: "Annie C. Smith"
-date: "September 4, 2020"
+date: "September 9, 2020"
 output: html_document
 ---
 
