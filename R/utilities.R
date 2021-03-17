@@ -38,7 +38,7 @@
 #' plot(x)
 #' @export
 fitplane <- function(x, order) {
-  if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
   if(length(order) > 1) {stop('too many values supplied to order.')}
   if(class(order) != 'integer' & class(order) != 'numeric') {stop('order must be numeric or integer.')}
   if(order %% 1 > 0) {
@@ -91,13 +91,13 @@ fitplane <- function(x, order) {
 #' plot(poly)
 #' @export
 bestfitplane <- function(x) {
-  if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
 
-  # fit least squares plane for polynomials from orders 2 - 3
+  # fit least squares plane for polynomials from orders 0-3
   mods <- lapply(seq(0, 3), FUN = function(i) fitplane(x, order = i))
 
   # convert raster to matrix
-  if (class(x) == 'RasterLayer') {
+  if (class(x)[1] == 'RasterLayer') {
     xmat <- matrix(x, nrow = nrow(x), ncol = ncol(x), byrow = TRUE)
   } else {
     xmat <- x
@@ -116,7 +116,7 @@ bestfitplane <- function(x) {
   }
 
   # fill in raster with best fit values
-  if (class(x) == 'RasterLayer'){
+  if (class(x)[1] == 'RasterLayer'){
     bfx <- setValues(x, mods[[bestfit]])
   } else {
     bfx <- matrix(mods[[bestfit]], nrow = nrow(x), ncol = ncol(x), byrow = TRUE)
@@ -151,7 +151,7 @@ bestfitplane <- function(x) {
 #' plot(new_rast)
 #' @export
 remove_plane <- function(x) {
-  if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
 
   bfx <- bestfitplane(x)
 

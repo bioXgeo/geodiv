@@ -5,10 +5,11 @@
 #' from a raster image (see Kedron et al. 2018).
 #'
 #' @param x A raster or matrix.
-#' @param plot Logical. If \code{TRUE}, returns a plot of the
+#' @param create_plot Logical. If \code{TRUE}, returns a plot of the
 #'   amplitude spectrum with lines showing directions in which
 #'   amplitude is summed for the Std and Stdi calculations.
 #'   Plotting is not possible when input is a matrix.
+#' @param option Numeric. Code for which output metric(s) to return. 1 = Std, 2 = Stdi.
 #' @return A vector containing numeric values for the angle of
 #'   dominating texture and the texture direction index.
 #' @examples
@@ -24,20 +25,20 @@
 #' Std <- stdvals[1]
 #' Stdi <- stdvals[2]
 #' @export
-std <- function(x, plot = FALSE) {
-  if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
-  if(class(plot) != 'logical') {stop('plot must be logical.')}
+std <- function(x, create_plot = FALSE, option = c(1, 2)) {
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(create_plot) != 'logical') {stop('plot must be logical.')}
 
   # get raster dimensions
   M <- ncol(x)
   N <- nrow(x)
 
-  data_type <- if(class(x) == 'matrix') {'matrix'} else {'RasterLayer'}
+  data_type <- if(class(x)[1] == 'matrix') {'matrix'} else {'RasterLayer'}
 
   # convert matrix to raster if necessary (equal area)
   if (data_type == 'matrix') {
     x <- raster(x)
-    extent(x) <- c(0, ncol(x), 0, nrow(x))
+    extent(x) <- c(0, M, 0, N)
     crs(x) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
   }
 
@@ -46,27 +47,37 @@ std <- function(x, plot = FALSE) {
 
   # if irregular non-na area, cut to biggest square possible
   if (sum(is.na(zmat)) != 0) {
-    origin <- c(mean(sp::coordinates(x)[, 1]), mean(sp::coordinates(x)[, 2]))
+    coords <- sp::coordinates(x)
+    origin <- c(mean(coords[, 1]), mean(coords(x)[, 2]))
+
     potentials <- data.frame(xmin = rep(origin[1], floor(N / 2)),
                              xmax = origin[1],
                              ymin = origin[2],
                              ymax = origin[2])
-    potentials$xmin <- origin[1] - (res(x)[1] * seq(1, floor(N / 2)))
-    potentials$xmax <- origin[1] + (res(x)[1] * seq(1, floor(N / 2)))
-    potentials$ymin <- origin[2] - (res(x)[2] * seq(1, floor(N / 2)))
-    potentials$ymax <- origin[2] + (res(x)[2] * seq(1, floor(N / 2)))
+
+    change1 <- (res(x)[1] * seq(1, floor(N / 2)))
+    change2 <- (res(x)[2] * seq(1, floor(N / 2)))
+    potentials$xmin <- origin[1] - change1
+    potentials$xmax <- origin[1] + change1
+    potentials$ymin <- origin[2] - change2
+    potentials$ymax <- origin[2] + change2
 
     potentials$na <- sapply(seq(1, nrow(potentials)), FUN = function(i) {
+
       xmin <-
       newrast <- crop(x, extent(potentials$xmin[i], potentials$xmax[i], potentials$ymin[i], potentials$ymax[i]))
       return(sum(is.na(getValues(newrast))))
+
     })
 
     max_dim <- potentials[max(which(potentials$na <= 0)),]
 
     if (sum(is.na(max_dim$xmin)) != 0) {
+
       zmat <- zmat
-    } else if (sum(is.na(max_dim$xmin)) == 0) {
+
+    } else {#if (sum(is.na(max_dim$xmin)) == 0) {
+
       x <- crop(x, extent(max_dim$xmin, max_dim$xmax, max_dim$ymin, max_dim$ymax))
 
       # get raster dimensions
@@ -75,13 +86,16 @@ std <- function(x, plot = FALSE) {
 
       # get matrix of values
       zmat <- matrix(getValues(x), ncol = M, nrow = N, byrow = TRUE)
+
     }
   }
-  
+
   if (sum(is.na(zmat)) == length(zmat)) {
+
     return(c(NA, NA))
-  } else if (sum(is.na(zmat)) != length(zmat)) {
-  
+
+  } else {#if (sum(is.na(zmat)) != length(zmat)) {
+
     # get fourier transform
     # complex spectrum from fast fourier transform
     ft <- fft(zmat)
@@ -94,16 +108,25 @@ std <- function(x, plot = FALSE) {
     amp_img <- setValues(x, amplitude)
 
     # take amplitude image, cut in half (y direction)
-    half_dist <- (ymax(amp_img) - ymin(amp_img)) / 2
-    ymin <- ymax(amp_img) - half_dist
-    amp_img <- crop(amp_img, c(xmin(amp_img), xmax(amp_img), ymin, ymax(amp_img)))
+    ymin_amp <- ymin(amp_img)
+    ymax_amp <- ymax(amp_img)
+    xmin_amp <- xmin(amp_img)
+    xmax_amp <- xmax(amp_img)
+    half_dist <- (ymax_amp - ymin_amp) / 2
+    ymin <- ymax_amp - half_dist
+    amp_img <- crop(amp_img, c(xmin_amp, xmax_amp, ymin, ymax_amp))
 
     # get origin of image (actually bottom center)
-    origin <- c(mean(sp::coordinates(amp_img)[, 1]), ymin(amp_img))
+    coords <- sp::coordinates(amp_img)
 
-    if(plot == TRUE) {
+    origin <- c(mean(coords[, 1]), ymin_amp)
+
+    if(create_plot == TRUE) {
+
       if (data_type == 'matrix') {
+
         print("cannot draw lines for object of class 'matrix.'")
+
       }
 
       ### line calculations are taken from the plotrix function draw.radial.line
@@ -112,8 +135,9 @@ std <- function(x, plot = FALSE) {
       j <- seq(0, (M - 1))
       alpha <- (pi * j) / M # angles
       px <- c(0, half_dist) # line length
-      linex <- unlist(lapply(seq(1, length(alpha)), function(x) origin[1] + px * cos(alpha[x])))
-      liney <- unlist(lapply(seq(1, length(alpha)), function(x) origin[2] + px * sin(alpha[x])))
+      a_len <- length(alpha)
+      linex <- unlist(lapply(seq(1, a_len), function(x) origin[1] + px * cos(alpha[x])))
+      liney <- unlist(lapply(seq(1, a_len), function(x) origin[2] + px * sin(alpha[x])))
       linelist <- lapply(seq(1, length(linex), 2),
                         FUN = function(i) sp::Lines(sp::Line(cbind(linex[i:(i + 1)], liney[i:(i + 1)])),
                                                     ID = paste('l', i, sep = '')))
@@ -122,13 +146,15 @@ std <- function(x, plot = FALSE) {
       # plot and calculate amplitude sums along rays
       plot(amp_img)
       lines(lines)
+
     }
 
     # replace: find distances and angle to each pixel, sum all values at given angle
 
     # calculate distances from center to all other points
     center <- ceiling(dim(x) / 2)
-    nce <- ifelse(ncol(amp_img) / 2 == round(ncol(amp_img) / 2), 1, 0)
+    ncol_amp2 <- ncol(amp_img) / 2
+    nce <- ifelse(ncol_amp2 == round(ncol_amp2), 1, 0)
     dist_rast <- amp_img
     values(dist_rast) <- NA
     dist_rast[nrow(amp_img), center[2] + nce] <- 1
@@ -138,9 +164,8 @@ std <- function(x, plot = FALSE) {
     # calculate angles from center to all points
     angle_rast <- amp_img
     values(angle_rast) <- NA
-    nce <- ifelse(ncol(amp_img) / 2 == round(ncol(amp_img) / 2), 1, 0)
+    nce <- ifelse(ncol_amp2 == round(ncol_amp2), 1, 0)
     center_ind <- cellFromRowCol(angle_rast, nrow(amp_img), center[2])
-    coords <- coordinates(amp_img)
     angles <- atan2(coords[, 2] - coords[center_ind, 2], coords[, 1] - coords[center_ind, 1])
     angles <- pracma::rad2deg(angles)
     angle_rast <- setValues(angle_rast, angles)
@@ -149,23 +174,23 @@ std <- function(x, plot = FALSE) {
     alpha <- seq(0, 180, 0.5)
 
     # sum values along lines
-    Aalpha <- list()
-    for (i in 1:length(alpha)) {
-      # get indices where angle is within range of desired angle
-      angle_ind <- which(dplyr::near(getValues(angle_rast), alpha[i], 0.25))
-      # cut off at shortest distance to edge (so all rays are the same length)
-      good_cells <- which(getValues(dist_rast) <= min_dist)
-      angle_ind <- angle_ind[angle_ind %in% good_cells]
-      angle_sum <- sum(amp_img[angle_ind], na.rm = TRUE)
-      Aalpha[i] <- angle_sum
-    }
+    vals <- getValues(angle_rast)
+    vals_dist <- getValues(dist_rast)
+    # cut off at shortest distance to edge (so all rays are the same length)
+    good_cells <- which(vals_dist <= min_dist)
+    Aalpha <- sapply(alpha, FUN = function(i) {
+      angle_ind <- which(dplyr::near(vals[good_cells], i, 0.25))
+      angle_sum <- sum(amp_img[good_cells[angle_ind]], na.rm = TRUE)
+      return(angle_sum)
+    })
 
     # find direction where sum of values is highest
-    std <- min(alpha[which(unlist(Aalpha) == max(unlist(Aalpha), na.rm = TRUE))], na.rm = TRUE)
+    std <- min(alpha[which(Aalpha == max(Aalpha, na.rm = TRUE))], na.rm = TRUE)
     # how dominant is the largest sum of values
-    stdi <- mean(unlist(Aalpha), na.rm = TRUE) / max(unlist(Aalpha), na.rm = TRUE)
+    stdi <- mean(Aalpha, na.rm = TRUE) / max(Aalpha, na.rm = TRUE)
 
-    return(c(std, stdi))
+    out <- c(std, stdi)
+    return(out[option])
   }
 }
 
@@ -176,9 +201,10 @@ std <- function(x, plot = FALSE) {
 #' See Kedron et al. (2018) for more detailed description.
 #'
 #' @param x A raster or matrix.
-#' @param plot Logical. If \code{TRUE}, returns a plot of the
+#' @param create_plot Logical. If \code{TRUE}, returns a plot of the
 #'   amplitude spectrum with lines showing the radii at which
 #'   Srw, Srwi, and Shw are calculated.
+#' @param option Numeric. Code for which output metric(s) to return. 1 = Srw, 2 = Srwi, 3 = Shw.
 #' @return A vector containing numeric values for the dominant
 #'   radial wavelength, radial wavelength index, and mean half
 #'   wavelength.
@@ -196,37 +222,42 @@ std <- function(x, plot = FALSE) {
 #' Srwi <- srwvals[2]
 #' Shw <- srwvals[3]
 #' @export
-srw <- function(x, plot = FALSE) {
-  if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
-  if(class(plot) != 'logical') {stop('plot must be logical.')}
+srw <- function(x, create_plot = FALSE, option = c(1, 2, 3)) {
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(create_plot) != 'logical') {stop('plot must be logical.')}
 
   # get raster dimensions
   M <- ncol(x)
   N <- nrow(x)
 
-  data_type <- if(class(x) == 'matrix') {'matrix'} else {'RasterLayer'}
+  data_type <- if(class(x)[1] == 'matrix') {'matrix'} else {'RasterLayer'}
 
   # convert matrix to raster if necessary (equal area)
   if (data_type == 'matrix') {
     x <- raster(x)
-    extent(x) <- c(0, ncol(x), 0, nrow(x))
+    extent(x) <- c(0, M, 0, N)
     crs(x) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
   }
 
   # get matrix of values
   zmat <- matrix(getValues(x), ncol = M, nrow = N, byrow = TRUE)
-  
+
   # if irregular non-na area, cut to biggest square possible
   if (sum(is.na(zmat)) != 0) {
-    origin <- c(mean(sp::coordinates(x)[, 1]), mean(sp::coordinates(x)[, 2]))
+
+    coords <- sp::coordinates(x)
+    origin <- c(mean(coords[, 1]), mean(coords[, 2]))
     potentials <- data.frame(xmin = rep(origin[1], floor(N / 2)),
                              xmax = origin[1],
                              ymin = origin[2],
                              ymax = origin[2])
-    potentials$xmin <- origin[1] - (res(x)[1] * seq(1, floor(N / 2)))
-    potentials$xmax <- origin[1] + (res(x)[1] * seq(1, floor(N / 2)))
-    potentials$ymin <- origin[2] - (res(x)[2] * seq(1, floor(N / 2)))
-    potentials$ymax <- origin[2] + (res(x)[2] * seq(1, floor(N / 2)))
+
+    change1 <- (res(x)[1] * seq(1, floor(N / 2)))
+    change2 <- (res(x)[2] * seq(1, floor(N / 2)))
+    potentials$xmin <- origin[1] - change1
+    potentials$xmax <- origin[1] + change1
+    potentials$ymin <- origin[2] - change2
+    potentials$ymax <- origin[2] + change2
 
     potentials$na <- sapply(seq(1, nrow(potentials)), FUN = function(i) {
       xmin <-
@@ -237,8 +268,11 @@ srw <- function(x, plot = FALSE) {
     max_dim <- potentials[max(which(potentials$na <= 0)),]
 
     if (sum(is.na(max_dim$xmin)) != 0) {
+
       zmat <- zmat
-    } else if (sum(is.na(max_dim$xmin)) == 0) {
+
+    } else {#if (sum(is.na(max_dim$xmin)) == 0) {
+
       x <- crop(x, extent(max_dim$xmin, max_dim$xmax, max_dim$ymin, max_dim$ymax))
 
       # get raster dimensions
@@ -249,10 +283,13 @@ srw <- function(x, plot = FALSE) {
       zmat <- matrix(getValues(x), ncol = M, nrow = N, byrow = TRUE)
     }
   }
-  
+
   if (sum(is.na(zmat)) == length(zmat)) {
+
     return(c(NA, NA, NA))
-  } else if (sum(is.na(zmat)) != length(zmat)) {
+
+  } else {#if (sum(is.na(zmat)) != length(zmat)) {
+
     # complex spectrum from fast fourier transform
     ft <- fft(zmat)
     ft_shift <- geodiv::fftshift(ft)
@@ -262,21 +299,29 @@ srw <- function(x, plot = FALSE) {
 
     # take amplitude image, cut in half (y direction)
     amp_img <- setValues(x, amplitude)
-    half_dist <- (ymax(amp_img) - ymin(amp_img)) / 2
+    ymax_amp <- ymax(amp_img)
+    ymin_amp <- ymin(amp_img)
+    half_dist <- (ymax_amp - ymin_amp) / 2
     ymin <- ymax(amp_img) - half_dist
-    amp_img <- crop(amp_img, c(xmin(amp_img), xmax(amp_img), ymin, ymax(amp_img)))
+    amp_img <- crop(amp_img, c(xmin(amp_img), xmax(amp_img), ymin, ymax_amp))
 
     # get origin of image (actually bottom center)
-    origin <- c(mean(sp::coordinates(amp_img)[,1]), ymin(amp_img))
+    coords_amp <- sp::coordinates(amp_img)
+    origin <- c(mean(coords_amp[, 1]), ymin_amp)
 
     # figure out number of circles
     if ((0.5 * ncol(amp_img)) <= 100) {
+
       ncircles <- floor(0.5 * ncol(amp_img))
+
     } else {
+
       ncircles <- 100
+
     }
 
-    if (plot == TRUE) {
+    if (create_plot == TRUE) {
+
       if (data_type == 'matrix') {
         print("cannot draw lines for object of class 'matrix.'")
       }
@@ -295,6 +340,7 @@ srw <- function(x, plot = FALSE) {
       # plot and get amplitude sums within each radius
       plot(amp_img)
       plot(lines, add = TRUE)
+
     }
 
     # calculate distances from center to all other points
@@ -311,25 +357,27 @@ srw <- function(x, plot = FALSE) {
 
     # get all points some distance away from center, then
     # sum all values at that distance and add to Br list
-    Br <- list()
-    Br[1] <- 0
     tolerance <- (radius[3] - radius[2]) / 2
-    for (i in 2:length(radius)) {
-      radius_inds <- which(dplyr::near(getValues(dist_rast), radius[i], tol = tolerance))
-      Br[i] <- sum(amp_img[radius_inds], na.rm = TRUE)
+    dist_vals <- getValues(dist_rast)
+    Br <- sapply(radius, FUN = function(i) {
+      radius_inds <- which(dplyr::near(dist_vals, i, tol = tolerance))
+      return(sum(amp_img[radius_inds], na.rm = TRUE))
+    })
+    Br[1] <- 0
+
+    if (create_plot == TRUE) {
+
+      plot(Br ~ (1 / radius), type = 'l')
+
     }
 
-    if (plot == TRUE) {
-      plot(unlist(Br) ~ (1 / radius), type = 'l')
-    }
+    Srw <- radius[which(Br == max(Br, na.rm = TRUE))]
+    Srwi <- mean(Br, na.rm = TRUE) / max(Br, na.rm = TRUE)
 
-    Srw <- radius[which(unlist(Br) == max(unlist(Br), na.rm = TRUE))]
-    Srwi <- mean(unlist(Br), na.rm = TRUE) / max(unlist(Br), na.rm = TRUE)
-
-    half_val <- 0.5 * sum(unlist(Br), na.rm = TRUE)
+    half_val <- 0.5 * sum(Br, na.rm = TRUE)
     vals <- as.numeric()
-    for (i in 1:length(unlist(Br))) {
-      vals[i] <- sum(unlist(Br)[1:i], na.rm = TRUE)
+    for (i in 1:length(Br)) {
+      vals[i] <- sum(Br[1:i], na.rm = TRUE)
     }
     shw_ind <- vals - half_val
     Shw <- radius[which(abs(shw_ind) == min(abs(shw_ind), na.rm = TRUE))]
@@ -344,6 +392,8 @@ srw <- function(x, plot = FALSE) {
     if (length(Shw) > 1) {
       Shw <- NA
     }
-    return(c(Srw, Srwi, Shw))
+
+    out <- c(Srw, Srwi, Shw)
+    return(out[option])
   }
 }

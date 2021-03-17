@@ -4,14 +4,16 @@
 \alias{srw}
 \title{Radial Wavelength Metrics}
 \usage{
-srw(x, plot = FALSE)
+srw(x, create_plot = FALSE, option = c(1, 2, 3))
 }
 \arguments{
 \item{x}{A raster or matrix.}
 
-\item{plot}{Logical. If \code{TRUE}, returns a plot of the
+\item{create_plot}{Logical. If \code{TRUE}, returns a plot of the
 amplitude spectrum with lines showing the radii at which
 Srw, Srwi, and Shw are calculated.}
+
+\item{option}{Numeric. Code for which output metric(s) to return. 1 = Srw, 2 = Srwi, 3 = Shw.}
 }
 \value{
 A vector containing numeric values for the dominant

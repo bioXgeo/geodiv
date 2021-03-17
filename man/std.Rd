@@ -4,15 +4,17 @@
 \alias{std}
 \title{Texture Direction Metrics}
 \usage{
-std(x, plot = FALSE)
+std(x, create_plot = FALSE, option = c(1, 2))
 }
 \arguments{
 \item{x}{A raster or matrix.}
 
-\item{plot}{Logical. If \code{TRUE}, returns a plot of the
+\item{create_plot}{Logical. If \code{TRUE}, returns a plot of the
 amplitude spectrum with lines showing directions in which
 amplitude is summed for the Std and Stdi calculations.
 Plotting is not possible when input is a matrix.}
+
+\item{option}{Numeric. Code for which output metric(s) to return. 1 = Std, 2 = Stdi.}
 }
 \value{
 A vector containing numeric values for the angle of

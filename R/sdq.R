@@ -18,7 +18,7 @@
 #' Sdq <- sdq(normforest)
 #' @export
 sdq <- function(x) {
-  if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
 
   deltax <- 1
   deltay <- 1
@@ -56,7 +56,7 @@ sdq <- function(x) {
 #' Sdq6 <- sdq6(normforest)
 #' @export
 sdq6 <- function(x) {
-  if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
 
   deltax <- 1 # per unit, not per degree, etc.
   deltay <- 1

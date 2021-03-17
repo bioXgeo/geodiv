@@ -41,7 +41,7 @@ zshift <- function(r, xdist = 0, ydist = 0, xrm, yrm, scale = FALSE) {
   try(if(missing(xrm)) (xrm = xdist))
   try(if(missing(yrm)) (yrm = ydist))
 
-  if(class(r) != 'RasterLayer' & class(r) != 'matrix') {stop('r must be a raster or matrix.')}
+  if(class(r)[1] != 'RasterLayer' & class(r)[1] != 'matrix') {stop('r must be a raster or matrix.')}
   if(class(xdist) != 'numeric') {stop('xdist must be numeric.')}
   if(class(ydist) != 'numeric') {stop('ydist must be numeric.')}
   if(class(xrm) != 'numeric') {stop('xrm must be numeric.')}
@@ -55,7 +55,7 @@ zshift <- function(r, xdist = 0, ydist = 0, xrm, yrm, scale = FALSE) {
   M <- dim(r)[2] # cols
 
   # calculate zmat and coordinates
-  if (class(r) == 'RasterLayer') {
+  if (class(r)[1] == 'RasterLayer') {
     z <- getValues(r)
   } else if (class(r) == 'matrix') {
     z <- as.numeric(r)

@@ -20,9 +20,9 @@
 #' plot(yval ~ xval)
 #' @export
 bearing_area <- function(x) {
-  if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
 
-  if (class(x) == 'RasterLayer') {
+  if (class(x)[1] == 'RasterLayer') {
     z <- getValues(x)
   } else {
     z <- x
@@ -37,9 +37,9 @@ bearing_area <- function(x) {
       f <- stats::ecdf(1 - z)
   } else {
     cat('No non-NA values.', '\n', sep = '')
-    f <- NA
+    f <- NULL
   }
-  
+
   return(f)
 }
 
@@ -67,7 +67,7 @@ bearing_area <- function(x) {
 #' plot_ba_curve(normforest, divisions = TRUE)
 #' @export
 plot_ba_curve <- function(x, divisions = FALSE) {
-  if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
   if(class(divisions) != 'logical') {stop('divisions argument must be TRUE/FALSE.')}
 
   f <- bearing_area(x)
@@ -119,16 +119,16 @@ plot_ba_curve <- function(x, divisions = FALSE) {
 #' bf_line <- line_data[[1]]
 #' @export
 find_flat <- function(x, perc = 0.4) {
-  if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
   if(class(perc) != 'numeric') {stop('perc must be numeric.')}
   if(length(perc) > 1) {stop('too many values supplied to perc.')}
   if(perc > 1 | perc < 0) {stop('perc must be between 0 and 1.')}
 
   f <- bearing_area(x)
-  
-  if (is.na(f)) {
+
+  if (is.null(f)) {
     return (list(NA, NA, NA, NA, NA, NA))
-  } else if (!is.na(f)) {
+  } else if (!is.null(f)) {
     xval <- environment(f)$y
     yval <- (1 - environment(f)$x)
 
@@ -188,16 +188,16 @@ find_flat <- function(x, perc = 0.4) {
 #' val <- height_ba(normforest, 0.4)
 #' @export
 height_ba <- function(x, xval) {
-  if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
   if(class(xval) != 'numeric') {stop('xval must be numeric.')}
   if(length(xval) > 1) {stop('too many values supplied to xval.')}
   if(xval > 1 | xval < 0) {stop('xval must be between 0 and 1.')}
 
   f <- bearing_area(x)
 
-  if (is.na(f)) {
+  if (is.null(f)) {
     return(NA)
-  } else if (!is.na(f)) {
+  } else if (!is.null(f)) {
     val <- (1 - stats::quantile(f, probs = c(xval))[[1]])
     return(val)
   }
@@ -226,7 +226,7 @@ height_ba <- function(x, xval) {
 #' val <- sdc(normforest, 0.1, 0.4)
 #' @export
 sdc <- function(x, low, high) {
-  if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
   if(class(low) != 'numeric') {stop('low value must be numeric.')}
   if(length(low) > 1) {stop('too many values supplied to low.')}
   if(low > 1 | low < 0) {stop('low value must be between 0 and 1.')}
@@ -260,7 +260,7 @@ sdc <- function(x, low, high) {
 #' Sbi <- sbi(normforest)
 #' @export
 sbi <- function(x) {
-  if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
 
   Sq <- sq(x)
   z05 <- height_ba(x, 0.05)
@@ -291,13 +291,13 @@ sbi <- function(x) {
 #' Svi <- svi(normforest)
 #' @export
 svi <- function(x) {
-  if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
 
   f <- bearing_area(x)
 
-  if (is.na(f)) {
+  if (is.null(f)) {
     return(NA)
-  } else if (!is.na(f)) {
+  } else if (!is.null(f)) {
     val <- area_above(f = f, b = 1, a = 0.8, n = 500)
     return(val)
   }
@@ -321,13 +321,13 @@ svi <- function(x) {
 #' Sci <- sci(normforest)
 #' @export
 sci <- function(x) {
-  if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
 
   f <- bearing_area(x)
 
-  if (is.na(f)) {
+  if (is.null(f)) {
     return(NA)
-  } else if (!is.na(f)) {
+  } else if (!is.null(f)) {
     core_above <- area_above(f = f, b = 1, a = 0.05, n = 1000)
 
     # remove the valley zone to get the core zone
@@ -357,7 +357,7 @@ sci <- function(x) {
 #' Sk <- sk(normforest)
 #' @export
 sk <- function(x) {
-  if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
 
   line_info <- find_flat(x, perc = 0.4)
 
@@ -388,14 +388,14 @@ sk <- function(x) {
 #' Svk <- svk(normforest)
 #' @export
 svk <- function(x) {
-  if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
 
   # find the bearing area curve
   f <- bearing_area(x)
 
-  if (is.na(f)) {
+  if (is.null(f)) {
     return(NA)
-  } else if (!is.na(f)) {
+  } else if (!is.null(f)) {
     # find the flattest 40% of the bearing area curve
     line_info <- find_flat(x, perc = 0.4)
 
@@ -426,14 +426,14 @@ svk <- function(x) {
 #' Spk <- spk(normforest)
 #' @export
 spk <- function(x) {
-  if(class(x) != 'RasterLayer' & class(x) != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
 
   # find the bearing area curve
   f <- bearing_area(x)
 
-  if (is.na(f)) {
+  if (is.null(f)) {
     return(NA)
-  } else if (!is.na(f)) {
+  } else if (!is.null(f)) {
     # find the flattest 40% of bearing area curve
     line_info <- find_flat(x, perc = 0.4)
 
