@@ -3,12 +3,17 @@ title: "geodiv_vignette"
 author: Sydne Record, Annie Smith, Phoebe Zarnetske, Kyla Dahlin, Jennifer Costanza,
   and Adam Wilson
 date: "March 17, 2021"
-output: pdf_document
+output: 
+  pdf_document
 vignette: >
   %\VignetteIndexEntry{geodiv_vignette}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
+
+\newpage 
+\tableofcontents 
+\newpage
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
@@ -21,7 +26,7 @@ knitr::opts_chunk$set(
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## *geodiv* R package vignette
+# Install *geodiv*
 
 *geodiv* is an R package that provides methods for calculating gradient surface metrics for continuous analysis of landscape features. There are a couple of ways to download and install the *geodiv* R package. You can install the released version of *geodiv* from CRAN with:
 
@@ -99,7 +104,7 @@ orforest
 First, we plot the data without any trends removed.
 
 ```{r, echo=TRUE}
-# plot without trend removed
+# Plot orforest without the trend removed.
 eviCols <- colorRampPalette(c('lightyellow1', 'darkgreen'))(100)
 eviTheme <- rasterVis::rasterTheme(region = eviCols)
 (orig_ndvi <- rasterVis::levelplot(orforest, margin = F, 
@@ -110,7 +115,7 @@ eviTheme <- rasterVis::rasterTheme(region = eviCols)
 Use the 'remove_plane' function of *geodiv* to remove the best fit polynomial plane from the image. This function searches polynomials of orders 0 - 3 to determine which is has the lowest error relative to the surface values. To fit a plane with a user-specified polynomial order, you may use the function 'fitplane.'
 
 ```{r, echo=TRUE}
-# plot with trend removed 
+# Plot orforest with the trend removed.
 orfor_rem <- remove_plane(orforest)
 (orig_rem_plot <- rasterVis::levelplot(orfor_rem, margin = F, 
                                       par.settings = eviTheme, 
@@ -121,7 +126,7 @@ orfor_rem <- remove_plane(orforest)
 You can also plot the raw satellite image (as opposed to the NDVI derived from Landsat imagery). To do this, create a Google Maps API key and copy to the indicated location. 
 
 ```{r, echo=TRUE}
-# Plot actual satellite image.
+# Plot the actual satellite image.
 coords <- coordinates(orforest)
 lon <- mean(coords[, 1], na.rm = TRUE)
 lat <- mean(coords[, 2], na.rm = TRUE)
@@ -134,17 +139,21 @@ api_key <- NA # ADD AN API KEY HERE
 Once an API key has been inserted, run the following code to get the satellite image next to the original NDVI image.
 
 ```{r remainder of mapping, echo = TRUE, eval = FALSE}
+# Register a Google API key.
 register_google(api_key)
+
+# Get a satellite image at the specified longitude and latitude.
 img <- get_map(c(lon, lat), zoom = 13, maptype = 'satellite', 
                source = "google")
-bbpoly <- data.frame(x = c(-122.9, -122.9, -123.00002, -123.00002), 
-                     y = c(43.00002, 43.1, 43.1, 43.00002))
+
+# Create a figure with the satellite image using ggplot.
 satimg <- ggmap(img) + coord_fixed(1.7) + xlab('Longitude') + 
   ylab('Latitude') +
   theme(axis.title.x = element_text(size = 12),
         axis.title.y = element_text(size = 12),
         plot.margin = unit(c(0, 0, 0, 0), "cm"))
 
+# Plot the satellite image next to the original NDVI image.
 plot_grid(satimg, orig_ndvi, ncol = 2, nrow = 1, scale = c(0.84, 1))
 ```
 
@@ -152,23 +161,24 @@ plot_grid(satimg, orig_ndvi, ncol = 2, nrow = 1, scale = c(0.84, 1))
 knitr::include_graphics("orig_ndvi_figure.png")
 ```
 
-### Calculate some surface gradient metrics for the orforest raster image.
-The 'sa' function calculates the average roughness of a surface as the absolute deviation of surface heights from the mean surface height. The 'sbi' function calculates the surface bearing index, which is the ratio of the root mean square roughness (Sq) to height at 5% of bearing area (z05). The 'std' function calculates texture direction metrics (i.e., the angle of dominating texture and the texture direction of the Fourier spectrum image calculated from the orforest image). 
+## Calculate global surface gradient metrics
+The simplest use of the *geodiv* package is to apply metrics globally over an entire image. This returns a measurement of the overall heterogeneity of the image. The 'sa' function calculates the average roughness of a surface as the absolute deviation of surface heights from the mean surface height. The 'sbi' function calculates the surface bearing index, which is the ratio of the root mean square roughness (Sq) to height at 5% of bearing area (z05). The 'std' function calculates texture direction metrics (i.e., the angle of dominating texture and the texture direction of the Fourier spectrum image calculated from the orforest image). 
 
 ```{r, echo=TRUE}
+# Calculate global metrics over the entire orforest image.
 (sa <- sa(orforest)) # average roughness
 (sbi <- sbi(orforest)) # surface bearing index
 (std <- std(orforest, create_plot = FALSE, option = 1))
 ```
 
-### Generate texture images for the orforest raster image.
-Another common use case is to look at texture images where a spatial function has been applied over focal windows across a landscape. This functionality is provided through both the 'focal_metrics' and 'texture_image' functions.
+## Generate texture images
+Another common use case is to look at texture images where a spatial function has been applied locally over focal windows across a landscape. This functionality is provided through both the 'focal_metrics' and 'texture_image' functions.
+
+The 'texture_image' function applies metrics in either square or round windows over the raster. This function tends to be faster than 'focal_metrics,' but can use more memory when run on Windows. It is suggested that Windows users use the 'focal_metrics' function instead, unless they have a computer with a lot of memory.
 
 The 'focal_metrics' function is modified from the 'window_lsm' function in *landscapemetrics* (Hesselbarth, et al. 2019). Windows must be rectangular or square, and the 'metrics' argument is a list of functions. The output of this function is a list of rasters.
 
-The 'texture_image' function applies metrics in either square or round windows over the raster. This function tends to be faster than 'focal_metrics,' but uses a lot of memory when run on Windows. It is suggested that Windows users use the 'focal_metrics' function instead, unless they have a computer with a lot of memory.
-
-Note that this step can be somewhat time intensive. For users that would like to run this example, but don't want to run this step, the code to import the rasters is included below.
+Note that this step can be somewhat time intensive. For users that would like to examine the output, but don't want to run this step, the code to import the rasters is included below.
 
 ```{r, eval = FALSE}
 # Texture image creation using 'focal_metrics' function.
@@ -203,7 +213,7 @@ output_rasters2[[3]] <- raster(url[[7]])
 Plot the texture image rasters.
 
 ```{r, eval=TRUE, fig.width=7.5, fig.height=6}
-# plots
+# Create list of plots.
 names <- c('Sa', 'Sbi', 'Std')
 rast_list <- unlist(output_rasters2) 
 plts <- lapply(seq(1, 3), FUN = function(i) {
@@ -211,16 +221,17 @@ plts <- lapply(seq(1, 3), FUN = function(i) {
                        ylab = NULL, xlab = NULL, main = names[i])
 })
 
-# export as one
-grid.arrange(plts[[1]], plts[[2]], plts[[3]], nrow = 2)
+# Arrange plots in the list into a grid.
+grid.arrange(grobs = plts, nrow = 2)
 ```
-## Example 2: Applying all surface metrics across the state of Oregon, USA
 
-### Motivation
-By assessing heterogeneity using a variety of metrics, researchers can gain a more complete picture of heterogeneity than they would with a single metric (Dahlin, 2016). To demonstrate the utility of *geodiv* for this common application, in Example 2 we apply all surface metric functions to images across Oregon, USA and examine the patterns of, and relationships among, metrics. We calculate metrics for both elevation data from the Shuttle Radar Topography Mission (SRTM) and a commonly-used measure of canopy greenness, Enhanced Vegetation Index (EVI) from NASA's Moderate Resolution Imaging Spectroradiometer (MODIS). We then examine the correlations among metrics along a transect crossing the state, and determined how the metrics cluster using two methods, hierarchical clustering and Principal Components Analysis (PCA). This analysis demonstrates the relationships among metrics, with potential for determining how metrics group and behave with various input data.
+# Example 2: Applying all surface metrics across the state of Oregon, USA
 
-### Elevation and EVI Data
-Elevation and EVI data that are available to use along with this vignette were prepared in Google Earth Engine (Gorelick et al., 2017) and analyzed in R. Void-filled SRTM data (Farr et al., 2007) and quality-filtered, maximum growing season, MODIS EVI data (Didan, 2015) were downloaded in Fall 2019.  The code chunk below loads these data into the current R session. Again, R may be used to access satellite data, but we provide previously-prepared data for the purpose of this analysis.
+## Motivation
+By assessing heterogeneity using a variety of metrics, researchers can gain a more complete picture of heterogeneity than they would with a single metric (Dahlin, 2016). To demonstrate the utility of *geodiv* for this common application, in Example 2 we apply all surface metric functions to images across Oregon, USA and examine the patterns of, and relationships among, metrics. We calculate metrics for both elevation data from the Shuttle Radar Topography Mission (SRTM) and a commonly-used measure of canopy greenness, Enhanced Vegetation Index (EVI), from NASA's Moderate Resolution Imaging Spectroradiometer (MODIS). We then examine the correlations among metrics along a transect crossing the state, and determine how the metrics cluster using two methods, hierarchical clustering and Principal Components Analysis (PCA). This analysis demonstrates the relationships among metrics, with potential for determining how metrics group and behave with various input data.
+
+## Elevation and EVI Data
+Elevation and EVI data that are available to use along with this vignette were prepared in Google Earth Engine (Gorelick et al., 2017) and analyzed in R. Void-filled SRTM data (Farr et al., 2007) and quality-filtered, maximum growing season, MODIS EVI data (Didan, 2015) were downloaded in Fall 2019.  The code chunk below downloads these data into the current R session from figshare. Again, R may be used to access satellite data, but we provide previously-prepared data for the purpose of this analysis.
 
 ```{r, warning=FALSE}
 # Download data from figshare. 
@@ -235,7 +246,7 @@ elev <- aggregate(elev, fact = 8)
 evi <- aggregate(evi, fact = 8)
 ```
 
-### Pre-processing of rasters
+## Pre-processing of rasters
 
 Begin by masking any values that are outside of the boundaries for the state of Oregon.
 
@@ -276,7 +287,7 @@ rasterVis::levelplot(elev_masked, margin = F, par.settings = elevTheme,
                      ylab = NULL, xlab = NULL, main = 'Elevation without Trend')
 ```
 
-### Generate texture images of the state of Oregon
+## Generate texture images of the state of Oregon
 
 Below we generate a texture image for the state of Oregon using the 'sa' metric for elevation. Note that the following step may take some time. We provide the output dataframe files along with this vignette for all metrics included in geodiv for elevation and EVI over ~30km x 30km square moving windows and scaled following calculation for the subsequent analyses in this vignette.
 
@@ -287,7 +298,7 @@ system.time(outrast <- texture_image(elev_masked, window_type = 'square', size =
                          ncores = 4, nclumps = 20))
 ```
 
-The code below illustrates how to convert the raster generated by the texture_image function (i.e., outrast) to a dataframe for subsequent analyses. 
+The code below illustrates how to convert the raster generated by the 'texture_image' function (i.e., outrast) to a dataframe for subsequent analyses. 
 
 ```{r, eval=FALSE}
 # get raster values
@@ -308,7 +319,7 @@ data_evi <- read.csv(url[2], stringsAsFactors = FALSE)
 data_elev <- read.csv(url[1], stringsAsFactors = FALSE)
 ```
 
-### Visualization of texture image outputs for elevation and EVI for the state of Oregon
+### Visualization of texture image outputs
 
 Distributions of a few elevation variables:
 
@@ -318,7 +329,7 @@ for (i in c(9, 10, 18, 6)) {
 }
 ```
 
-The code below visualizes metrics over the entire state in order to capture different aspects of landscape heterogeneity. Individual metrics primarily distinguished mountainous versus flat terrain, and managed versus more natural areas; however, some metrics are difficult to interpret, or do not show very much variation over the region. The difficulty of interpreting metrics is a known complicating factor for their use. Others have addressed this issue and linked metrics with known ecosystem features or patch metrics (McGarigal et al., 2009; Kedron et al., 2018).
+The code below visualizes metrics over the entire state in order to capture different aspects of landscape heterogeneity. Individual metrics primarily distinguish mountainous versus flat terrain, and managed versus more natural areas; however, some metrics are difficult to interpret, or do not show very much variation over the region. The difficulty of interpreting metrics is a known complicating factor for their use. Others have addressed this issue and linked metrics with known ecosystem features or patch metrics (McGarigal et al., 2009; Kedron et al., 2018).
 
 ```{r, warning=FALSE, fig.width=7.5, fig.height=8}
 # New names for plots
@@ -332,10 +343,9 @@ plt_names <- data.frame(old = names(data_elev)[3:ncol(data_elev)],
 create_maps <- function(df, r, theme) {
   maps_list <- list()
   for (i in seq(3, ncol(df))) {
-    cat('Creating map for var: ', names(df)[i], '\n', sep = '')
     temp <- setValues(r, df[, i])
     temp[is.na(r)] <- NA
-    goodname <- plt_names$new[plt_names$old == names(df)[i]]
+    goodname <- as.character(plt_names$new[plt_names$old == names(df)[i]])
     maps_list[[i - 2]] <- rasterVis::levelplot(temp, margin = F, 
                                               par.settings = theme, 
                                               ylab = NULL, xlab = NULL, 
@@ -359,11 +369,10 @@ elev_maps <- create_maps(data_elev, elev_masked, elevTheme)
 evi_maps <- create_maps(data_evi, evi_masked, eviTheme)
 
 # Make sure that order of maps is the same for both EVI and Elevation.
-# get order according to names table
-new_order <- match(plt_names$new, names(evi_maps))
+new_order <- match(plt_names$new, names(evi_maps)) # get order according to names table
 evi_maps <- evi_maps[new_order]
 
-# create 3x4 panels (x3 for each)
+# Create map panels (3 each for EVI and elevation).
 for (l in list(elev_maps, evi_maps)) {
   grid.arrange(grobs = l[1:12], nrow = 4, ncol = 3) # 850x800
   grid.arrange(grobs = l[13:24], nrow = 4, ncol = 3) # 850x800
@@ -391,7 +400,7 @@ data_evi <- sp_df(evi, data_evi)
 
 ```
 
-Now let's extract the data along a latitudinal transect going across the state of Oregon.
+Now we extract the data along a latitudinal transect going across the state of Oregon.
 
 ```{r, warning=FALSE}
 
@@ -424,7 +433,7 @@ transect_evi <- get_transect(evi, data_evi)
 
 ```
 
-The code below places standardizes all metrics by placing them on the same scale from 0-1.
+The code below places standardizes all metrics by placing them on the same scale from 0 - 1.
 
 ```{r, warning=FALSE}
 # Get all metrics on same scale (0-1).
@@ -440,7 +449,9 @@ transect_elev <- scale_mets(transect_elev)
 transect_evi <- scale_mets(transect_evi)
 ```
 
-#### Clustering Analysis
+
+### Clustering analysis over transect
+
 
 For the transect analysis, we will perform hierarchical clustering on metric values using the function ‘eclust’ in the package *factoextra* (Kassambara & Mundt, 2020). First, some additional data wrangling is required to prepare the data for the clustering analysis below.
 
@@ -458,10 +469,9 @@ transect_elev <- rm_nas(transect_elev)
 transect_evi <- rm_nas(transect_evi)
 
 ```
-The code below performs the clustering analysis on the surface gradient metrics.
+The code below performs the clustering analysis on the surface gradient metrics. We first determine the optimal number of clusters by examining the gap statistic, and then plot the clustered variables to see the relationships among them.
 
 ```{r, warning=FALSE}
-### EVI
 ### Plot optimal number of clusters
 plot_gap <- function(df) {
   # enhanced k-means clustering
@@ -483,7 +493,7 @@ get_clusters <- function(df, nclust) {
   return(res.hc)
 }
 
-plot_clusters <- function(res.hc, nclust){
+plot_dendrogram <- function(res.hc, nclust){
   # Plot colors
   plt_cols <- c('lightgoldenrod1', 'lightblue', 'grey', 'lightsteelblue4')
   
@@ -492,20 +502,25 @@ plot_clusters <- function(res.hc, nclust){
             lwd = 1, label_cols = 'black', cex = 0.8, main = "", ylab = "", 
             type = 'rectangle', horiz = TRUE, labels_track_height = 14) + 
     theme(axis.text.y = element_blank(), axis.ticks = element_blank())
-  
+}
+
+plot_scatter <- function(res.hc) {
   # Scatterplot
-  fviz_cluster(res.hc) # scatter plot
+  fviz_cluster(res.hc)
 }
 
 res.hc_elev <- get_clusters(transect_elev, nclust = 4)
 res.hc_evi <- get_clusters(transect_evi, nclust = 3)
 
-plot_clusters(res.hc_elev, nclust = 4)
-plot_clusters(res.hc_evi, nclust = 3)
+plot_dendrogram(res.hc_elev, nclust = 4)
+plot_dendrogram(res.hc_evi, nclust = 3)
+
+plot_scatter(res.hc_elev)
+plot_scatter(res.hc_evi)
 
 ```
 
-Now let's generate plots that show the EVI and elevation surface gradient metrics along the Oregon state transect. 
+Now we generate plots that show the EVI and elevation surface gradient metrics along the Oregon state transect. 
 
 First, the data have to be gathered into a longer format for this visualization.
 
@@ -539,6 +554,9 @@ plot_transect_mets <- function(df, res.hc, varname) {
   # Create a dataframe to match variable names with cluster number.
   clust_df <- data.frame(var = res.hc$labels, clust = res.hc$cluster)
   clust_df <- clust_df[order(clust_df$clust),]
+  
+  # Convert var to character.
+  clust_df$var <- as.character(clust_df$var)
   
   # Join cluster number with main dataframe to get cluster labels for plotting.
   df <- left_join(df, clust_df, by = 'var')
@@ -696,8 +714,7 @@ map_comps <- function(pc_dat, noNA_df, full_df, r, theme) {
   }
   
   # Plot in a grid.
-  grid.arrange(out_maps[[1]], out_maps[[2]], out_maps[[3]], out_maps[[4]], 
-               out_maps[[5]], nrow = 2, ncol = 3) 
+  grid.arrange(grobs = out_maps, nrow = 2, ncol = 3) 
 }
 
 map_comps(elev_prc, data_elev_noNA, data_elev, elev, elevTheme)
@@ -759,7 +776,7 @@ plot_loadings <- function(pc_dat) {
   }
   
   # Return grid of first three components.
-  grid.arrange(imp_plts[[1]], imp_plts[[1]], imp_plts[[1]], ncol = 3)
+  grid.arrange(grobs = imp_plts[1:3], ncol = 3)
 }
 
 plot_loadings(elev_prc)
@@ -777,3 +794,23 @@ Looking at the PCA components and loadings, the first component for both elevati
 
 ## Overall summary
 The contrast in metric groupings between the transect hierarchical clustering analysis and statewide PCA demonstrate that there may be differences in metric information depending on the landscape size and scale. As the PCA results were more in line with previous results in the literature, this suggests that those results show the broader metric grouping habits. The transect results demonstrate that this grouping does not always hold across different regions.
+
+# References
+
+1) Dahlin, K.M. 2016. Spectral diversity area relationships for assessing biodiversity in a wildland–agriculture matrix. Ecological applications. 26(8):2758-2768.
+
+2) Didan, K., Munoz, A.B., Solano, R., Huete, A. 2015. MODIS vegetation index user’s guide (MOD13 series). University of Arizona: Vegetation Index and Phenology Lab. 
+
+3) Farr, T.G., Rosen, P.A., Caro, E., Crippen, R., Duren, R., Hensley, S., Kobrick, M., Paller, M., Rodriguez, E., Roth, L. and Seal, D. 2007. The shuttle radar topography mission. Reviews of geophysics. 45(2).
+
+4) Gorelick, N., Hancher, M., Dixon, M., Ilyushchenko, S., Thau, D. and Moore, R., 2017. Google Earth Engine: Planetary-scale geospatial analysis for everyone. Remote sensing of Environment. 202:18-27.
+
+5) Hesselbarth, M.H.K., Sciaini, M., With, K.A., Wiegand, K., Nowosad, J. 2019. landscapemetrics: an open-source R tool to calculate landscape metrics. Ecography 42:1648-1657(ver. 0).
+
+6) Kassambara, A. and Mundt, F. (2020). factoextra: Extract and Visualize the Results of Multivariate Data Analyses. R package version 1.0.7. https://CRAN.R-project.org/package=factoextra
+
+7) Kedron, P.J., Frazier, A.E., Ovando-Montejo, G.A., Wang, J. 2018. Surface metrics for landscape ecology: a comparison of landscape models across ecoregions and scales. Landscape Ecology. 33(9):1489-504.
+
+8) Hesselbarth, M.H.K., Sciaini, M., With, K.A., Wiegand, K., Nowosad, J. 2019. landscapemetrics: an open-source R tool to calculate landscape metrics. Ecography 42:1648-1657(ver. 0).
+  
+9) McGarigal, K., Tagil, S., Cushman, SA. 2009. Surface metrics: an alternative to patch metrics for the quantification of landscape structure. Landscape ecology. 24(3):433-50.
