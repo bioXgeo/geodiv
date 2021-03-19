@@ -65,12 +65,15 @@ library(raster)
 # import raster image
 data(normforest)
 
+# crop raster to smaller area
+x <- crop(normforest, extent(normforest, 1, 100, 1, 100))
+
 # get a surface of root mean square roughness
-sa_img <- focal_metrics(x = normforest, window = matrix(1, 5, 5),
+sa_img <- focal_metrics(x = x, window = matrix(1, 5, 5),
                         metrics = list('sa'), progress = TRUE)
 
 # plot the result
-plot(sa_img)
+plot(sa_img$sa)
 }
 \references{
 \enumerate{

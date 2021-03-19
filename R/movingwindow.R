@@ -63,13 +63,13 @@
 #' # import raster image
 #' data(normforest)
 #'
-#' # crop raster to much smaller area
-#' x <- crop(normforest, extent(-123, -122.99, 43, 43.01))
+#' # crop raster to smaller area
+#' x <- crop(normforest, extent(normforest, 1, 100, 1, 100))
 #'
 #' # get a surface of root mean square roughness
 #' sa_img <- texture_image(x = x, window = 'square',
-#' size = 11, metric = 'sa',
-#' parallel = FALSE)
+#' size = 5, metric = 'sa',
+#' parallel = TRUE, ncores = 2, nclumps = 20)
 #'
 #' # plot the result
 #' plot(sa_img)
@@ -118,18 +118,19 @@ texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE
 
   # add padding to matrix and create matrix of same size (all NA) for finding
   # which values are extra later
-  ext_x <- dummy_ext_x <- pad_edges(new_x, size = (size * 2), val = NULL)
+  shift <- floor(size / 2)
+  ext_x <- dummy_ext_x <- pad_edges(new_x, size = shift, val = NULL)
   dummy_ext_x[] <- NA
 
   # find indices of center, left, right, top, and bottom of each window
-  start_ind <- 1 + (size * 2)
+  start_ind <- 1 + shift
   center <- left <- right <- top <- bottom <- dummy_ext_x
   # first, set those values to 1 for each side
-  center[start_ind:((size * 2) + nrow(new_x)), start_ind:((size * 2) + ncol(new_x))] <- 1
-  left[start_ind:((size * 2) + nrow(new_x)), (size + 1):(size + ncol(new_x))] <- 1
-  right[start_ind:((size * 2) + nrow(new_x)), (start_ind + size):((size * 3) + ncol(new_x))] <- 1
-  top[(size + 1):(size + nrow(new_x)), start_ind:((size * 2) + ncol(new_x))] <- 1
-  bottom[(start_ind + size):((size * 3) + nrow(new_x)), start_ind:((size * 2) + ncol(new_x))] <- 1
+  center[start_ind:(shift + nrow(new_x)), start_ind:(shift + ncol(new_x))] <- 1
+  left[start_ind:(shift + nrow(new_x)), 1:(ncol(new_x))] <- 1
+  right[start_ind:(shift + nrow(new_x)), (start_ind + shift):((shift * 2) + ncol(new_x))] <- 1
+  top[1:nrow(new_x), (shift + 1):(shift + ncol(new_x))] <- 1
+  bottom[(start_ind + shift):((shift * 2) + nrow(new_x)), start_ind:(shift + ncol(new_x))] <- 1
   # get those indices
   center_inds <- which(center == 1)
   left_inds <- which(left == 1, arr.ind = TRUE)
@@ -204,7 +205,6 @@ texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE
     # make and start cluster
     try(stopCluster(cl), silent = TRUE)
     cl <- makeCluster(ncores, type = 'SOCK')
-    # doSNOW::registerDoSNOW(cl)
     parallel::clusterExport(cl = cl, list('ext_x', 'coord_list', 'size',
                                           'window_type',
                                           'new_pixlist', 'metric', 'input_args',
@@ -230,13 +230,9 @@ texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE
   outfinal <- list()
   nresult <- length(result) / nrow(coord_list)
   for (i in 1:nresult) {
-
     temp <- data.frame(newvals = result[seq(i, length(result), nresult)], ind = pixlist)
-    temprast <- x
-    temprast[temp$ind] <- temp$newvals
-    outfinal[[i]] <- temprast
-    outfinal[[i]] <- trim(outfinal[[i]])
-
+    outfinal[[i]] <- x
+    outfinal[[i]] <- setValues(x, matrix(temp$newvals, nrow = nrow(x), ncol = ncol(x)))
   }
 
   if (length(outfinal) == 1) {
@@ -293,24 +289,6 @@ texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE
 #'    \item{\code{'scl'}: correlation length}
 #'    \item{\code{'sdc'}: bearing area curve height interval}
 #' }
-#' @examples
-#' library(raster)
-#'
-#' # import raster image
-#' data(normforest)
-#'
-#' # crop raster to much smaller area if on a smaller computer
-#' x <- crop(normforest, extent(-123, -122.99, 43, 43.01))
-#'
-#' # get coordinates, rownums, cellnums
-#' pixlist <- seq(1, length(x), 1)
-#' ext_x <- pad_edges(x, size = 4)
-#' rownum <- rowFromCell(x, pixlist) + 4
-#' colnum <- colFromCell(x, pixlist) + 4
-#'
-#' # get a surface of root mean square roughness
-#' sq_val <- window_metric(x = x, i = 40, window = 'square',
-#' size = 4, rownum = rownum, colnum = colnum, metric = 'sq')
 #' @export
 window_metric <- function(x, coords, window_type = 'square', size = 11, metric, args = NULL) {
 
@@ -397,7 +375,12 @@ pad_edges <- function(x, size = 11, val = NULL) {
   ext_x[(size + 1):(nrow(ext_x) - size), (size + 1):(ncol(ext_x) - size)] <- x
 
   # fill in corners with nearest point value (always the same)
-  ext_x_mat <- zoo::na.approx(matrix(ext_x, nrow = nrow(ext_x), ncol = ncol(ext_x)), rule = 2)
+  if (is.null(val)) {
+    ext_x_mat <- zoo::na.approx(matrix(ext_x, nrow = nrow(ext_x), ncol = ncol(ext_x)), rule = 2)
+  } else {
+    ext_x_mat <- ext_x
+    ext_x_mat[is.na(ext_x_mat)] <- val
+  }
 
   # If the values were NA before (-9999999 now), convert them back to NA.
   ext_x_mat[is.na(x)] <- NA

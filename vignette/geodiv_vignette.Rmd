@@ -82,6 +82,7 @@ library(gridExtra)
 library(cowplot)
 library(factoextra)
 library(cluster)
+library(rfigshare)
 ```
 # Example 1: Simple workflow with Landsat NDVI
 
@@ -152,13 +153,12 @@ knitr::include_graphics("orig_ndvi_figure.png")
 ```
 
 ### Calculate some surface gradient metrics for the orforest raster image.
-The 'sa' function calculates the average roughness of a surface as the absolute deviation of surface heights from the mean surface height. The 'sbi' function calculates the surface bearing index, which is the ratio of the root mean square roughness (Sq) to height at 5% of bearing area (z05). The 'sfd' function calculates the fractal dimension of the raster (i.e., the 3D fractal dimension using the triangular prism surface method).  
+The 'sa' function calculates the average roughness of a surface as the absolute deviation of surface heights from the mean surface height. The 'sbi' function calculates the surface bearing index, which is the ratio of the root mean square roughness (Sq) to height at 5% of bearing area (z05). The 'std' function calculates texture direction metrics (i.e., the angle of dominating texture and the texture direction of the Fourier spectrum image calculated from the orforest image). 
 
 ```{r, echo=TRUE}
 (sa <- sa(orforest)) # average roughness
 (sbi <- sbi(orforest)) # surface bearing index
 (std <- std(orforest, create_plot = FALSE, option = 1))
-(sfd <- sfd(orforest)) # fractal dimension
 ```
 
 ### Generate texture images for the orforest raster image.
@@ -168,7 +168,7 @@ The 'focal_metrics' function is modified from the 'window_lsm' function in *land
 
 The 'texture_image' function applies metrics in either square or round windows over the raster. This function tends to be faster than 'focal_metrics,' but uses a lot of memory when run on Windows. It is suggested that Windows users use the 'focal_metrics' function instead, unless they have a computer with a lot of memory.
 
-Note that this step can be somewhat time intensive. 
+Note that this step can be somewhat time intensive. For users that would like to run this example, but don't want to run this step, the code to import the rasters is included below.
 
 ```{r, eval = FALSE}
 # Texture image creation using 'focal_metrics' function.
@@ -176,34 +176,43 @@ window <- matrix(1, nrow = 7, ncol = 7)
 system.time(
 output_rasters <- focal_metrics(orforest, window, 
                                 metrics = list('sa', 'sbi'), 
-                                progress = TRUE, silent = TRUE)
+                                progress = TRUE)
 )
 
 print(output_rasters)
 
 # Texture image creation using 'texture_image' function.
-metric_list <- c('sa', 'sbi', 'std', 'sfd')
-system.time(
-output_rasters2 <- lapply(metric_list, FUN = function(m) {
+metric_list <- c('sa', 'sbi', 'std')
+system.time(output_rasters2 <- lapply(metric_list, FUN = function(m) {
   texture_image(orforest, window_type = 'square', size = 7,
                                 in_meters = FALSE, metric = m, 
-                                parallel = TRUE, ncore = 4, nclumps = 20))
-)
+                                parallel = TRUE, ncore = 4, nclumps = 20)}))
+```
+```{r, eval = TRUE}
+# Download rasters from figshare. The list of data returned here will be used
+# throughout the vignette.
+url <- fs_download(12834896, mine = FALSE, session = NULL)
+
+output_rasters2 <- list()
+output_rasters2[[1]] <- raster(url[[5]])
+output_rasters2[[2]] <- raster(url[[6]])
+output_rasters2[[3]] <- raster(url[[7]])
+
 ```
 
 Plot the texture image rasters.
 
 ```{r, eval=TRUE, fig.width=7.5, fig.height=6}
 # plots
-names <- c('Sa', 'Sbi', 'Std', 'Sfd')
-rast_list <- output_rasters[1:2]
-plts <- lapply(seq(1, 4), FUN = function(i) {
-  rasterVis::levelplot(rast_list[i], margin = F, par.settings = eviTheme, 
+names <- c('Sa', 'Sbi', 'Std')
+rast_list <- unlist(output_rasters2) 
+plts <- lapply(seq(1, 3), FUN = function(i) {
+  rasterVis::levelplot(rast_list[[i]], margin = F, par.settings = eviTheme, 
                        ylab = NULL, xlab = NULL, main = names[i])
 })
 
 # export as one
-grid.arrange(plts, nrow = 2)
+grid.arrange(plts[[1]], plts[[2]], plts[[3]], nrow = 2)
 ```
 ## Example 2: Applying all surface metrics across the state of Oregon, USA
 
@@ -214,9 +223,9 @@ By assessing heterogeneity using a variety of metrics, researchers can gain a mo
 Elevation and EVI data that are available to use along with this vignette were prepared in Google Earth Engine (Gorelick et al., 2017) and analyzed in R. Void-filled SRTM data (Farr et al., 2007) and quality-filtered, maximum growing season, MODIS EVI data (Didan, 2015) were downloaded in Fall 2019.  The code chunk below loads these data into the current R session. Again, R may be used to access satellite data, but we provide previously-prepared data for the purpose of this analysis.
 
 ```{r, warning=FALSE}
-# The below line of code will need to be modified to match the directory on the user's machine that contains the vignette files for this code chunk to run.
-elev <- raster('oregon_SRTM_elevation_2000.tif')
-evi <- raster('oregon_max_growing_season_EVI_2000_2019.tif') * 0.0001
+# Download data from figshare. 
+elev <- raster(url[4])
+evi <- raster(url[3]) * 0.0001
 ```
 
 Aggregate both datasets to ~2km resolution for comparison between datasets and to reduce computational time. 
@@ -231,34 +240,39 @@ evi <- aggregate(evi, fact = 8)
 Begin by masking any values that are outside of the boundaries for the state of Oregon.
 
 ```{r, warning=FALSE}
-state <- maps::map(database = 'state', regions = 'oregon', fill = TRUE, plot = FALSE)
-statePoly <- map2SpatialPolygons(state, IDs = state$names, proj4string = CRS(proj4string(evi)))
-evi <- mask(x = evi, mask = statePoly)
-elev <- mask(x = elev, mask = statePoly)
+state <- maps::map(database = 'state', regions = 'oregon', 
+                   fill = TRUE, plot = FALSE)
+statePoly <- map2SpatialPolygons(state, IDs = state$names, 
+                                 proj4string = CRS(proj4string(evi)))
+evi_masked <- mask(x = evi, mask = statePoly)
+elev_masked <- mask(x = elev, mask = statePoly)
 ```
 
 Generate plots to get a sense for the spatial patterns in the data.
 
 ```{r, warning=FALSE}
 # plot maximum growing season EVI for Oregon
-rasterVis::levelplot(evi, margin = F, par.settings = eviTheme, ylab = NULL, xlab = NULL, main = 'Maximum Growing Season EVI')
+rasterVis::levelplot(evi_masked, margin = F, par.settings = eviTheme, 
+                     ylab = NULL, xlab = NULL, 
+                     main = 'Maximum Growing Season EVI')
 
 # plot elevation (in meters) for Oregon
 elevCols <- colorRampPalette(c('grey7', 'grey93'))(100)
 elevTheme <- rasterVis::rasterTheme(region = elevCols)
-rasterVis::levelplot(elev, margin = F, par.settings = elevTheme, ylab = NULL, xlab = NULL, main = 'Elevation (m)')
+rasterVis::levelplot(elev_masked, margin = F, par.settings = elevTheme, 
+                     ylab = NULL, xlab = NULL, main = 'Elevation (m)')
 ```
 
 Remove any trends in the data with the 'remove_plane' function and take a look at the plots of the images with the trends removed.
 
 ```{r, warning=FALSE}
-evi <- remove_plane(evi)
-elev <- remove_plane(elev) # there was no trend
+evi_masked <- remove_plane(evi_masked)
+elev_masked <- remove_plane(elev_masked) # there was no trend
 
 # plot again to see what the new raster looks like
-rasterVis::levelplot(evi, margin = F, par.settings = eviTheme, 
+rasterVis::levelplot(evi_masked, margin = F, par.settings = eviTheme, 
                      ylab = NULL, xlab = NULL, main = 'EVI without Trend')
-rasterVis::levelplot(elev, margin = F, par.settings = elevTheme, 
+rasterVis::levelplot(elev_masked, margin = F, par.settings = elevTheme, 
                      ylab = NULL, xlab = NULL, main = 'Elevation without Trend')
 ```
 
@@ -268,27 +282,30 @@ Below we generate a texture image for the state of Oregon using the 'sa' metric 
 
 ```{r, eval=FALSE}
 # Calculate elevation sa texture image for state of Oregon
-outrast <- texture_image(elev, window = matrix(1, nrow = 7, ncol = 7), 
-                         metrics = list('sa')) 
+system.time(outrast <- texture_image(elev_masked, window_type = 'square', size = 7, 
+                         in_meters = FALSE, metric = 'sa', parallel = TRUE,
+                         ncores = 4, nclumps = 20))
 ```
 
-The code below illustrates how to convert the raster generated by the texture_image function (i.e., outrast) to a dataframe for subsequent analyses.
+The code below illustrates how to convert the raster generated by the texture_image function (i.e., outrast) to a dataframe for subsequent analyses. 
 
 ```{r, eval=FALSE}
 # get raster values
 vals <- outrast[]
 
-# Convert output raster of sa metrics (outrast) to a dataframe for easier use in subsequent analyses
+# Convert output raster of sa metrics (outrast) to a dataframe for 
+# easier use in subsequent analyses
 coords <- coordinates(outrast)
 sa_data_elev <- data.frame(x = coords[, 1], y = coords[, 2], v = vals)
 ```
 
-Generating these data frames can take a while, so we have provided .csv files for all gradient surface metrics calculated for elevation and EVI in case you find them useful for working with this vignette. The below code reads in these provided .csv files.
+Generating these data frames can take a while, so we have provided .csv files for all gradient surface metrics calculated for elevation and EVI in case you find them useful for working with this vignette. The below code reads in these provided .csv files by downloading data from figshare.
 
 ```{r, warning=FALSE}
-# Read in dataframes containing state of Oregon texture image outputs for EVI and elevation.
-data_evi <- read.csv('evi_variables.csv', stringsAsFactors = FALSE)
-data_elev <- read.csv('elevation_variables.csv', stringsAsFactors = FALSE)
+# The list of figshare files was completed above, so grab the appropriate files
+# for the csv's of all texture image outputs for Oregon.
+data_evi <- read.csv(url[2], stringsAsFactors = FALSE)
+data_elev <- read.csv(url[1], stringsAsFactors = FALSE)
 ```
 
 ### Visualization of texture image outputs for elevation and EVI for the state of Oregon
@@ -296,82 +313,63 @@ data_elev <- read.csv('elevation_variables.csv', stringsAsFactors = FALSE)
 Distributions of a few elevation variables:
 
 ```{r, warning=FALSE}
-# Histogram of average roughness of a surface (Sa) of elevation
-hist(data_elev$sa, breaks = 30, xlab = 'Elevation Average Surface Roughness (Sa)', 
-     main = '')
-# Histogram of average roughness of the elevation surface (Sa) 
-hist(data_elev$sbi, breaks = 30, xlab = 'Elevation Surface Bearing Index (Sbi)', 
-     main = '')
-# Histogram of fractal dimension of the elevation raster 
-hist(data_elev$sfd, breaks = 30, xlab = 'Fractal Dimension of Elevation',
-     main = '')
-# Histogram of texture dimension of elevation
-hist(data_elev$std, breaks = 30, xlab = 'Texture Dimension of Elevation',
-     main = '')
+for (i in c(9, 10, 18, 6)) {
+  hist(data_elev[, i], breaks = 30, xlab = names(data_elev)[i], main = '')
+}
 ```
 
 The code below visualizes metrics over the entire state in order to capture different aspects of landscape heterogeneity. Individual metrics primarily distinguished mountainous versus flat terrain, and managed versus more natural areas; however, some metrics are difficult to interpret, or do not show very much variation over the region. The difficulty of interpreting metrics is a known complicating factor for their use. Others have addressed this issue and linked metrics with known ecosystem features or patch metrics (McGarigal et al., 2009; Kedron et al., 2018).
 
 ```{r, warning=FALSE, fig.width=7.5, fig.height=8}
-# Create plots of all possible surface gradient metrics that geodiv calculates for elevation and EVI.
-elev_maps <- list()
-elev_names <- c('Shw', 'Srw', 'Srwi', 'Std', 'Stdi', 'S10z', 'Sa', 'Sbi', 
-                'Sci', 'Sdc 50-55%', 'Sdc 80-85%', 'Sdc 0-5%', 'Sdq6', 
-                'Sdr', 'Sds', 'Sfd', 'Sk', 'Sku', 'Smean', 'Sp', 'Spk', 
-                'Sq', 'Ssc', 'Ssk', 'Sv', 'Svi', 'Svk')
-for (i in seq(3, ncol(data_elev))) {
-  cat('Creating map for var: ', names(data_elev)[i], '\n', sep = '')
-  temp <- setValues(elev, data_elev[,i])
-  temp[is.na(elev)] <- NA
-  goodname <- elev_names[i-2]
-  elev_maps[[i - 2]] <- rasterVis::levelplot(temp, margin = F, 
-                                             par.settings = elevTheme, 
-                                             ylab = NULL, xlab = NULL, 
-                                             main = goodname)
-  elev_maps[[i-2]]$par.settings$layout.heights[
-    c( 'bottom.padding',
-       'top.padding',
-       'key.sub.padding',
-       'axis.xlab.padding',
-       'key.axis.padding',
-       'main.key.padding') ] <- 1
-  elev_maps[[i-2]]$aspect.fill <- TRUE
+# New names for plots
+plt_names <- data.frame(old = names(data_elev)[3:ncol(data_elev)],
+                        new = c('Shw', 'Srw', 'Srwi', 'Std', 'Stdi', 'S10z',
+                                'Sa', 'Sbi', 'Sci', 'Sdc 50-55%', 'Sdc 80-85%',
+                                'Sdc 0-5%', 'Sdq6', 'Sdr', 'Sds', 'Sfd', 'Sk',
+                                'Sku', 'Smean', 'Sph', 'Spk', 'Sq', 'Ssc',
+                                'Ssk', 'Sv', 'Svi', 'Svk'))
+
+create_maps <- function(df, r, theme) {
+  maps_list <- list()
+  for (i in seq(3, ncol(df))) {
+    cat('Creating map for var: ', names(df)[i], '\n', sep = '')
+    temp <- setValues(r, df[, i])
+    temp[is.na(r)] <- NA
+    goodname <- plt_names$new[plt_names$old == names(df)[i]]
+    maps_list[[i - 2]] <- rasterVis::levelplot(temp, margin = F, 
+                                              par.settings = theme, 
+                                              ylab = NULL, xlab = NULL, 
+                                              main = goodname)
+    maps_list[[i - 2]]$par.settings$layout.heights[
+      c( 'bottom.padding',
+        'top.padding',
+        'key.sub.padding',
+        'axis.xlab.padding',
+        'key.axis.padding',
+        'main.key.padding') ] <- 1
+    maps_list[[i - 2]]$aspect.fill <- TRUE
+    names(maps_list)[i - 2] <- goodname
+  }
+  return(maps_list)
 }
 
-evi_maps <- list()
-evi_names <- c('S10z', 'Sa', 'Sbi', 'Sci', 'Sdc 50-55%', 'Sdc 80-85%', 
-               'Sdc 0-5%', 'Sdq6', 'Sdr', 'Sds', 'Sfd', 'Shw', 'Sk', 'Sku', 
-               'Smean', 'Sp', 'Spk', 'Sq', 'Srw', 'Srwi', 'Ssc', 'Ssk', 
-               'Std', 'Stdi', 'Sv', 'Svi', 'Svk')
-for (i in seq(3, ncol(data_evi))) {
-  cat('Creating map for var: ', names(data_evi)[i], '\n', sep = '')
-  temp <- setValues(evi, data_evi[,i])
-  temp[is.na(evi)] <- NA
-  goodname <- evi_names[i-2]
-  evi_maps[[i - 2]] <- rasterVis::levelplot(temp, margin = F, 
-                                            par.settings = eviTheme, 
-                                            ylab = NULL, xlab = NULL, 
-                                            main = goodname)
-  evi_maps[[i-2]]$par.settings$layout.heights[
-    c( 'bottom.padding',
-       'top.padding',
-       'key.sub.padding',
-       'axis.xlab.padding',
-       'key.axis.padding',
-       'main.key.padding') ] <- 1
-  evi_maps[[i-2]]$aspect.fill <- TRUE
-}
+# Create plots of all possible surface gradient metrics that geodiv calculates 
+# for elevation and EVI.
+elev_maps <- create_maps(data_elev, elev_masked, elevTheme)
+evi_maps <- create_maps(data_evi, evi_masked, eviTheme)
+
+# Make sure that order of maps is the same for both EVI and Elevation.
+# get order according to names table
+new_order <- match(plt_names$new, names(evi_maps))
+evi_maps <- evi_maps[new_order]
 
 # create 3x4 panels (x3 for each)
-grid.arrange(grobs = elev_maps[1:12], nrow = 4, ncol = 3) # 850x800
-grid.arrange(grobs = elev_maps[13:24], nrow = 4, ncol = 3) # 850x800
-grid.arrange(grobs = elev_maps[25:27], nrow = 4, ncol = 3) # 850x800
+for (l in list(elev_maps, evi_maps)) {
+  grid.arrange(grobs = l[1:12], nrow = 4, ncol = 3) # 850x800
+  grid.arrange(grobs = l[13:24], nrow = 4, ncol = 3) # 850x800
+  grid.arrange(grobs = l[25:27], nrow = 4, ncol = 3) # 850x800
+}
 
-grid.arrange(grobs = evi_maps[c(12, 19, 20, 23, 24, seq(1,7))], nrow = 4, 
-             ncol = 3) # 850x800
-grid.arrange(grobs = evi_maps[c(seq(8, 11), 13, 14, 15, 16, 17, 18, 21, 22)], 
-             nrow = 4, ncol = 3) # 850x800
-grid.arrange(grobs = evi_maps[c(25, 26, 27)], nrow = 4, ncol = 3) # 850x800
 ```
 
 ## Transect analysis
@@ -380,240 +378,201 @@ In the code below, we examine an example of local correlation and clustering amo
 First we convert the raw elevation and EVI data from the NASA's SRTM and MODIS mission, respectively, to a dataframe and add those raw values to the dataframes for EVI and elevation containing the gradient surface metrics we've calculated across the state of Oregon.
 
 ```{r, warning=FALSE}
-elev <- raster('oregon_SRTM_elevation_2000.tif')
-evi <- raster('oregon_max_growing_season_EVI_2000_2019.tif') * 0.0001
+# Convert the rasters to dataframe format and add value to dataframe with 
+# metric values.
+sp_df <- function(r, df) {
+  pixdf <- as.data.frame(as(r, "SpatialPixelsDataFrame"))
+  df$value <- pixdf[, 1]
+  return(df)
+}
 
-# Coarsen resolution to 2km
-elev <- aggregate(elev, fact = 8)
-evi <- aggregate(evi, fact = 8)
+data_elev <- sp_df(elev, data_elev)
+data_evi <- sp_df(evi, data_evi)
 
-# convert to data frame
-elev_pixdf <- as(elev, "SpatialPixelsDataFrame")
-elev_df <- as.data.frame(elev_pixdf)
-colnames(elev_df) <- c("value", "x", "y")
-evi_pixdf <- as(evi, "SpatialPixelsDataFrame")
-evi_df <- as.data.frame(evi_pixdf)
-colnames(evi_df) <- c("value", "x", "y")
-
-# add raw values to other metric dataframe
-data_evi$evi <- evi_df$value
-data_elev$elev <- elev_df$value
 ```
 
 Now let's extract the data along a latitudinal transect going across the state of Oregon.
 
 ```{r, warning=FALSE}
-# Calculate the closest y value to the mean and then select all pixels along that line.
-evi_crop <- crop(evi, extent(evi, round(nrow(evi) / 2) - 7, 
-                             round(nrow(evi) / 2) + 7, 1, ncol(evi)))
-elev_crop <- crop(elev, extent(elev, round(nrow(elev) / 2) - 7, 
-                               round(nrow(elev) / 2) + 7, 1, ncol(elev)))
-central_y_evi <- unique(coordinates(evi_crop)[,2])[8]
-central_y_elev <- unique(coordinates(elev_crop)[,2])[8]
-central_y_evi <- unique(data_evi$y[near(data_evi$y,
-                                        central_y_evi, 0.01)])[1]
-central_y_elev <- unique(data_elev$y[near(data_elev$y, 
-                                          central_y_elev, 0.01)])[1]
 
-# Extract mean EVI and elevation values by column
-evi_means <- colMeans(as.matrix(evi_crop), na.rm = TRUE)
-elev_means <- colMeans(as.matrix(elev_crop), na.rm = TRUE)
+# Create new dataframe of values along a latitudinal transect.
+get_transect <- function(r, df) {
+  # Crop raster to center transect (+/- 7 pixels North or South).
+  center_row <- round(nrow(r) / 2)
+  r_crop <- crop(r, extent(r, center_row - 7, center_row + 7, 1, ncol(r)))
+  
+  # Get 8th latitudinal coordinate (center latitude) from the cropped raster.
+  central_y <- unique(coordinates(r_crop)[, 2])[8]
+  
+  # Get the closest latitude in the dataframe to the central raster coordinate.
+  central_y <- unique(df$y[near(df$y, central_y, 0.01)])[1]
 
-# Now limit the dataframe to those points in space
-transect_evi <- data_evi[data_evi$y == central_y_evi,]
-transect_elev <- data_elev[data_elev$y == central_y_elev,]
+  # Extract mean EVI and elevation values by raster column.
+  r_means <- colMeans(as.matrix(r_crop), na.rm = TRUE)
 
-# Add column means to dataframe
-transect_evi$evi <- evi_means
-transect_elev$elev <- elev_means
+  # Now limit the dataframe to the central row across the transect.
+  transect_vals <- df[df$y == central_y,]
+
+  # Add column means to dataframe.
+  transect_vals$value <- r_means
+  
+  return(transect_vals)
+}
+
+transect_elev <- get_transect(elev, data_elev)
+transect_evi <- get_transect(evi, data_evi)
+
 ```
 
 The code below places standardizes all metrics by placing them on the same scale from 0-1.
 
 ```{r, warning=FALSE}
-# Get all metrics on same scale (0-1)
-for (i in 3:ncol(transect_evi)) {
-  transect_evi[,i] <- (transect_evi[,i] - min(transect_evi[,i], 
-                                              na.rm = TRUE)) / 
-    (max(transect_evi[,i], na.rm = TRUE) - min(transect_evi[,i],
-                                               na.rm = TRUE))
+# Get all metrics on same scale (0-1).
+scale_mets <- function(df) {
+  for (i in 3:ncol(df)) {
+     df[,i] <- (df[, i] - min(df[, i], na.rm = TRUE)) / 
+       (max(df[, i], na.rm = TRUE) - min(df[, i], na.rm = TRUE))
+  }
+  return(df)
 }
-for (i in 3:ncol(transect_elev)) {
-  transect_elev[,i] <- (transect_elev[,i] - min(transect_elev[,i], 
-                                                na.rm = TRUE)) / 
-    (max(transect_elev[,i], na.rm = TRUE) - min(transect_elev[,i], 
-                                                na.rm = TRUE))
-}
-```
 
-Final data wrangling to take data from wide to long version for the clustering analysis.
-
-```{r, warning=FALSE}
-# save full spread out (i.e., wide) version of dataframe
-spread_evi <- transect_evi
-spread_elev <- transect_elev
-
-# gather data to create long version of dataframe
-transect_evi <- transect_evi %>%
-  tidyr::gather(key = 'var', value = 'value', 
-                names(transect_evi[, seq(3, ncol(transect_evi))]))
-transect_elev <- transect_elev %>%
-  tidyr::gather(key = 'var', value = 'value',
-                names(transect_elev[, seq(3, ncol(transect_elev))]))
-
-# order variables the same way for evi and elevation
-transect_evi <- transect_evi[order(transect_evi$var),]
-transect_elev <- transect_elev[order(transect_elev$var),]
+transect_elev <- scale_mets(transect_elev)
+transect_evi <- scale_mets(transect_evi)
 ```
 
 #### Clustering Analysis
 
-For the transect analysis, we will perform hierarchical clustering on metric values using the function ‘eclust’ in the package factoextra (Kassambara & Mundt, 2020). But, first some additional data wrangling to prepare the data for the clustering analysis below.
+For the transect analysis, we will perform hierarchical clustering on metric values using the function ‘eclust’ in the package *factoextra* (Kassambara & Mundt, 2020). First, some additional data wrangling is required to prepare the data for the clustering analysis below.
 
 ```{r, warning=FALSE}
-# Remove NA values
-sapply(spread_evi[, c(3:ncol(spread_evi))], function(x) sum(is.na(x)))
-for (i in 3:ncol(spread_evi)) {
-  spread_evi <- spread_evi[!is.na(spread_evi[, i]),]
-}
-sapply(spread_elev[, c(3:ncol(spread_elev))], function(x) sum(is.na(x)))
-for (i in 3:ncol(spread_elev)) {
-  spread_elev <- spread_elev[!is.na(spread_elev[, i]),]
+
+# Remove NA values from the metric columns.
+rm_nas <- function(df) {
+  for (i in 3:ncol(df)) {
+    df <- df[!is.na(df[, i]),]
+  }
+  return(df)
 }
 
-# Check for constant columns
-sapply(spread_evi[, c(3:ncol(spread_evi))], function(x) length(unique(x)))
-sapply(spread_elev[, c(3:ncol(spread_elev))], function(x) length(unique(x)))
+transect_elev <- rm_nas(transect_elev)
+transect_evi <- rm_nas(transect_evi)
+
 ```
-The code below performs the clustering analysis on the EVI surface gradient metrics.
+The code below performs the clustering analysis on the surface gradient metrics.
 
 ```{r, warning=FALSE}
 ### EVI
-# Compute dissimilarity matrix
-res.dist_evi <- dist(t(spread_evi)[3:(ncol(spread_evi) - 1),], 
-                     method = "euclidean")
-# Compute hierarchical clustering
-res.hc_evi <- hclust(t(res.dist_evi), method = "ward.D2")
-# Visualize
-plot(res.hc_evi, cex = 0.5)
+### Plot optimal number of clusters
+plot_gap <- function(df) {
+  # enhanced k-means clustering
+  res.km <- clusGap(t(df)[3:(ncol(df) - 1), ], stats::kmeans, K.max = 10, 
+                    B = 100, nstart = 25)
+  # gap statistic plot
+  factoextra::fviz_gap_stat(res.km)
+}
 
-# Enhanced k-means clustering
-res.km_evi <- clusGap(t(spread_evi)[3:(ncol(spread_evi) - 1),], 
-                      stats::kmeans, K.max = 10, B = 100, nstart = 25)
-# Gap statistic plot
-factoextra::fviz_gap_stat(res.km_evi)
+plot_gap(transect_evi)
+plot_gap(transect_elev)
 
-# Enhanced hierarchical clustering
-res.hc_evi <- factoextra::eclust(t(spread_evi)[3:(ncol(spread_evi) - 1),], 
-                                 "hclust") # compute hclust
-# Dendrogram plot
-fviz_dend(res.hc_evi, rect = FALSE,
-          k_colors = c('lightgoldenrod1', 'lightblue', 'grey'), 
-          lwd = 1, label_cols = 'black',
-          cex = 0.8, main = "", ylab = "", type = 'rectangle', horiz = TRUE, 
-          labels_track_height = 14) +
-  theme(axis.text.y = element_blank(),
-        axis.ticks = element_blank())
-# Scatterplot
-fviz_cluster(res.hc_evi) # scatter plot
-```
-
-The code below performs the clustering analysis on the elevation surface gradient metrics.
+### Dendrogram and scatterplot of clusters
+get_clusters <- function(df, nclust) {
+  # Enhanced hierarchical clustering using optimal # of clusters.
+  res.hc <- factoextra::eclust(t(df)[3:(ncol(df) - 1),], 
+                                 "hclust", k = nclust)
   
-```{r, warning=FALSE}
-### ELEV
-# Compute dissimilarity matrix
-res.dist_elev <- dist(t(spread_elev)[3:(ncol(spread_elev) - 1),], 
-                      method = "euclidean")
-# Compute hierarchical clustering
-res.hc_elev <- hclust(t(res.dist_elev), method = "ward.D2")
-# Visualize
-plot(res.hc_elev, cex = 0.5)
+  return(res.hc)
+}
 
-# Enhanced k-means clustering
-res.km_elev <- clusGap(t(spread_elev)[3:(ncol(spread_elev) - 1),], 
-                       stats::kmeans, K.max = 10, B = 100, nstart = 25)
-# Gap statistic plot
-factoextra::fviz_gap_stat(res.km_elev)
+plot_clusters <- function(res.hc, nclust){
+  # Plot colors
+  plt_cols <- c('lightgoldenrod1', 'lightblue', 'grey', 'lightsteelblue4')
+  
+  # Dendrogram plot
+  fviz_dend(res.hc, rect = FALSE, k_colors = plt_cols[1:nclust], 
+            lwd = 1, label_cols = 'black', cex = 0.8, main = "", ylab = "", 
+            type = 'rectangle', horiz = TRUE, labels_track_height = 14) + 
+    theme(axis.text.y = element_blank(), axis.ticks = element_blank())
+  
+  # Scatterplot
+  fviz_cluster(res.hc) # scatter plot
+}
 
-# Enhanced hierarchical clustering
-res.hc_elev <- factoextra::eclust(t(spread_elev)[3:(ncol(spread_elev) - 1),], 
-                                  "hclust", k = 4) # compute hclust
-# Plot Dendrogram
-fviz_dend(res.hc_elev, rect = FALSE, 
-          k_colors = c('lightgoldenrod1', 'lightblue', 
-                       'grey', 'lightsteelblue4'), lwd = 1, 
-          label_cols = 'black',
-          cex = 0.8, main = "", ylab = "", horiz = TRUE, type = 'rectangle', 
-          labels_track_height = 8) +
-  theme(axis.text.y = element_blank(),
-        axis.ticks = element_blank())
-# Scatterplot
-fviz_cluster(res.hc_elev) 
+res.hc_elev <- get_clusters(transect_elev, nclust = 4)
+res.hc_evi <- get_clusters(transect_evi, nclust = 3)
+
+plot_clusters(res.hc_elev, nclust = 4)
+plot_clusters(res.hc_evi, nclust = 3)
+
 ```
 
-Now, let's generate plots that show the EVI and elevation surface gradient metrics along the Oregon state transect. 
+Now let's generate plots that show the EVI and elevation surface gradient metrics along the Oregon state transect. 
+
+First, the data have to be gathered into a longer format for this visualization.
+
+```{r, warning=FALSE}
+
+# Create gathered (long) version of dataframe for the clustering analysis.
+gather_data <- function(df) {
+  df <- df %>% tidyr::gather(key = 'var', value = 'value', 
+                             names(df[, seq(3, ncol(df))]))
+  
+  # Order variables.
+  df <- df[order(df$var),]
+  
+  return(df)
+}
+
+gathered_elev <- gather_data(transect_elev)
+gathered_evi <- gather_data(transect_evi)
+```
+
+Now we can plot the metrics along the transect, labeling the cluster.
 
 ```{r, warning=FALSE, , fig.width=7.5, fig.height=10}
-# EVI clusters
-evi_c1 <- c('sds', 'srw', 'shw', 'ssc', 'srwi', 'sbi', 'stdi')
-evi_c2 <- c('sdc0005', 'sku', 'std', 'sk' , 'svi', 'smean', 'sq', 'sdc05055', 
-            'sdr', 'sdc08085', 'svk')
-evi_c3 <- c('ssk', 'sph', 'sci', 'spk', 'sfd', 'sv', 'sdq6', 's10z', 'sa')
 
-# Elevation clusters
-elev_c1 <- c('srw', 'std', 'sdc08085', 'svk', 'sv', 'sku', 'sdr', 'sfd')
-elev_c2 <- c('ssc', 'sbi', 'svi')
-elev_c3 <- c('sdc0005', 'spk', 'sdc05055', 'sk', 'sci', 'sa', 'sq')
-elev_c4 <- c('srwi', 'stdi', 'shw', 'ssk', 'smean', 'sph', 'sds', 's10z', 
-             'sdq6')
+# Plot metrics along transect, with cluster labeled.
+plot_transect_mets <- function(df, res.hc, varname) {
+  # Map colors to cluster or variable names.
+  col_map <- c("1" = "lightgoldenrod1", "2" = "lightblue", "3" = "grey",
+               "4" = "lightsteelblue4", "EVI" = "white", "Elev" = "white")
+  
+  # Create a dataframe to match variable names with cluster number.
+  clust_df <- data.frame(var = res.hc$labels, clust = res.hc$cluster)
+  clust_df <- clust_df[order(clust_df$clust),]
+  
+  # Join cluster number with main dataframe to get cluster labels for plotting.
+  df <- left_join(df, clust_df, by = 'var')
+  
+  # Anything not labeled with a cluster (i.e., the actual value) gets labeled.
+  df$clust[is.na(df$clust)] <- varname
+  
+  # Change 'value' label to actual variable name.
+  df$var[df$var == 'value'] <- varname
+  
+  # Convert cluster names to factors and match with colors.
+  df$clust <- as.factor(df$clust) 
+  df$var <- factor(df$var, levels = c(clust_df$var, varname))
+  cols_to_use <- col_map[names(col_map) %in% df$clust]
+  
+  ggplot(df, aes(x = x, y = value)) + 
+    geom_rect(aes(xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf, 
+                  fill = clust)) +
+    geom_line(lwd = 0.7) +
+    xlab('Longitude') +
+    facet_grid(var~., switch = 'y') +
+    scale_fill_manual(values = cols_to_use, name = 'Cluster') +
+    theme_bw() +
+    theme(axis.title.y = element_blank(),
+          axis.text.y = element_blank(),
+          strip.text.y.left = element_text(face = 'bold', size = 11, angle = 0),
+          legend.position = 'none',
+          axis.title.x = element_text(face = 'bold', size = 11))
+}
 
-# Apply colors by cluster
-transect_evi$cluster <- NA
-transect_evi$cluster[transect_evi$var %in% evi_c1] <- 1
-transect_evi$cluster[transect_evi$var %in% evi_c2] <- 2
-transect_evi$cluster[transect_evi$var %in% evi_c3] <- 3
-transect_evi$cluster[is.na(transect_evi$cluster)] <- 'EVI'
+plot_transect_mets(gathered_elev, res.hc_elev, "Elev")
+plot_transect_mets(gathered_evi, res.hc_evi, "EVI")
 
-transect_elev$cluster <- NA
-transect_elev$cluster[transect_elev$var %in% elev_c1] <- 1
-transect_elev$cluster[transect_elev$var %in% elev_c2] <- 2
-transect_elev$cluster[transect_elev$var %in% elev_c3] <- 3
-transect_elev$cluster[transect_elev$var %in% elev_c4] <- 4
-transect_elev$cluster[is.na(transect_elev$cluster)] <- 'Elevation'
 
-# Plot EVI 
-ggplot(transect_evi, aes(x = x, y = value)) + 
-  geom_rect(aes(xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf, 
-                fill = as.factor(cluster))) +
-  geom_line(lwd = 0.7) +
-  xlab('Longitude') +
-  facet_grid(var~., switch = 'y') +
-  scale_fill_manual(values = c("1" = "lightgoldenrod1", "2" = "lightblue", 
-                               "3" = "grey", 'EVI' = 'white'), 
-                    name = 'Cluster') +
-  theme_bw() +
-  theme(axis.title.y = element_blank(),
-        axis.text.y = element_blank(),
-        strip.text.y.left = element_text(face = 'bold', size = 11, angle = 0),
-        legend.position = 'none',
-        axis.title.x = element_text(face = 'bold', size = 11))
-# Plot elevation 
-ggplot(transect_elev, aes(x = x, y = value)) + 
-  geom_rect(aes(xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf, 
-                fill = as.factor(cluster))) +
-  geom_line(lwd = 0.7) +
-  xlab('Longitude') +
-  facet_grid(var~., switch = 'y') +
-  scale_fill_manual(values = c("1" = "lightgoldenrod1", "2" = "lightblue", 
-                               "3" = "grey", "4" = "lightsteelblue4", 
-                               'Elevation' = 'white'), name = 'Cluster') +
-  theme_bw() +
-  theme(axis.title.y = element_blank(),
-        axis.text.y = element_blank(),
-        strip.text.y.left = element_text(face = 'bold', size = 11, angle = 0),
-        legend.position = 'none',
-        axis.title.x = element_text(face = 'bold', size = 11))
 ```
 
 ### Summary of transect cluster analysis
@@ -624,493 +583,192 @@ Overall trends along the transect were similar among metrics, with more variatio
 Next, we will determine the statewide elevation and EVI variance explained by metrics using PCA. First, we need to get the data ready for the PCA. In the code below, we remove several variables due to their large number of NA values, caused either by windows containing too few values, or windows lacking ‘peaks’ or ‘valleys’ (pixels surrounded by lower or higher values, respectively). After cleaning the data, 21 metrics remain in the analysis. 
 
 ```{r}
-# Get data ready for PCA 
-# Identify metrics with large numbers of NA values
-sapply(data_elev, function(x) sum(is.na(x)))
-sapply(data_evi, function(x) sum(is.na(x)))
-#Remove metrics with large numbers of NA values
-data_elev <- data_elev[, c(-3, -4, -5, -21, -25, -18)] 
-data_evi <- data_evi[, c(-13, -14, -21, -22, -23, -17)] 
-data_elev_noNA <- na.omit(data_elev) 
-data_evi_noNA <- na.omit(data_evi)
+# Get data ready for PCA by removing NA values.
+clean_data <- function(df) {
+  # Remove columns with very large numbers of NAs.
+  NAs <- sapply(df, function(x) sum(is.na(x)))
+  rm_cols <- which(NAs >= 20000)
+  df <- df[, -rm_cols]
+  # Remove NAs from remaining columns.
+  df <- na.omit(df)
+  return(df)
+}
+
+data_elev_noNA <- clean_data(data_elev)
+data_evi_noNA <- clean_data(data_evi)
+
 ```
 
-In the code below, the PCA is performed with the remaining metrics using the ‘prcomp’ function in the stats package. 
+In the code below, the PCA is performed with the remaining metrics using the ‘prcomp’ function in the *stats* package. 
 ```{r}
-# Calculate the principal components
-elev_prc <- prcomp(data_elev_noNA[,3:23], center = TRUE, scale = TRUE)
-evi_prc <- prcomp(data_evi_noNA[,3:23], center = TRUE, scale = TRUE)
+# Calculate the principal components.
+elev_prc <- prcomp(data_elev_noNA[,3:22], center = TRUE, scale = TRUE)
+evi_prc <- prcomp(data_evi_noNA[,3:22], center = TRUE, scale = TRUE)
 summary(elev_prc)
 summary(evi_prc)
 ```
 
-Now let's look at some diagnostic plots for the principal components. Scree plots indicate the importance of the principal components with a broken stick criterion. The point at which the
-scree plot curve crosses the broken stick model distribution, which we will plot in red is considered to indicate the maximum number of components to retain.
+Now let's look at some diagnostic plots for the principal components. Scree plots indicate the importance of the principal components with a broken stick criterion. The point at which the scree plot curve crosses the broken stick model distribution, which we will plot in red, is considered to indicate the maximum number of components to retain.
 
 ```{r, fig.width=7.5, fig.height=4}
-# Take a look at the components for elevation using a screeplot
-screeplot(elev_prc, type = "l", npcs = 15, 
-          main = "Screeplot of the first 10 PCs")
-abline(h = 1, col = "red", lty = 5)
-legend("topright", legend = c("Eigenvalue = 1"),
-       col = c("red"), lty = 5, cex = 0.6)
-# Take a look at the components for EVI using a screeplot
-screeplot(evi_prc, type = "l", npcs = 15, 
-          main = "Screeplot of the first 10 PCs")
-abline(h = 1, col = "red", lty = 5)
-legend("topright", legend = c("Eigenvalue = 1"),
-       col = c("red"), lty = 5, cex = 0.6)
+# Take a look at the components using a screeplot.
+plot_scree <- function(pc_dat) {
+  screeplot(pc_dat, type = "l", npcs = 15, 
+            main = "Screeplot of the first 10 PCs")
+  abline(h = 1, col = "red", lty = 5)
+  legend("topright", legend = c("Eigenvalue = 1"),
+         col = c("red"), lty = 5, cex = 0.6)
+}
+
+plot_scree(elev_prc)
+plot_scree(evi_prc)
 ```
 
 We can also take a look at the components for elevation and EVI to see how much variance the surface metrics explain with cumulative variance plots.
 
 ```{r, , fig.width=7.5, fig.height=4}
-# Elevation Cumulative Variance Plot
-cumpro <- cumsum(elev_prc$sdev ^ 2 / sum(elev_prc$sdev ^ 2))
-plot(cumpro[0:15], xlab = "PC #", ylab = "Amount of explained variance", 
-     main = "Cumulative variance plot")
-abline(v = 5, col = "blue", lty = 5)
-abline(h = 0.70133, col = "blue", lty = 5)
-legend("topleft", legend = c("Cut-off @ PC5"),
-       col = c("blue"), lty = 5, cex = 0.6)
-#EVI Cumulative Variance Plot
-cumpro <- cumsum(evi_prc$sdev ^ 2 / sum(evi_prc$sdev ^ 2))
-plot(cumpro[0:15], xlab = "PC #", ylab = "Amount of explained variance", 
-     main = "Cumulative variance plot")
-abline(v = 5, col = "blue", lty = 5)
-abline(h = 0.76640, col = "blue", lty = 5)
-legend("topleft", legend = c("Cut-off @ PC5"),
-       col = c("blue"), lty = 5, cex = 0.6)
+# Look at how much variance is explained using a cumulative variance plot.
+plot_cvar <- function(pc_dat) {
+  # Get cumulative variance explained.
+  cumpro <- summary(pc_dat)$importance[3, ][1:16]
+  
+  # Create plot of cumulative variance, marking the 5th component as the cutoff.
+  plot(cumpro, xlab = "PC #", ylab = "Amount of explained variance", 
+       main = "Cumulative variance plot")
+  abline(v = 5, col = "blue", lty = 5)
+  abline(h = cumpro[5], col = "blue", lty = 5)
+  legend("topleft", legend = c("Cut-off @ PC5"),
+         col = c("blue"), lty = 5, cex = 0.6)
+}
+
+plot_cvar(elev_prc)
+plot_cvar(evi_prc)
+
 ```
 
 For both elevation and EVI, the first 5 principal components explained >70% of the variation.
 Now, let's plot the first components for elevation.
 
 ```{r}
-plot(elev_prc$x[, 1], elev_prc$x[, 2], xlab = "PC1 (30.90%)", 
-     ylab = "PC2 (17.61%)", main = "PC1 / PC2 - plot")
-plot(elev_prc$x[, 1], elev_prc$x[, 3], xlab = "PC1 (30.90%)", 
-     ylab = "PC3 (16.19%)", main = "PC1 / PC3 - plot")
-plot(elev_prc$x[, 2], elev_prc$x[, 3], xlab = "PC2 (17.61%)", 
-     ylab = "PC3 (16.19%)", main = "PC2 / PC3 - plot")
+
+# Create scatterplots to look at relationships among principal components.
+plot(elev_prc$x[, 1], elev_prc$x[, 2], xlab = "PC1 (27.83%)", 
+     ylab = "PC2 (16.13%)", main = "PC1 / PC2 - plot")
+plot(elev_prc$x[, 1], elev_prc$x[, 3], xlab = "PC1 (27.83%)", 
+     ylab = "PC3 (12.54%)", main = "PC1 / PC3 - plot")
+plot(elev_prc$x[, 2], elev_prc$x[, 3], xlab = "PC2 (16.13%)", 
+     ylab = "PC3 (12.54%)", main = "PC2 / PC3 - plot")
 ```
 
-In the code below, let's also map these elevation components to see if there are any spatial patterns.
+In the code below, we map the components to see if there are any spatial patterns readily identifiable.
 
 ```{r, fig.width=7.5, fig.height=4}
-data_elev_noNA$prc1 <- elev_prc$x[, 1]
-data_elev_noNA$prc2 <- elev_prc$x[, 2]
-data_elev_noNA$prc3 <- elev_prc$x[, 3]
-data_elev_noNA$prc4 <- elev_prc$x[, 4]
-data_elev_noNA$prc5 <- elev_prc$x[, 5]
-data_evi_noNA$prc1 <- evi_prc$x[, 1]
-data_evi_noNA$prc2 <- evi_prc$x[, 2]
-data_evi_noNA$prc3 <- evi_prc$x[, 3]
-data_evi_noNA$prc4 <- evi_prc$x[, 4]
-data_evi_noNA$prc5 <- evi_prc$x[, 5]
 
-# Plot pca results 
-# Add pca results back to raster data
-elev_pca_dat <- data_elev %>%
-  left_join(data_elev_noNA)
-evi_pca_dat <- data_evi %>%
-  left_join(data_evi_noNA)
+# Map components across state.
+map_comps <- function(pc_dat, noNA_df, full_df, r, theme) {
+  # Add pc values to no-NA dataframe.
+  for (i in 1:5) {
+    colname <- paste0('prc', i)
+    noNA_df[, colname] <- pc_dat$x[, i]
+  }
+  
+  # Add PCA results back to full raster dataframe.
+  full_dat <- full_df %>% left_join(noNA_df)
+  # Cut to only the prc columns.
+  full_dat <- full_dat[, grep('prc', names(full_dat))]
+  
+  # Create rasters and maps with principle component values.
+  out_maps <- list()
+  for (i in 1:5) {
+    new_rast <- setValues(r, full_dat[, i])
+    pc_map <- rasterVis::levelplot(new_rast, margin = F, 
+                                   par.settings = theme, 
+                                   ylab = NULL, xlab = NULL, 
+                                   main = paste0('PC', i))
+    pc_map$par.settings$layout.heights[c( 'bottom.padding',
+                                          'top.padding',
+                                          'key.sub.padding',
+                                          'axis.xlab.padding',
+                                          'key.axis.padding',
+                                          'main.key.padding') ] <- 1
+    pc_map$aspect.fill <- TRUE
+    out_maps[[i]] <- pc_map
+  }
+  
+  # Plot in a grid.
+  grid.arrange(out_maps[[1]], out_maps[[2]], out_maps[[3]], out_maps[[4]], 
+               out_maps[[5]], nrow = 2, ncol = 3) 
+}
 
-elev_prc1 <- setValues(elev, elev_pca_dat$prc1)
-elev_prc2 <- setValues(elev, elev_pca_dat$prc2)
-elev_prc3 <- setValues(elev, elev_pca_dat$prc3)
-elev_prc4 <- setValues(elev, elev_pca_dat$prc4)
-elev_prc5 <- setValues(elev, elev_pca_dat$prc5)
+map_comps(elev_prc, data_elev_noNA, data_elev, elev, elevTheme)
 
-evi_prc1 <- setValues(evi, evi_pca_dat$prc1)
-evi_prc2 <- setValues(evi, evi_pca_dat$prc2)
-evi_prc3 <- setValues(evi, evi_pca_dat$prc3)
-evi_prc4 <- setValues(evi, evi_pca_dat$prc4)
-evi_prc5 <- setValues(evi, evi_pca_dat$prc5)
+```
+```{r, fig.width=7.5, fig.height=4}
+map_comps(evi_prc, data_evi_noNA, data_evi, evi, eviTheme)
 
-## Elevation plots for the first five components as indicated as appropriate by the scree plot.
-elev_pc1_map <- rasterVis::levelplot(elev_prc1, margin = F, 
-                                     par.settings = elevTheme, 
-                                     ylab = NULL, xlab = NULL, main = 'PC1')
-elev_pc2_map <- rasterVis::levelplot(elev_prc2, margin = F, 
-                                     par.settings = elevTheme,
-                                     ylab = NULL, xlab = NULL, main = 'PC2')
-elev_pc3_map <- rasterVis::levelplot(elev_prc3, margin = F, 
-                                     par.settings = elevTheme, 
-                                     ylab = NULL, xlab = NULL, main = 'PC3')
-elev_pc4_map <- rasterVis::levelplot(elev_prc4, margin = F, 
-                                     par.settings = elevTheme, 
-                                     ylab = NULL, xlab = NULL, main = 'PC4')
-elev_pc5_map <- rasterVis::levelplot(elev_prc5, margin = F, 
-                                     par.settings = elevTheme, 
-                                     ylab = NULL, xlab = NULL, main = 'PC5')
-
-elev_pc1_map$par.settings$layout.heights[
-  c( 'bottom.padding',
-     'top.padding',
-     'key.sub.padding',
-     'axis.xlab.padding',
-     'key.axis.padding',
-     'main.key.padding') ] <- 1
-elev_pc1_map$aspect.fill <- TRUE
-elev_pc2_map$par.settings$layout.heights[
-  c( 'bottom.padding',
-     'top.padding',
-     'key.sub.padding',
-     'axis.xlab.padding',
-     'key.axis.padding',
-     'main.key.padding') ] <- 1
-elev_pc2_map$aspect.fill <- TRUE
-elev_pc3_map$par.settings$layout.heights[
-  c( 'bottom.padding',
-     'top.padding',
-     'key.sub.padding',
-     'axis.xlab.padding',
-     'key.axis.padding',
-     'main.key.padding') ] <- 1
-elev_pc3_map$aspect.fill <- TRUE
-elev_pc4_map$par.settings$layout.heights[
-  c( 'bottom.padding',
-     'top.padding',
-     'key.sub.padding',
-     'axis.xlab.padding',
-     'key.axis.padding',
-     'main.key.padding') ] <- 1
-elev_pc4_map$aspect.fill <- TRUE
-elev_pc5_map$par.settings$layout.heights[
-  c( 'bottom.padding',
-     'top.padding',
-     'key.sub.padding',
-     'axis.xlab.padding',
-     'key.axis.padding',
-     'main.key.padding') ] <- 1
-elev_pc5_map$aspect.fill <- TRUE
-grid.arrange(elev_pc1_map, elev_pc2_map, elev_pc3_map, elev_pc4_map, 
-             elev_pc5_map, nrow = 2, ncol = 3) 
 ```
 
-Let's map the EVI components in space, too.
+What are the principal component loadings for elevation? 
 
 ```{r, fig.width=7.5, fig.height=4}
-# EVI plots for first 5 components as indicated by scree plots.
-evi_pc1_map <- rasterVis::levelplot(evi_prc1, margin = F, 
-                                    par.settings = eviTheme, ylab = NULL, 
-                                    xlab = NULL, main = 'PC1')
-evi_pc2_map <- rasterVis::levelplot(evi_prc2, margin = F, 
-                                    par.settings = eviTheme, ylab = NULL, 
-                                    xlab = NULL, main = 'PC2')
-evi_pc3_map <- rasterVis::levelplot(evi_prc3, margin = F, 
-                                    par.settings = eviTheme, ylab = NULL, 
-                                    xlab = NULL, main = 'PC3')
-evi_pc4_map <- rasterVis::levelplot(evi_prc4, margin = F, 
-                                    par.settings = eviTheme, ylab = NULL, 
-                                    xlab = NULL, main = 'PC4')
-evi_pc5_map <- rasterVis::levelplot(evi_prc5, margin = F, 
-                                    par.settings = eviTheme, ylab = NULL, 
-                                    xlab = NULL, main = 'PC5')
 
-evi_pc1_map$par.settings$layout.heights[
-  c( 'bottom.padding',
-     'top.padding',
-     'key.sub.padding',
-     'axis.xlab.padding',
-     'key.axis.padding',
-     'main.key.padding') ] <- 1
-evi_pc1_map$aspect.fill <- TRUE
-evi_pc2_map$par.settings$layout.heights[
-  c( 'bottom.padding',
-     'top.padding',
-     'key.sub.padding',
-     'axis.xlab.padding',
-     'key.axis.padding',
-     'main.key.padding') ] <- 1
-evi_pc2_map$aspect.fill <- TRUE
-evi_pc3_map$par.settings$layout.heights[
-  c( 'bottom.padding',
-     'top.padding',
-     'key.sub.padding',
-     'axis.xlab.padding',
-     'key.axis.padding',
-     'main.key.padding') ] <- 1
-evi_pc3_map$aspect.fill <- TRUE
-evi_pc4_map$par.settings$layout.heights[
-  c( 'bottom.padding',
-     'top.padding',
-     'key.sub.padding',
-     'axis.xlab.padding',
-     'key.axis.padding',
-     'main.key.padding') ] <- 1
-evi_pc4_map$aspect.fill <- TRUE
-evi_pc5_map$par.settings$layout.heights[
-  c( 'bottom.padding',
-     'top.padding',
-     'key.sub.padding',
-     'axis.xlab.padding',
-     'key.axis.padding',
-     'main.key.padding') ] <- 1
-evi_pc5_map$aspect.fill <- TRUE
-grid.arrange(evi_pc1_map, evi_pc2_map, evi_pc3_map, evi_pc4_map, 
-             evi_pc5_map, nrow = 2, ncol = 3)
+# Plot principal component loadings.
+plot_loadings <- function(pc_dat) {
+  # Get rotation for top 5 components.
+  loadings <- pc_dat$rotation[, 1:5]
+  
+  # Figure out the relative loadings.
+  aload <- abs(loadings)
+  rel <- sweep(aload, 2, colSums(aload), "/")
+  
+  # Convert relative loadings to dataframe.
+  rel <- as.data.frame(rel)
+  # Get good variable names (from dataframe created earlier).
+  rel$var <- plt_names$new[match(rownames(rel), plt_names$old)]
+  
+  # Create importance plots.
+  imp_plts <- list()
+  for (i in 1:5) {
+    temp <- rel
+    # Determine whether component loading is postive or negative.
+    temp$sign <- factor(sapply(loadings[, i], FUN = function(x) x / abs(x)), 
+                        levels = c(-1, 1))
+    
+    # Order loadings by value.
+    temp <- temp[order(temp[, i]),]
+    
+    temp$var <- factor(temp$var, levels = temp$var)
+    
+    temp_plt <- ggplot(temp, aes(x = temp[, i], y = var)) +
+      geom_point(size = 3, aes(pch = sign)) +
+      scale_shape_manual(name = element_blank(),
+                         breaks = c(1, -1),
+                         values = c(19, 8),
+                         labels = c("Positive", "Negative")) +
+      xlab(paste0('PC', i)) +
+      ylab('Metric') +
+      theme_bw() +
+      theme(panel.grid.minor = element_blank(),
+            legend.justification = c(1, 0), 
+            legend.position = c(1, 0),
+            legend.background = element_blank(),
+            legend.text = element_text(size = 12),
+            axis.title = element_text(size = 12))
+    
+    imp_plts[[i]] <- temp_plt
+  }
+  
+  # Return grid of first three components.
+  grid.arrange(imp_plts[[1]], imp_plts[[1]], imp_plts[[1]], ncol = 3)
+}
+
+plot_loadings(elev_prc)
 ```
 
-What are the pc loadings for elevation? 
+What are the principal component loadings for EVI?
 
 ```{r, fig.width=7.5, fig.height=4}
-# Elevation
-# Rotation
-elev_loadings <- elev_prc$rotation[, 1:5]
-# Elevation components' relative loadings
-aload <- abs(elev_loadings)
-elev_rel <- sweep(aload, 2, colSums(aload), "/")
-elev_rel <- as.data.frame(elev_rel)
-elev_rel$var <- c('Std', 'Stdi', 'S10z', 'Sa', 'Sbi', 'Sci', 
-                  'Sdc 50-55%', 'Sdc 80-85%', 'Sdc 0-5%', 'Sdq6', 'Sdr', 
-                  'Sds', 'Sk', 'Sku', 'Sp', 'Spk',
-                  'Sq', 'Ssk', 'Sv', 'Svi', 'Svk')
-# Importance plots for elevation
-elev_rel1 <- elev_rel
-elev_rel1$sign <- factor(sapply(elev_loadings[,1], 
-                                FUN = function(x) x / abs(x)), 
-                         levels = c(-1, 1))
-elev_rel1 <- elev_rel1[order(elev_rel1$PC1),]
-elev_rel1$var <- factor(elev_rel1$var, levels = elev_rel1$var)
-elev_pc1_plt <- ggplot(elev_rel1, aes(x = PC1, y = var)) +
-  geom_point(size = 3, aes(pch = sign)) +
-  scale_shape_manual(name = element_blank(),
-                     breaks = c(1, -1),
-                     values = c(19, 8),
-                     labels = c("Positive", "Negative")) +
-  xlab('PC1') +
-  ylab('Metric') +
-  theme_bw() +
-  theme(panel.grid.minor = element_blank(),
-        legend.justification = c(1, 0), 
-        legend.position = c(1, 0),
-        legend.background = element_blank(),
-        legend.text = element_text(size = 12),
-        axis.title = element_text(size = 12))
-
-elev_rel2 <- elev_rel
-elev_rel2$sign <- factor(sapply(elev_loadings[,1], 
-                                FUN = function(x) x / abs(x)), 
-                         levels = c(-1, 1))
-elev_rel2 <- elev_rel2[order(elev_rel2$PC2),]
-elev_rel2$var <- factor(elev_rel2$var, levels = elev_rel2$var)
-elev_pc2_plt <- ggplot(elev_rel2, aes(x = PC2, y = var)) +
-  geom_point(size = 3, aes(pch = sign)) +
-  scale_shape_manual(name = element_blank(),
-                     breaks = c(1, -1),
-                     values = c(19, 8),
-                     labels = c("Positive", "Negative")) +
-  xlab('PC2') +
-  ylab('Metric') +
-  theme_bw() +
-  theme(panel.grid.minor = element_blank(),
-        legend.justification = c(1, 0), 
-        legend.position = c(1, 0),
-        legend.background = element_blank(),
-        legend.text = element_text(size = 12),
-        axis.title = element_text(size = 12))
-
-elev_rel3 <- elev_rel
-elev_rel3$sign <- factor(sapply(elev_loadings[,1], 
-                                FUN = function(x) x / abs(x)), 
-                         levels = c(-1, 1))
-elev_rel3 <- elev_rel3[order(elev_rel3$PC3),]
-elev_rel3$var <- factor(elev_rel3$var, levels = elev_rel3$var)
-elev_pc3_plt <- ggplot(elev_rel3, aes(x = PC3, y = var)) +
-  geom_point(size = 3, aes(pch = sign)) +
-  scale_shape_manual(name = element_blank(),
-                     breaks = c(1, -1),
-                     values = c(19, 8),
-                     labels = c("Positive", "Negative")) +
-  xlab('PC3') +
-  ylab('Metric') +
-  theme_bw() +
-  theme(panel.grid.minor = element_blank(),
-        legend.justification = c(1, 0), 
-        legend.position = c(1, 0),
-        legend.background = element_blank(),
-        legend.text = element_text(size = 12),
-        axis.title = element_text(size = 12))
-
-elev_rel4 <- elev_rel
-elev_rel4$sign <- factor(sapply(elev_loadings[,1], 
-                                FUN = function(x) x / abs(x)), 
-                         levels = c(-1, 1))
-elev_rel4 <- elev_rel4[order(elev_rel4$PC4),]
-elev_rel4$var <- factor(elev_rel4$var, levels = elev_rel4$var)
-elev_pc4_plt <- ggplot(elev_rel4, aes(x = PC4, y = var)) +
-  geom_point(size = 3, aes(pch = sign)) +
-  scale_shape_manual(name = element_blank(),
-                     breaks = c(1, -1),
-                     values = c(19, 8),
-                     labels = c("Positive", "Negative")) +
-  xlab('PC4') +
-  ylab('Metric') +
-  theme_bw() +
-  theme(panel.grid.minor = element_blank(),
-        legend.justification = c(1, 0), 
-        legend.position = c(1, 0),
-        legend.background = element_blank(),
-        legend.text = element_text(size = 12),
-        axis.title = element_text(size = 12))
-
-elev_rel5 <- elev_rel
-elev_rel5$sign <- factor(sapply(elev_loadings[,1], 
-                                FUN = function(x) x / abs(x)), 
-                         levels = c(-1, 1))
-elev_rel5 <- elev_rel5[order(elev_rel5$PC5),]
-elev_rel5$var <- factor(elev_rel5$var, levels = elev_rel5$var)
-elev_pc5_plt <- ggplot(elev_rel5, aes(x = PC5, y = var)) +
-  geom_point(size = 3, aes(pch = sign)) +
-  scale_shape_manual(name = element_blank(),
-                     breaks = c(1, -1),
-                     values = c(19, 8),
-                     labels = c("Positive", "Negative")) +
-  xlab('PC5') +
-  ylab('Metric') +
-  theme_bw() +
-  theme(panel.grid.minor = element_blank(),
-        legend.justification = c(1, 0), 
-        legend.position = c(1, 0),
-        legend.background = element_blank(),
-        legend.text = element_text(size = 12),
-        axis.title = element_text(size = 12))
-
-grid.arrange(elev_pc1_plt, elev_pc2_plt, elev_pc3_plt, elev_pc4_plt, 
-             elev_pc5_plt, nrow = 2, ncol = 3)
-grid.arrange(elev_pc1_plt, elev_pc2_plt, elev_pc3_plt, ncol = 3) 
-```
-
-What are the pc loadings for EVI?
-
-```{r, fig.width=7.5, fig.height=4}
-# EVI
-# rotation
-evi_loadings <- evi_prc$rotation[, 1:5]
-# EVI components' relative loadings
-aload <- abs(evi_loadings)
-evi_rel <- sweep(aload, 2, colSums(aload), "/")
-evi_rel <- as.data.frame(evi_rel)
-evi_rel$var <- c('S10z', 'Sa', 'Sbi', 'Sci', 'Sdc 50-55%', 'Sdc 80-85%', 
-                 'Sdc 0-5%', 'Sdq6', 'Sdr', 'Sds', 'Sk', 'Sku', 'Sp', 'Spk',
-                 'Sq', 'Ssk', 'Std', 'Stdi', 'Sv', 'Svi', 'Svk')
-
-# EVI importance plots
-evi_rel1 <- evi_rel
-evi_rel1$sign <- factor(sapply(evi_loadings[,1], 
-                               FUN = function(x) x / abs(x)), 
-                        levels = c(-1, 1))
-evi_rel1 <- evi_rel1[order(evi_rel1$PC1),]
-evi_rel1$var <- factor(evi_rel1$var, levels = evi_rel1$var)
-evi_pc1_plt <- ggplot(evi_rel1, aes(x = PC1, y = var)) +
-  geom_point(size = 3, aes(pch = sign)) +
-  scale_shape_manual(name = element_blank(),
-                     breaks = c(1, -1),
-                     values = c(19, 8),
-                     labels = c("Positive", "Negative")) +
-  xlab('PC1') +
-  ylab('Metric') +
-  theme_bw() +
-  theme(panel.grid.minor = element_blank(),
-        legend.justification = c(1, 0), 
-        legend.position = c(1, 0),
-        legend.background = element_blank(),
-        legend.text = element_text(size = 12),
-        axis.title = element_text(size = 12))
-
-evi_rel2 <- evi_rel
-evi_rel2$sign <- factor(sapply(evi_loadings[,1], 
-                               FUN = function(x) x / abs(x)), 
-                        levels = c(-1, 1))
-evi_rel2 <- evi_rel2[order(evi_rel2$PC2),]
-evi_rel2$var <- factor(evi_rel2$var, levels = evi_rel2$var)
-evi_pc2_plt <- ggplot(evi_rel2, aes(x = PC2, y = var)) +
-  geom_point(size = 3, aes(pch = sign)) +
-  scale_shape_manual(name = element_blank(),
-                     breaks = c(1, -1),
-                     values = c(19, 8),
-                     labels = c("Positive", "Negative")) +
-  xlab('PC2') +
-  ylab('Metric') +
-  theme_bw() +
-  theme(panel.grid.minor = element_blank(),
-        legend.justification = c(1, 0), 
-        legend.position = c(1, 0),
-        legend.background = element_blank(),
-        legend.text = element_text(size = 12),
-        axis.title = element_text(size = 12))
-
-evi_rel3 <- evi_rel
-evi_rel3$sign <- factor(sapply(evi_loadings[,1], 
-                               FUN = function(x) x / abs(x)), 
-                        levels = c(-1, 1))
-evi_rel3 <- evi_rel3[order(evi_rel3$PC3),]
-evi_rel3$var <- factor(evi_rel3$var, levels = evi_rel3$var)
-evi_pc3_plt <- ggplot(evi_rel3, aes(x = PC3, y = var)) +
-  geom_point(size = 3, aes(pch = sign)) +
-  scale_shape_manual(name = element_blank(),
-                     breaks = c(1, -1),
-                     values = c(19, 8),
-                     labels = c("Positive", "Negative")) +
-  xlab('PC3') +
-  ylab('Metric') +
-  theme_bw() +
-  theme(panel.grid.minor = element_blank(),
-        legend.justification = c(1, 0), 
-        legend.position = c(1, 0),
-        legend.background = element_blank(),
-        legend.text = element_text(size = 12),
-        axis.title = element_text(size = 12))
-
-evi_rel4 <- evi_rel
-evi_rel4$sign <- factor(sapply(evi_loadings[,1], 
-                               FUN = function(x) x / abs(x)), 
-                        levels = c(-1, 1))
-evi_rel4 <- evi_rel4[order(evi_rel4$PC4),]
-evi_rel4$var <- factor(evi_rel4$var, levels = evi_rel4$var)
-evi_pc4_plt <- ggplot(evi_rel4, aes(x = PC4, y = var)) +
-  geom_point(size = 3, aes(pch = sign)) +
-  scale_shape_manual(name = element_blank(),
-                     breaks = c(1, -1),
-                     values = c(19, 8),
-                     labels = c("Positive", "Negative")) +
-  xlab('PC4') +
-  ylab('Metric') +
-  theme_bw() +
-  theme(panel.grid.minor = element_blank(),
-        legend.justification = c(1, 0), 
-        legend.position = c(1, 0),
-        legend.background = element_blank(),
-        legend.text = element_text(size = 12),
-        axis.title = element_text(size = 12))
-
-evi_rel5 <- evi_rel
-evi_rel5$sign <- factor(sapply(evi_loadings[,1], 
-                               FUN = function(x) x / abs(x)), 
-                        levels = c(-1, 1))
-evi_rel5 <- evi_rel5[order(evi_rel5$PC5),]
-evi_rel5$var <- factor(evi_rel5$var, levels = evi_rel5$var)
-evi_pc5_plt <- ggplot(evi_rel5, aes(x = PC5, y = var)) +
-  geom_point(size = 3, aes(pch = sign)) +
-  scale_shape_manual(name = element_blank(),
-                     breaks = c(1, -1),
-                     values = c(19, 8),
-                     labels = c("Positive", "Negative")) +
-  xlab('PC5') +
-  ylab('Metric') +
-  theme_bw() +
-  theme(panel.grid.minor = element_blank(),
-        legend.justification = c(1, 0), 
-        legend.position = c(1, 0),
-        legend.background = element_blank(),
-        legend.text = element_text(size = 12),
-        axis.title = element_text(size = 12))
-
-grid.arrange(evi_pc1_plt, evi_pc2_plt, evi_pc3_plt, evi_pc4_plt, 
-             evi_pc5_plt, nrow = 2, ncol = 3)
-grid.arrange(evi_pc1_plt, evi_pc2_plt, evi_pc3_plt, ncol = 3)
+plot_loadings(evi_prc)
 ```
 
 ### Summary of PCA

@@ -96,13 +96,13 @@ library(raster)
 # import raster image
 data(normforest)
 
-# crop raster to much smaller area
-x <- crop(normforest, extent(-123, -122.99, 43, 43.01))
+# crop raster to smaller area
+x <- crop(normforest, extent(normforest, 1, 100, 1, 100))
 
 # get a surface of root mean square roughness
 sa_img <- texture_image(x = x, window = 'square',
-size = 11, metric = 'sa',
-parallel = FALSE)
+size = 5, metric = 'sa',
+parallel = TRUE, ncores = 2, nclumps = 20)
 
 # plot the result
 plot(sa_img)

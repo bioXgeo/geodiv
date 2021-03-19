@@ -71,22 +71,3 @@ Note that if calculating the metric at the edge of a raster or matrix,
 the input raster/matrix must be padded. This can be done using the \code{pad_edges}
 function.
 }
-\examples{
-library(raster)
-
-# import raster image
-data(normforest)
-
-# crop raster to much smaller area if on a smaller computer
-x <- crop(normforest, extent(-123, -122.99, 43, 43.01))
-
-# get coordinates, rownums, cellnums
-pixlist <- seq(1, length(x), 1)
-ext_x <- pad_edges(x, size = 4)
-rownum <- rowFromCell(x, pixlist) + 4
-colnum <- colFromCell(x, pixlist) + 4
-
-# get a surface of root mean square roughness
-sq_val <- window_metric(x = x, i = 40, window = 'square',
-size = 4, rownum = rownum, colnum = colnum, metric = 'sq')
-}

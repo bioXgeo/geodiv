@@ -159,3 +159,15 @@ remove_plane <- function(x) {
 
   return(errors)
 }
+
+#' Rotates a matrix 180 degrees.
+#'
+#' Rotates a matrix 180 degrees. Code is from https://stackoverflow.com/questions/16496210/rotate-a-matrix-in-r-by-90-degrees-clockwise.
+#'
+#' @param x A matrix.
+#' @return A matrix rotate 180 degrees.
+#' @export
+rotate <- function(x) {
+  x[] <- rev(x)
+  return(x)
+}
