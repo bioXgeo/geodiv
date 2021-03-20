@@ -27,7 +27,7 @@
 #' @export
 std <- function(x, create_plot = FALSE, option = c(1, 2)) {
   if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
-  if(class(create_plot) != 'logical') {stop('plot must be logical.')}
+  if(class(create_plot) != 'logical') {stop('create_plot must be logical.')}
 
   # get raster dimensions
   M <- ncol(x)
@@ -224,7 +224,7 @@ std <- function(x, create_plot = FALSE, option = c(1, 2)) {
 #' @export
 srw <- function(x, create_plot = FALSE, option = c(1, 2, 3)) {
   if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
-  if(class(create_plot) != 'logical') {stop('plot must be logical.')}
+  if(class(create_plot) != 'logical') {stop('create_plot must be logical.')}
 
   # get raster dimensions
   M <- ncol(x)

@@ -1,7 +1,7 @@
 ---
 title: "NEWS.md"
 author: "Annie C. Smith"
-date: "September 3, 2020"
+date: "March 19, 2021"
 output: html_document
 ---
 
@@ -21,3 +21,9 @@ Decreased version requirement for parallel.
 
 Added a vignette that shows more complex examples and demonstrates the correlation among metrics.
 Fixed a new issue with NA autocorrelation images in the scl function.
+
+## geodiv 1.0.0
+
+Added an alternative function for applying focal metrics to create a texture image (focal_metrics), added the vignette with example uses and figures demonstrating relationships among metrics to the R package, fixed several minor bugs resulting in erroneous warnings in most metric functions (issues with checking input classes), and increased the speed of the 'std' and 'srw' functions.
+
+Additionally, the 'texture_image' function no longer requires a projection as input, and will not reproject any rasters. Users should now reproject rasters on their own and then apply the function.

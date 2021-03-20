@@ -20,7 +20,7 @@ window_metric(
 
 \item{window_type}{Character. Type of window, either circular or square.}
 
-\item{size}{Numeric. Radius of window in number of pixels.}
+\item{size}{Numeric. Edge length or diameter of window in number of pixels.}
 
 \item{metric}{Character. Metric to calculate for each window. Metrics
 from the geodiv package are listed below.}

@@ -7,6 +7,12 @@
 .calculate_met_focal(landscape, n_row, n_col, points, what, ...)
 }
 \arguments{
+\item{landscape}{A raster or matrix.}
+
+\item{n_row}{Numeric. Number of rows in focal window.}
+
+\item{n_col}{Numeric. Number of columns in focal window.}
+
 \item{points}{Dataframe. Coordinates and values of cells, calculated with the *landscapemetrics*
 \code{raster_to_points} function.}
 
@@ -15,12 +21,6 @@ from the geodiv package are listed below.}
 
 \item{...}{Additional arguments for the metric functions. All applicable arguments
 will be applied to the entire list of metrics.}
-
-\item{x}{A raster or matrix.}
-
-\item{nrow}{Numeric. Number of rows in focal window.}
-
-\item{ncol}{Numeric. Number of columns in focal window.}
 }
 \value{
 The metric value over the window.

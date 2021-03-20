@@ -2,12 +2,12 @@
 % Please edit documentation in R/movingwindow.R
 \name{pad_edges}
 \alias{pad_edges}
-\title{Extend edges of a raster or matrix.}
+\title{Extend edges of a matrix.}
 \usage{
-pad_edges(x, size = 11, val = NULL)
+pad_edges(x, size, val = NULL)
 }
 \arguments{
-\item{x}{A raster or matrix.}
+\item{x}{A matrix.}
 
 \item{size}{Numeric. Number of pixels to add to each side.}
 
@@ -27,5 +27,5 @@ library(raster)
 data(normforest)
 
 # crop raster to much smaller area
-x <- pad_edges(normforest, 11)
+x <- pad_edges(as.matrix(normforest), 3, val = NA)
 }

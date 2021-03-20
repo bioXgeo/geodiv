@@ -141,9 +141,9 @@ focal_metrics <- function(x,
 #' on an individual pixel. This function is modified slightly from the
 #' \code{calculate_lsm_focal} function in the \emph{landscapemetrics} package (Hesselbarth et al. 2019).
 #'
-#' @param x A raster or matrix.
-#' @param nrow Numeric. Number of rows in focal window.
-#' @param ncol Numeric. Number of columns in focal window.
+#' @param landscape A raster or matrix.
+#' @param n_row Numeric. Number of rows in focal window.
+#' @param n_col Numeric. Number of columns in focal window.
 #' @param points Dataframe. Coordinates and values of cells, calculated with the *landscapemetrics*
 #' \code{raster_to_points} function.
 #' @param what Character. Metric to calculate for each window. Metrics

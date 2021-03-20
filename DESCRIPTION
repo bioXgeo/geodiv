@@ -1,11 +1,12 @@
 Package: geodiv
 Type: Package
 Title: Methods for Calculating Gradient Surface Metrics
-Version: 0.2.0
+Version: 1.0.0
 Author: Annie C. Smith, Phoebe Zarnetske, Kyla Dahlin, Adam Wilson, Andrew Latimer
 Maintainer: Annie C. Smith <annie.smith@dnr.wa.gov>
 Description: Methods for calculating gradient surface metrics for
-    continuous analysis of landscape features. 
+    continuous analysis of landscape features. See github.com/bioXgeo/geodiv to report 
+    bugs or to download the working version of the package.
 Depends: R (>= 3.5)
 Imports: 
     dplyr (>= 0.7.8),
@@ -42,6 +43,9 @@ Suggests:
     cowplot,
     gridExtra,
     factoextra,
-    cluster
+    cluster,
+    knitr,
+    rfigshare
 LinkingTo: 
     Rcpp, RcppArmadillo
+VignetteBuilder: knitr

@@ -22,8 +22,7 @@ an equal area projection (given by \code{epsg_proj} argument).}
 
 \item{window_type}{Character. Type of window, either circular or square.}
 
-\item{size}{Numeric. Size of window, in number of pixels extra on each side,
-or radius (in meters).}
+\item{size}{Numeric. Size of window (edge length) or diameter (in meters).}
 
 \item{in_meters}{Logical. Is the size given in meters?}
 
@@ -55,8 +54,7 @@ texture metric.
 }
 \details{
 Note that this function is meant to work on rasters with an equal area
-projection. The \code{epsg_proj} argument should be changed to include the
-equal area EPSG code appropriate for the image area.
+projection.
 
 Metrics available from geodiv package:
 \enumerate{

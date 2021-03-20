@@ -5,14 +5,12 @@
 #' texture metric.
 #'
 #' Note that this function is meant to work on rasters with an equal area
-#' projection. The \code{epsg_proj} argument should be changed to include the
-#' equal area EPSG code appropriate for the image area.
+#' projection.
 #'
 #' @param x A raster or matrix. If a raster is given, it will be projected to
 #' an equal area projection (given by \code{epsg_proj} argument).
 #' @param window_type Character. Type of window, either circular or square.
-#' @param size Numeric. Size of window, in number of pixels extra on each side,
-#' or radius (in meters).
+#' @param size Numeric. Size of window (edge length) or diameter (in meters).
 #' @param in_meters Logical. Is the size given in meters?
 #' @param metric Character. Metric to calculate for each window. Metrics
 #' from the geodiv package are listed below.
@@ -93,16 +91,6 @@ texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE
     os_type = 'windows'
   } else {
     os_type = 'other'
-  }
-  # Check if the input is a matrix, and initialize into raster if it is
-  if ('matrix' %in% base::class(x)) {
-
-    # convert to equal area raster
-    x <- raster(x)
-    extent(x) <- c(0, ncol(x), 0, nrow(x))
-    #crs(x) <- paste0('+init=EPSG:', epsg_proj)
-    crs(x) <- st_crs(5070)$proj4string
-
   }
 
   # Is size argument is in meters, convert it to a number of pixels
@@ -232,7 +220,11 @@ texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE
   for (i in 1:nresult) {
     temp <- data.frame(newvals = result[seq(i, length(result), nresult)], ind = pixlist)
     outfinal[[i]] <- x
-    outfinal[[i]] <- setValues(x, matrix(temp$newvals, nrow = nrow(x), ncol = ncol(x)))
+    if ('RasterLayer' %in% base::class(x)) {
+      outfinal[[i]] <- setValues(x, matrix(temp$newvals, nrow = nrow(x), ncol = ncol(x)))
+    } else {
+      outfinal[[i]] <- matrix(temp$newvals, nrow = nrow(x), ncol = ncol(x))
+    }
   }
 
   if (length(outfinal) == 1) {
@@ -251,7 +243,7 @@ texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE
 #' @param x A raster or matrix.
 #' @param coords Dataframe. Coordinates of window edges.
 #' @param window_type Character. Type of window, either circular or square.
-#' @param size Numeric. Radius of window in number of pixels.
+#' @param size Numeric. Edge length or diameter of window in number of pixels.
 #' @param metric Character. Metric to calculate for each window. Metrics
 #' from the geodiv package are listed below.
 #' @param args List. Arguments from function to be applied over each window
@@ -321,11 +313,11 @@ window_metric <- function(x, coords, window_type = 'square', size = 11, metric, 
   return(out_val)
 }
 
-#' Extend edges of a raster or matrix.
+#' Extend edges of a matrix.
 #'
 #' Extends edge values of a raster or matrix by a specified number of pixels.
 #'
-#' @param x A raster or matrix.
+#' @param x A matrix.
 #' @param size Numeric. Number of pixels to add to each side.
 #' @param val Numeric. If NULL (default), this extends the edge values
 #' out. If not null, this value will be used for the extended cells.
@@ -337,11 +329,11 @@ window_metric <- function(x, coords, window_type = 'square', size = 11, metric, 
 #' data(normforest)
 #'
 #' # crop raster to much smaller area
-#' x <- pad_edges(normforest, 11)
+#' x <- pad_edges(as.matrix(normforest), 3, val = NA)
 #' @export
-pad_edges <- function(x, size = 11, val = NULL) {
+pad_edges <- function(x, size, val = NULL) {
 
-  # add padding to raster or matrix
+  # add padding to matrix
   # continue values to edges to account for edge effect (# pixels radius/edge)
   x[is.na(x)] <- -9999999 # change NA values for now
 

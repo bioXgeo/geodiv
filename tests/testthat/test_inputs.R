@@ -79,10 +79,10 @@ test_that("incorrect inputs return errors in fftshift", {
 })
 
 test_that("incorrect inputs return errors in fourier", {
-  expect_error(std('a', plot = FALSE), 'x must be a raster or matrix.')
-  expect_error(std(normforest, plot = 'a'), 'plot must be logical.')
-  expect_error(srw('a', plot = FALSE), 'x must be a raster or matrix.')
-  expect_error(srw(normforest, plot = 'a'), 'plot must be logical.')
+  expect_error(std('a', create_plot = FALSE), 'x must be a raster or matrix.')
+  expect_error(std(normforest, create_plot = 'a'), 'create_plot must be logical.')
+  expect_error(srw('a', create_plot = FALSE), 'x must be a raster or matrix.')
+  expect_error(srw(normforest, create_plot = 'a'), 'create_plot must be logical.')
 })
 
 test_that("incorrect inputs return errors in localsurface", {
