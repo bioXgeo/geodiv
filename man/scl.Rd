@@ -4,7 +4,7 @@
 \alias{scl}
 \title{Calculate Correlation Length}
 \usage{
-scl(x, threshold = c(0.2, 1/exp(1)), plot = FALSE)
+scl(x, threshold = c(0.2, 1/exp(1)), create_plot = FALSE)
 }
 \arguments{
 \item{x}{A raster or matrix.}
@@ -12,7 +12,7 @@ scl(x, threshold = c(0.2, 1/exp(1)), plot = FALSE)
 \item{threshold}{A numeric vector containing values between 0 and 1. Indicates
 the autocorrelation values to which the rates of decline are measured.}
 
-\item{plot}{Logical. Defaults to \code{FALSE}. If \code{TRUE}, the AACF and
+\item{create_plot}{Logical. Defaults to \code{FALSE}. If \code{TRUE}, the AACF and
 lines showing the considered directions of autocorrelation from the origin
 will be plotted.}
 }

@@ -192,7 +192,7 @@ texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE
     start <- Sys.time()
     # make and start cluster
     try(stopCluster(cl), silent = TRUE)
-    cl <- makeCluster(ncores, type = 'SOCK')
+    cl <- parallel::makeCluster(ncores, type = 'SOCK')
     parallel::clusterExport(cl = cl, list('ext_x', 'coord_list', 'size',
                                           'window_type',
                                           'new_pixlist', 'metric', 'input_args',

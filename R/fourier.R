@@ -119,7 +119,7 @@ std <- function(x, create_plot = FALSE, option = c(1, 2)) {
     # get origin of image (actually bottom center)
     coords <- sp::coordinates(amp_img)
 
-    origin <- c(mean(coords[, 1]), ymin_amp)
+    origin <- c(mean(coords[, 1]), ymin)
 
     if(create_plot == TRUE) {
 

@@ -21,6 +21,7 @@ Imports:
     rgeos (>= 0.4-3),
     parallel (>= 3.5.0),
     sf (>= 0.7-4),
+    snow,
     zoo (>= 1.8-5),
     Rcpp (>= 1.0.1),
     landscapemetrics(>= 1.5.2)
