@@ -1,7 +1,7 @@
 ---
 title: "cran-comments.md"
 author: "Annie C. Smith"
-date: "March 24, 2021"
+date: "March 29, 2021"
 output: html_document
 ---
 
@@ -16,9 +16,13 @@ knitr::opts_chunk$set(echo = TRUE)
 ## R CMD check results
 There were no ERRORS or WARNINGS.
 
-There was 1 NOTE: "Suggests orphaned package: 'ggmap'." This package is only used for a figure in the vignette and does not influence anything in the geodiv package functions.
+There were 2 NOTEs: 
 
-This update fixes warnings caused by bad class checks in many of the functions, adds a new focal windowing function, updates the texture_image function, speeds up the 'std' and 'srw' functions, and adds a vignette to demonstrate correlations among included spatial heterogeneity metrics.
+"Suggests orphaned package: 'ggmap'." This package is only used for a figure in the vignette and does not influence anything in the geodiv package functions.
+
+"Uses the superseded package: snow." The tests failed without including 'snow' as an import, although all 'snow' functions are actually accessed through the package 'parallel.'
+
+This update fixes minor bugs resulting in warnings, adds a new focal windowing function, updates the texture_image function, speeds up the 'std' and 'srw' functions, and adds a vignette.
 
 ## Downstream dependencies
 There are currently no downstream dependencies for this package.

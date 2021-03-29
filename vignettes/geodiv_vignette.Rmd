@@ -195,17 +195,26 @@ metric_list <- c('sa', 'sbi', 'std')
 system.time(output_rasters2 <- lapply(metric_list, FUN = function(m) {
   texture_image(orforest, window_type = 'square', size = 7,
                                 in_meters = FALSE, metric = m, 
-                                parallel = TRUE, ncore = 4, nclumps = 20)}))
+                                parallel = TRUE, nclumps = 100)}))
 ```
 ```{r, eval = TRUE}
 # Download rasters from figshare. The list of data returned here will be used
 # throughout the vignette.
-url <- fs_download(12834896, mine = FALSE, session = NULL)
+url <- fs_download(12834896,  urls_only = TRUE, mine = FALSE, session = NULL,
+                   version = 4)
+
+# Set tempfile for rasters
+get_raster <- function(url) {
+  tf <- tempfile()
+  download.file(url, destfile = tf, mode = 'wb')
+  outrast <- raster(tf)
+  return(outrast)
+}
 
 output_rasters2 <- list()
-output_rasters2[[1]] <- raster(url[[5]])
-output_rasters2[[2]] <- raster(url[[6]])
-output_rasters2[[3]] <- raster(url[[7]])
+output_rasters2[[1]] <- get_raster(url[[5]])
+output_rasters2[[2]] <- get_raster(url[[6]])
+output_rasters2[[3]] <- get_raster(url[[7]])
 
 ```
 
@@ -234,8 +243,8 @@ Elevation and EVI data that are available to use along with this vignette were p
 
 ```{r, warning=FALSE}
 # Download data from figshare. 
-elev <- raster(url[4])
-evi <- raster(url[3]) * 0.0001
+elev <- get_raster(url[[4]])
+evi <- get_raster(url[[3]]) * 0.0001
 ```
 
 Aggregate both datasets to ~2km resolution for comparison between datasets and to reduce computational time. 
@@ -314,8 +323,16 @@ Generating these data frames can take a while, so we have provided .csv files fo
 ```{r, warning=FALSE}
 # The list of figshare files was completed above, so grab the appropriate files
 # for the csv's of all texture image outputs for Oregon.
-data_evi <- read.csv(url[2], stringsAsFactors = FALSE)
-data_elev <- read.csv(url[1], stringsAsFactors = FALSE)
+tf <- tempfile()
+download.file(url[[2]], destfile = tf, mode = 'wb')
+data_evi <- read.csv(tf, stringsAsFactors = FALSE)
+unlink(tf)
+
+tf <- tempfile()
+download.file(url[[1]], destfile = tf, mode = 'wb')
+data_elev <- read.csv(tf, stringsAsFactors = FALSE)
+unlink(tf)
+
 ```
 
 ### Visualization of texture image outputs
