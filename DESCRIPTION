@@ -7,6 +7,8 @@ Maintainer: Annie C. Smith <annie.smith@dnr.wa.gov>
 Description: Methods for calculating gradient surface metrics for
     continuous analysis of landscape features. See github.com/bioXgeo/geodiv to report 
     bugs or to download the working version of the package.
+URL: https://github.com/bioXgeo/geodiv
+BugReports: https://github.com/bioXgeo/geodiv/issues
 Depends: R (>= 3.5)
 Imports: 
     dplyr (>= 0.7.8),
