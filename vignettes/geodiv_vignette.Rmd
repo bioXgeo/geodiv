@@ -6,8 +6,10 @@ date: "March 17, 2021"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{geodiv Examples}
-  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
 ---
 
 \newpage 
@@ -202,10 +204,18 @@ system.time(output_rasters2 <- lapply(metric_list, FUN = function(m) {
 # throughout the vignette.
 url <- fs_download(12834896, mine = FALSE, session = NULL)
 
+f1=tempfile()
+f2=tempfile()
+f3=tempfile()
+
+download.file(url=url[[5]],destfile = f1)
+download.file(url=url[[6]],destfile = f2)
+download.file(url=url[[7]],destfile = f3)
+
 output_rasters2 <- list()
-output_rasters2[[1]] <- raster(url[[5]])
-output_rasters2[[2]] <- raster(url[[6]])
-output_rasters2[[3]] <- raster(url[[7]])
+output_rasters2[[1]] <- raster(f1)
+output_rasters2[[2]] <- raster(f2)
+output_rasters2[[3]] <- raster(f3)
 
 ```
 
@@ -234,8 +244,15 @@ Elevation and EVI data that are available to use along with this vignette were p
 
 ```{r, warning=FALSE}
 # Download data from figshare. 
-elev <- raster(url[4])
-evi <- raster(url[3]) * 0.0001
+f4=tempfile()
+f5=tempfile()
+
+download.file(url=url[[4]],destfile = f4)
+download.file(url=url[[3]],destfile = f5)
+
+
+elev <- raster(f4)
+evi <- raster(f5) * 0.0001
 ```
 
 Aggregate both datasets to ~2km resolution for comparison between datasets and to reduce computational time. 
