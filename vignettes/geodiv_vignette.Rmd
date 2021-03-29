@@ -2,7 +2,7 @@
 title: "geodiv Examples"
 author: Sydne Record, Annie Smith, Phoebe Zarnetske, Kyla Dahlin, Jennifer Costanza,
   and Adam Wilson
-date: "March 17, 2021"
+date: "March 29, 2021"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{geodiv Examples}
