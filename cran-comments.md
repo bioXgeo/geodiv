@@ -12,6 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 * local Kubuntu 20.04 install, R 4.0.4
 * local Windows 10, R 4.0.2
 * local Windows 10, R 3.6.1
+* win-builder, R-devel
 
 ## R CMD check results
 There were no ERRORS or WARNINGS.
