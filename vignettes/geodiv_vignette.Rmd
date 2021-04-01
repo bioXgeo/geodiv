@@ -2,7 +2,7 @@
 title: "geodiv Examples"
 author: Sydne Record, Annie Smith, Phoebe Zarnetske, Kyla Dahlin, Jennifer Costanza,
   and Adam Wilson
-date: "March 29, 2021"
+date: "April 1, 2021"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{geodiv Examples}
@@ -24,6 +24,17 @@ knitr::opts_chunk$set(
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+## Learning Objectives
+
+This vignette is designed to:
+
+**(1)** show how gradient surface metrics are calculated globally and locally using *geodiv*.
+
+**(2)** show the potential relationships among metrics.
+
+Example 1, "Simple workflow with Landsat NDVI," demonstrates the first objective by applying *geodiv* functions globally and locally to a small region in southwestern Oregon state, USA. Example 2, "Applying all surface metrics across Oregon, USA," addresses the second objective. The second example applies metrics across a larger region and runs an example analysis demonstrating ways in which metrics may be correlated and grouped. 
+
 
 # Install *geodiv*
 
@@ -88,6 +99,7 @@ library(factoextra)
 library(cluster)
 library(rfigshare)
 ```
+
 # Example 1: Simple workflow with Landsat NDVI
 
 The National Aeronautics and Space Administration (NASA) has been collecting Earth observing images with Landsat for decades. Normalized Difference Vegetation Index (NDVI) is a measure of vegetation or greenness that can be quantified from Landsat images by measuring the difference between near-infrared and red light, which vegetation strongly reflects and absorbs, respectively. For this first example, we generated an NDVI image over a small region in southwestern Oregon using Google Earth Engine. This image is available as a raster layer available as an R data object entitled 'orforest' when *geodiv* is installed. Google Earth Engine already has a number of tutorials and sample code and functions for this step that can be accessed on its site: earthengine.google.com. There are also several ways in which to access satellite data from R as well. Given that the focus of this tutorial is on the use of the *geodiv* R package, we provide these data already generated in Google Earth Engine. 
@@ -135,7 +147,7 @@ api_key <- NA # ADD AN API KEY HERE
 # api_key <- # PRIVATE API KEY FOR VIGNETTE
 ```
 
-Once an API key has been inserted, run the following code to get the satellite image next to the original NDVI image.
+Once an API key has been added, run the following code to get the satellite image next to the original NDVI image.
 
 ```{r remainder of mapping, echo = TRUE, eval = FALSE}
 # Register a Google API key.
@@ -173,11 +185,11 @@ The simplest use of the *geodiv* package is to apply metrics globally over an en
 ## Generate texture images
 Another common use case is to look at texture images where a spatial function has been applied locally over focal windows across a landscape. This functionality is provided through both the 'focal_metrics' and 'texture_image' functions.
 
-The 'texture_image' function applies metrics in either square or round windows over the raster. This function tends to be faster than 'focal_metrics,' but can use more memory when run on Windows. It is suggested that Windows users use the 'focal_metrics' function instead, unless they have a computer with a lot of memory.
+The 'texture_image' function applies metrics in either square or circular windows over an image. This function tends to be faster than 'focal_metrics,' but uses more memory. 
 
-The 'focal_metrics' function is modified from the 'window_lsm' function in *landscapemetrics* (Hesselbarth, et al. 2019). Windows must be rectangular or square, and the 'metrics' argument is a list of functions. The output of this function is a list of rasters.
+The 'focal_metrics' function is modified from the 'window_lsm' function in *landscapemetrics* (Hesselbarth, et al. 2019). Windows must be rectangular or square, and the 'metrics' argument is a list of functions. The output of this function is a list of rasters. This function is slower than 'texture_image,' but uses less memory.
 
-Note that this step can be somewhat time intensive. For users that would like to examine the output, but don't want to run this step, the code to import the rasters is included below.
+Note that this step can be somewhat time intensive. For users that would like to examine the output, but don't want to run this step, the code to import the resulting rasters is included below.
 
 ```{r, eval = FALSE}
 # Texture image creation using 'focal_metrics' function.
@@ -236,10 +248,10 @@ grid.arrange(grobs = plts, nrow = 2)
 # Example 2: Applying all surface metrics across the state of Oregon, USA
 
 ## Motivation
-By assessing heterogeneity using a variety of metrics, researchers can gain a more complete picture of heterogeneity than they would with a single metric (Dahlin, 2016). To demonstrate the utility of *geodiv* for this common application, in Example 2 we apply all surface metric functions to images across Oregon, USA and examine the patterns of, and relationships among, metrics. We calculate metrics for both elevation data from the Shuttle Radar Topography Mission (SRTM) and a commonly-used measure of canopy greenness, Enhanced Vegetation Index (EVI), from NASA's Moderate Resolution Imaging Spectroradiometer (MODIS). We then examine the correlations among metrics along a transect crossing the state, and determine how the metrics cluster using two methods, hierarchical clustering and Principal Components Analysis (PCA). This analysis demonstrates the relationships among metrics, with potential for determining how metrics group and behave with various input data.
+By assessing heterogeneity using a variety of metrics, researchers can gain a more complete picture of heterogeneity than they would with a single metric (Dahlin, 2016). However, many metrics are related and not all are informative for every situation. To demonstrate the utility of *geodiv* for producing and evaluating the utility of multiple metrics, in Example 2 we apply all surface metric functions to images across Oregon, USA and examine the patterns of, and relationships among, metrics. We calculate metrics for both elevation data from the Shuttle Radar Topography Mission (SRTM) and a commonly-used measure of canopy greenness, Enhanced Vegetation Index (EVI), from NASA's Moderate Resolution Imaging Spectroradiometer (MODIS). We then examine the correlations among metrics along a transect crossing the state, and determine how the metrics cluster using two methods, hierarchical clustering and Principal Components Analysis (PCA). This analysis demonstrates the relationships among metrics, with potential for determining how metrics group and behave with various input data.
 
 ## Elevation and EVI Data
-Elevation and EVI data that are available to use along with this vignette were prepared in Google Earth Engine (Gorelick et al., 2017) and analyzed in R. Void-filled SRTM data (Farr et al., 2007) and quality-filtered, maximum growing season, MODIS EVI data (Didan, 2015) were downloaded in Fall 2019.  The code chunk below downloads these data into the current R session from figshare. Again, R may be used to access satellite data, but we provide previously-prepared data for the purpose of this analysis.
+Elevation and EVI data that are available to use along with this vignette were prepared in Google Earth Engine (Gorelick et al., 2017) and analyzed in R. Void-filled SRTM data (Farr et al., 2007) and quality-filtered, maximum growing season, MODIS EVI data (Didan, 2015) were downloaded in Fall 2019.  The code chunk below downloads these data into the current R session from figshare. R may be used to access satellite data, but we provide previously-prepared data for the purpose of this analysis.
 
 ```{r, warning=FALSE}
 # Download data from figshare. 
@@ -297,7 +309,7 @@ rasterVis::levelplot(elev_masked, margin = F, par.settings = elevTheme,
 
 ## Generate texture images of the state of Oregon
 
-Below we generate a texture image for the state of Oregon using the 'sa' metric for elevation. Note that the following step may take some time. We provide the output dataframe files along with this vignette for all metrics included in geodiv for elevation and EVI over ~30km x 30km square moving windows and scaled following calculation for the subsequent analyses in this vignette.
+Below we generate a texture image for the state of Oregon using the 'sa' metric for elevation. Note that the following step may take some time. We provide the output dataframe files along with this vignette for all metrics included in *geodiv* for elevation and EVI over ~30km x 30km square moving windows and scaled following calculation for the subsequent analyses in this vignette.
 
 ```{r, eval=FALSE}
 # Calculate elevation sa texture image for state of Oregon
@@ -681,7 +693,7 @@ plot_cvar(evi_prc)
 ```
 
 For both elevation and EVI, the first 5 principal components explained >70% of the variation.
-Now, let's plot the first components for elevation.
+Now, let's plot the first components for elevation to examine their relationships.
 
 ```{r}
 

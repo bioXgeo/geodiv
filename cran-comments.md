@@ -1,7 +1,7 @@
 ---
 title: "cran-comments.md"
 author: "Annie C. Smith"
-date: "March 29, 2021"
+date: "April 1, 2021"
 output: html_document
 ---
 
@@ -23,7 +23,7 @@ There were 2 NOTEs:
 
 "Uses the superseded package: snow." The tests failed without including 'snow' as an import, although all 'snow' functions are actually accessed through the package 'parallel.'
 
-This update fixes minor bugs resulting in warnings, adds a new focal windowing function, updates the texture_image function, speeds up the 'std' and 'srw' functions, and adds a vignette.
+This update fixes minor a minor bug in the texture_image and pad_edges functions, adds text to the vignette, and fixes a small error in the DESCRIPTION.
 
 ## Downstream dependencies
 There are currently no downstream dependencies for this package.
