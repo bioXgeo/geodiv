@@ -107,7 +107,7 @@ texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE
   # add padding to matrix and create matrix of same size (all NA) for finding
   # which values are extra later
   shift <- floor(size / 2)
-  ext_x <- dummy_ext_x <- pad_edges(new_x, size = shift, val = NULL)
+  ext_x <- dummy_ext_x <- pad_edges(new_x, size = shift, val = NA)
   dummy_ext_x[] <- NA
 
   # find indices of center, left, right, top, and bottom of each window
@@ -375,7 +375,7 @@ pad_edges <- function(x, size, val = NULL) {
   }
 
   # If the values were NA before (-9999999 now), convert them back to NA.
-  ext_x_mat[is.na(x)] <- NA
+  ext_x_mat[ext_x_mat == -9999999] <- NA
 
   return(ext_x_mat)
 }
