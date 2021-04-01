@@ -72,7 +72,7 @@ fitplane <- function(x, order) {
 #'
 #' Finds the best fit polynomial plane for a surface. This
 #' function tests least squares polynomial fits with orders of
-#' 1 - 3 and determines which order minimizes the error when the
+#' 0 - 3 and determines which order minimizes the error when the
 #' fit is subtracted from the original image.
 #'
 #' @param x A raster or matrix.
