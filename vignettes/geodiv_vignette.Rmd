@@ -3,16 +3,21 @@ title: "geodiv Examples"
 author: Sydne Record, Annie Smith, Phoebe Zarnetske, Kyla Dahlin, Jennifer Costanza,
   and Adam Wilson
 date: "April 1, 2021"
-output: rmarkdown::html_vignette
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 2
 vignette: >
   %\VignetteIndexEntry{geodiv Examples}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
+
 \newpage 
 \tableofcontents 
 \newpage
+
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
