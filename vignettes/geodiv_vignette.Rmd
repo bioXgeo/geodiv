@@ -113,7 +113,7 @@ Let's begin by loading the example data, which is a raster layer called 'orfores
 ```{r, echo=TRUE}
 # Load the orforest data into your active session.
 data(orforest)
-# check out the properties of the orforest raster layer.
+# Check out the properties of the orforest raster layer.
 orforest
 ```
 
@@ -122,13 +122,13 @@ First, we plot the data without any trends removed.
 ```{r, echo=TRUE}
 # Plot orforest without the trend removed.
 eviCols <- colorRampPalette(c('lightyellow1', 'darkgreen'))(100)
-eviTheme <- rasterVis::rasterTheme(region = eviCols)
+eviTheme <- rasterTheme(region = eviCols)
 (orig_ndvi <- rasterVis::levelplot(orforest, margin = F, 
                                   par.settings = eviTheme, xlab = 'Longitude', 
                                   ylab = 'Latitude', main='orforest original'))
 ```
 
-Use the 'remove_plane' function of *geodiv* to remove the best fit polynomial plane from the image. This function searches polynomials of orders 0 - 3 to determine which is has the lowest error relative to the surface values. To fit a plane with a user-specified polynomial order, you may use the function 'fitplane.'
+Use the 'remove_plane' function of *geodiv* to remove the best fit polynomial surface from the image. This function searches polynomials of orders 0 - 3 to determine which is has the lowest error relative to the surface values. To fit a surface with a user-specified polynomial order, you may use the function 'fitplane.'
 
 ```{r, echo=TRUE}
 # Plot orforest with the trend removed.
@@ -137,44 +137,6 @@ orfor_rem <- remove_plane(orforest)
                                       par.settings = eviTheme, 
                                       xlab = 'Longitude', ylab = 'Latitude', 
                                       main='orforest trend removed'))
-```
-
-You can also plot the raw satellite image (as opposed to the NDVI derived from Landsat imagery). To do this, create a Google Maps API key and copy to the indicated location. 
-
-```{r, echo=TRUE}
-# Plot the actual satellite image.
-coords <- coordinates(orforest)
-lon <- mean(coords[, 1], na.rm = TRUE)
-lat <- mean(coords[, 2], na.rm = TRUE)
-api_key <- NA # ADD AN API KEY HERE
-```
-```{r private API key, echo = FALSE}
-# api_key <- # PRIVATE API KEY FOR VIGNETTE
-```
-
-Once an API key has been added, run the following code to get the satellite image next to the original NDVI image.
-
-```{r remainder of mapping, echo = TRUE, eval = FALSE}
-# Register a Google API key.
-register_google(api_key)
-
-# Get a satellite image at the specified longitude and latitude.
-img <- get_map(c(lon, lat), zoom = 13, maptype = 'satellite', 
-               source = "google")
-
-# Create a figure with the satellite image using ggplot.
-satimg <- ggmap(img) + coord_fixed(1.7) + xlab('Longitude') + 
-  ylab('Latitude') +
-  theme(axis.title.x = element_text(size = 12),
-        axis.title.y = element_text(size = 12),
-        plot.margin = unit(c(0, 0, 0, 0), "cm"))
-
-# Plot the satellite image next to the original NDVI image.
-plot_grid(satimg, orig_ndvi, ncol = 2, nrow = 1, scale = c(0.84, 1))
-```
-
-```{r figurename, echo=FALSE, out.width = '90%'}
-knitr::include_graphics("orig_ndvi_figure.png")
 ```
 
 ## Calculate global surface gradient metrics
@@ -217,21 +179,21 @@ system.time(output_rasters2 <- lapply(metric_list, FUN = function(m) {
 ```{r, eval = TRUE}
 # Download rasters from figshare. The list of data returned here will be used
 # throughout the vignette.
-url <- fs_download(12834896,  urls_only = TRUE, mine = FALSE, session = NULL,
+fs_rasts <- fs_download(12834896,  urls_only = TRUE, mine = FALSE, session = NULL,
                    version = 4)
 
 # Set tempfile for rasters
-get_raster <- function(url) {
+get_raster <- function(rasts) {
   tf <- tempfile()
-  download.file(url, destfile = tf, mode = 'wb')
+  download.file(rasts), destfile = tf, mode = 'wb')
   outrast <- raster(tf)
   return(outrast)
 }
 
 output_rasters2 <- list()
-output_rasters2[[1]] <- get_raster(url[[5]])
-output_rasters2[[2]] <- get_raster(url[[6]])
-output_rasters2[[3]] <- get_raster(url[[7]])
+output_rasters2[[1]] <- get_raster(fs_rasts[[5]])
+output_rasters2[[2]] <- get_raster(fs_rasts[[6]])
+output_rasters2[[3]] <- get_raster(fs_rasts[[7]])
 
 ```
 
@@ -256,19 +218,19 @@ grid.arrange(grobs = plts, nrow = 2)
 By assessing heterogeneity using a variety of metrics, researchers can gain a more complete picture of heterogeneity than they would with a single metric (Dahlin, 2016). However, many metrics are related and not all are informative for every situation. To demonstrate the utility of *geodiv* for producing and evaluating the utility of multiple metrics, in Example 2 we apply all surface metric functions to images across Oregon, USA and examine the patterns of, and relationships among, metrics. We calculate metrics for both elevation data from the Shuttle Radar Topography Mission (SRTM) and a commonly-used measure of canopy greenness, Enhanced Vegetation Index (EVI), from NASA's Moderate Resolution Imaging Spectroradiometer (MODIS). We then examine the correlations among metrics along a transect crossing the state, and determine how the metrics cluster using two methods, hierarchical clustering and Principal Components Analysis (PCA). This analysis demonstrates the relationships among metrics, with potential for determining how metrics group and behave with various input data.
 
 ## Elevation and EVI Data
-Elevation and EVI data that are available to use along with this vignette were prepared in Google Earth Engine (Gorelick et al., 2017) and analyzed in R. Void-filled SRTM data (Farr et al., 2007) and quality-filtered, maximum growing season, MODIS EVI data (Didan, 2015) were downloaded in Fall 2019.  The code chunk below downloads these data into the current R session from figshare. R may be used to access satellite data, but we provide previously-prepared data for the purpose of this analysis.
+Elevation and EVI data that are available to use along with this vignette were prepared in Google Earth Engine (Gorelick et al., 2017) and analyzed in R. Void-filled SRTM data aggregated to 240m resolution (Farr et al., 2007) and quality-filtered, maximum growing season, MODIS EVI data at 250m resolution (Didan, 2015) were downloaded in Fall 2019.  The code chunk below downloads these data into the current R session from figshare. R may be used to access satellite data, but we provide previously-prepared data for the purpose of this analysis.
 
 ```{r, warning=FALSE}
 # Download data from figshare. 
-elev <- get_raster(url[[4]])
-evi <- get_raster(url[[3]]) * 0.0001
+elev <- get_raster(fs_rasts[[4]])
+evi <- get_raster(fs_rasts[[3]]) * 0.0001
 ```
 
 Aggregate both datasets to ~2km resolution for comparison between datasets and to reduce computational time. 
 
 ```{r, warning=FALSE}
-elev <- aggregate(elev, fact = 8)
-evi <- aggregate(evi, fact = 8)
+elev <- raster::aggregate(elev, fact = 8)
+evi <- raster::aggregate(evi, fact = 8)
 ```
 
 ## Pre-processing of rasters
@@ -294,7 +256,7 @@ rasterVis::levelplot(evi_masked, margin = F, par.settings = eviTheme,
 
 # plot elevation (in meters) for Oregon
 elevCols <- colorRampPalette(c('grey7', 'grey93'))(100)
-elevTheme <- rasterVis::rasterTheme(region = elevCols)
+elevTheme <- rasterTheme(region = elevCols)
 rasterVis::levelplot(elev_masked, margin = F, par.settings = elevTheme, 
                      ylab = NULL, xlab = NULL, main = 'Elevation (m)')
 ```
@@ -331,7 +293,7 @@ vals <- outrast[]
 
 # Convert output raster of sa metrics (outrast) to a dataframe for 
 # easier use in subsequent analyses
-coords <- coordinates(outrast)
+coords <- raster::coordinates(outrast)
 sa_data_elev <- data.frame(x = coords[, 1], y = coords[, 2], v = vals)
 ```
 
@@ -341,12 +303,12 @@ Generating these data frames can take a while, so we have provided .csv files fo
 # The list of figshare files was completed above, so grab the appropriate files
 # for the csv's of all texture image outputs for Oregon.
 tf <- tempfile()
-download.file(url[[2]], destfile = tf, mode = 'wb')
+download.file(fs_rasts[[2]], destfile = tf, mode = 'wb')
 data_evi <- read.csv(tf, stringsAsFactors = FALSE)
 unlink(tf)
 
 tf <- tempfile()
-download.file(url[[1]], destfile = tf, mode = 'wb')
+download.file(fs_rasts[[1]], destfile = tf, mode = 'wb')
 data_elev <- read.csv(tf, stringsAsFactors = FALSE)
 unlink(tf)
 
@@ -358,7 +320,7 @@ Distributions of a few elevation variables:
 
 ```{r, warning=FALSE}
 for (i in c(9, 10, 18, 6)) {
-  hist(data_elev[, i], breaks = 30, xlab = names(data_elev)[i], main = '')
+  raster::hist(data_elev[, i], breaks = 30, xlab = names(data_elev)[i], main = '')
 }
 ```
 
@@ -511,7 +473,7 @@ plot_gap <- function(df) {
   res.km <- clusGap(t(df)[3:(ncol(df) - 1), ], stats::kmeans, K.max = 10, 
                     B = 100, nstart = 25)
   # gap statistic plot
-  factoextra::fviz_gap_stat(res.km)
+  fviz_gap_stat(res.km)
 }
 
 plot_gap(transect_evi)
@@ -520,7 +482,7 @@ plot_gap(transect_elev)
 ### Dendrogram and scatterplot of clusters
 get_clusters <- function(df, nclust) {
   # Enhanced hierarchical clustering using optimal # of clusters.
-  res.hc <- factoextra::eclust(t(df)[3:(ncol(df) - 1),], 
+  res.hc <- eclust(t(df)[3:(ncol(df) - 1),], 
                                  "hclust", k = nclust)
   
   return(res.hc)
@@ -561,8 +523,8 @@ First, the data have to be gathered into a longer format for this visualization.
 
 # Create gathered (long) version of dataframe for the clustering analysis.
 gather_data <- function(df) {
-  df <- df %>% tidyr::gather(key = 'var', value = 'value', 
-                             names(df[, seq(3, ncol(df))]))
+  df <- df %>% gather(key = 'var', value = 'value',
+                      names(df[, seq(3, ncol(df))]))
   
   # Order variables.
   df <- df[order(df$var),]

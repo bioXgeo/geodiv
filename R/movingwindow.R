@@ -7,8 +7,7 @@
 #' Note that this function is meant to work on rasters with an equal area
 #' projection.
 #'
-#' @param x A raster or matrix. If a raster is given, it will be projected to
-#' an equal area projection (given by \code{epsg_proj} argument).
+#' @param x A raster or matrix.
 #' @param window_type Character. Type of window, either circular or square.
 #' @param size Numeric. Size of window (edge length) or diameter (in meters).
 #' @param in_meters Logical. Is the size given in meters?
@@ -23,9 +22,7 @@
 #' @param nclumps Numeric. Number of clumps to split the raster or matrix into.
 #' @return A raster or list of rasters (if function results in multiple outputs)
 #' with pixel values representative of the metric value for the window
-#' surrounding that pixel. Note that the raster will always be projected to an
-#' equal area projection because calculations are done on matrices with a
-#' radius of number of pixels.
+#' surrounding that pixel.
 #' @note The total window size for square windows will be (size * 2) + 1.
 #' @details Metrics available from geodiv package:
 #' \enumerate{
@@ -192,13 +189,14 @@ texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE
     start <- Sys.time()
     # make and start cluster
     try(stopCluster(cl), silent = TRUE)
-    cl <- parallel::makeCluster(ncores, type = 'SOCK')
+    cl <- snow::makeCluster(ncores, type = 'SOCK')
     parallel::clusterExport(cl = cl, list('ext_x', 'coord_list', 'size',
                                           'window_type',
                                           'new_pixlist', 'metric', 'input_args',
                                           'window_metric'),
                             envir = environment())
     parallel::clusterEvalQ(cl, library('geodiv'))
+    parallel::clusterEvalQ(cl, library('raster'))
     # for each list in new_pixlist, run lapply
     result <- parallel::parLapply(cl, new_pixlist, fun = function(l) {
       lapply(l, FUN = function(i) {window_metric(x = ext_x, coords = coord_list[i, ],

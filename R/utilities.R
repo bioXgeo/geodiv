@@ -14,9 +14,9 @@
 #' @return Numeric of degree value(s).
 .deg2rad <- function(x) {(x * pi) / (180)}
 
-#' Calculate a Least Squares Polynomial Plane
+#' Calculate a Least Squares Polynomial Surface
 #'
-#' Fits a polynomial plane of order \code{n} to a raster
+#' Fits a polynomial surface of order \code{n} to a raster
 #' or matrix.
 #'
 #' @param x A raster or matrix.
@@ -28,7 +28,7 @@
 #' # import raster image
 #' data(orforest)
 #'
-#' # find the 2nd order least squares polynomial plane
+#' # find the 2nd order least squares polynomial surface
 #' polyfit <- fitplane(orforest, order = 2)
 #'
 #' # create raster of polyfit
@@ -68,9 +68,9 @@ fitplane <- function(x, order) {
   return(surfvals)
 }
 
-#' Finds the Best Fit Polynomial Plane
+#' Finds the Best Fit Polynomial Surface
 #'
-#' Finds the best fit polynomial plane for a surface. This
+#' Finds the best fit polynomial surface for a raster or matrix. This
 #' function tests least squares polynomial fits with orders of
 #' 0 - 3 and determines which order minimizes the error when the
 #' fit is subtracted from the original image.
@@ -84,7 +84,7 @@ fitplane <- function(x, order) {
 #' # import raster image
 #' data(orforest)
 #'
-#' # find the least squares polynomial plane
+#' # find the least squares polynomial surface
 #' poly <- bestfitplane(orforest)
 #'
 #' # plot the fit
@@ -126,13 +126,12 @@ bestfitplane <- function(x) {
   return(bfx)
 }
 
-#' Removes the Best Fit Polynomial Plane from a Surface
+#' Removes the Best Fit Polynomial Surface
 #'
-#' Finds the best fit polynomial plane for a surface and
-#' subtracts it from the actual values. The remaining
-#' surface has positive values where the actual values are higher
-#' than the plane and negative values where the actual value
-#' are lower than the plane.
+#' Finds the best fit polynomial surface for a raster or matrix and
+#' subtracts it from the actual values. The output image has positive values
+#' where the actual values are higher than the surface and negative values
+#' where the actual value are lower than the surface.
 #'
 #' @param x A raster or matrix.
 #' @return A raster or matrix of the same size as the input with values
@@ -144,7 +143,7 @@ bestfitplane <- function(x) {
 #' # import raster image
 #' data(orforest)
 #'
-#' # remove the least squares polynomial plane
+#' # remove the least squares polynomial surface
 #' new_rast <- remove_plane(orforest)
 #'
 #' # plot
