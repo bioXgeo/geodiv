@@ -155,7 +155,7 @@ scl <- function(x, threshold = c(0.20, 1 / exp(1)), create_plot = FALSE) {
   # get aacf img
   aacfimg <- aacf(x)
 
-  if (!(class(aacfimg)[1] %in% c('matrix', 'RasterLayer'))) {
+  if (!(class(aacfimg)[1] %in% c('matrix', 'RasterLayer')) | sum(is.na(aacfimg)) == length(aacfimg)) {
     return(c(NA, NA, NA, NA))
   } else if (class(aacfimg)[1] %in% c('matrix', 'RasterLayer')) {
 
