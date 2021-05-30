@@ -185,7 +185,7 @@ fs_rasts <- fs_download(12834896,  urls_only = TRUE, mine = FALSE, session = NUL
 # Set tempfile for rasters
 get_raster <- function(rasts) {
   tf <- tempfile()
-  download.file(rasts), destfile = tf, mode = 'wb')
+  download.file(rasts, destfile = tf, mode = 'wb')
   outrast <- raster(tf)
   return(outrast)
 }

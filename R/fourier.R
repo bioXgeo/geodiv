@@ -48,7 +48,7 @@ std <- function(x, create_plot = FALSE, option = c(1, 2)) {
   # if irregular non-na area, cut to biggest square possible
   if (sum(is.na(zmat)) != 0) {
     coords <- sp::coordinates(x)
-    origin <- c(mean(coords[, 1]), mean(coords(x)[, 2]))
+    origin <- c(mean(coords[, 1]), mean(coords[, 2]))
 
     potentials <- data.frame(xmin = rep(origin[1], floor(N / 2)),
                              xmax = origin[1],
