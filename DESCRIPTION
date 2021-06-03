@@ -47,8 +47,7 @@ Suggests:
     factoextra,
     cluster,
     knitr,
-    rfigshare,
-    snow
+    rfigshare
 LinkingTo: 
     Rcpp, RcppArmadillo
 VignetteBuilder: knitr

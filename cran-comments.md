@@ -1,7 +1,7 @@
 ---
 title: "cran-comments.md"
 author: "Annie C. Smith"
-date: "April 1, 2021"
+date: "June 3, 2021"
 output: html_document
 ---
 
@@ -17,13 +17,11 @@ knitr::opts_chunk$set(echo = TRUE)
 ## R CMD check results
 There were no ERRORS or WARNINGS.
 
-There were 2 NOTEs: 
+There were 1 NOTE: 
 
 "Suggests orphaned package: 'ggmap'." This package is only used for a figure in the vignette and does not influence anything in the geodiv package functions.
 
-"Uses the superseded package: snow." The tests failed without including 'snow' as an import, although all 'snow' functions are actually accessed through the package 'parallel.'
-
-This update fixes minor a minor bug in the texture_image and pad_edges functions, adds text to the vignette, and fixes an error in the DESCRIPTION.
+This update fixes minor issues with function documentation, simplifies the vignette, and fixes an error with a variable name in the vignette. We also updated the dependencies to include 'snow' to remove a note.
 
 ## Downstream dependencies
 There are currently no downstream dependencies for this package.

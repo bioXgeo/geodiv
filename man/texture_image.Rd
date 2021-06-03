@@ -17,8 +17,7 @@ texture_image(
 )
 }
 \arguments{
-\item{x}{A raster or matrix. If a raster is given, it will be projected to
-an equal area projection (given by \code{epsg_proj} argument).}
+\item{x}{A raster or matrix.}
 
 \item{window_type}{Character. Type of window, either circular or square.}
 
@@ -43,9 +42,7 @@ run the calculations. Defaults to all available, minus 1.}
 \value{
 A raster or list of rasters (if function results in multiple outputs)
 with pixel values representative of the metric value for the window
-surrounding that pixel. Note that the raster will always be projected to an
-equal area projection because calculations are done on matrices with a
-radius of number of pixels.
+surrounding that pixel.
 }
 \description{
 Calculates the various texture metrics over windows centered

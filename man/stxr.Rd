@@ -30,12 +30,9 @@ library(raster)
 # import raster image
 data(normforest)
 
-# crop raster to much smaller area
-x <- crop(normforest, extent(-123, -122.99, 43, 43.01))
-
 # estimate the texture aspect ratio for autocorrelation
 # thresholds of 0.20 and 0.37 (1/e)
-strvals <- stxr(x, threshold = c(0.20, 1 / exp(1)))
+strvals <- stxr(normforest, threshold = c(0.20, 1 / exp(1)))
 
 # calculate Str20, the texture aspect ratio for
 # autocorrelation value of 0.2 in the AACF

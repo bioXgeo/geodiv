@@ -2,7 +2,7 @@
 % Please edit documentation in R/utilities.R
 \name{bestfitplane}
 \alias{bestfitplane}
-\title{Finds the Best Fit Polynomial Plane}
+\title{Finds the Best Fit Polynomial Surface}
 \usage{
 bestfitplane(x)
 }
@@ -14,7 +14,7 @@ A raster or matrix of the same size as the input with values
   predicted from the best polynomial fit.
 }
 \description{
-Finds the best fit polynomial plane for a surface. This
+Finds the best fit polynomial surface for a raster or matrix. This
 function tests least squares polynomial fits with orders of
 0 - 3 and determines which order minimizes the error when the
 fit is subtracted from the original image.
@@ -25,7 +25,7 @@ library(raster)
 # import raster image
 data(orforest)
 
-# find the least squares polynomial plane
+# find the least squares polynomial surface
 poly <- bestfitplane(orforest)
 
 # plot the fit

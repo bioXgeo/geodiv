@@ -2,7 +2,7 @@
 % Please edit documentation in R/utilities.R
 \name{remove_plane}
 \alias{remove_plane}
-\title{Removes the Best Fit Polynomial Plane from a Surface}
+\title{Removes the Best Fit Polynomial Surface}
 \usage{
 remove_plane(x)
 }
@@ -15,11 +15,10 @@ A raster or matrix of the same size as the input with values
   plane.
 }
 \description{
-Finds the best fit polynomial plane for a surface and
-subtracts it from the actual values. The remaining
-surface has positive values where the actual values are higher
-than the plane and negative values where the actual value
-are lower than the plane.
+Finds the best fit polynomial surface for a raster or matrix and
+subtracts it from the actual values. The output image has positive values
+where the actual values are higher than the surface and negative values
+where the actual value are lower than the surface.
 }
 \examples{
 library(raster)
@@ -27,7 +26,7 @@ library(raster)
 # import raster image
 data(orforest)
 
-# remove the least squares polynomial plane
+# remove the least squares polynomial surface
 new_rast <- remove_plane(orforest)
 
 # plot
