@@ -1,7 +1,7 @@
 ---
 title: "NEWS.md"
 author: "Annie C. Smith"
-date: "April 1, 2021"
+date: "June 3, 2021"
 output: html_document
 ---
 
@@ -34,4 +34,4 @@ Fixed a minor bug in the 'texture_image' and 'pad_edges' functions. Added text t
 
 ## geodiv 1.0.2
 
-Fixed errors in function descriptions.
+Fixed errors in function descriptions and examples. Simplified the vignette.

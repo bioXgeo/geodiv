@@ -17,11 +17,13 @@ knitr::opts_chunk$set(echo = TRUE)
 ## R CMD check results
 There were no ERRORS or WARNINGS.
 
-There were 1 NOTE: 
+There were 2 NOTEs: 
 
 "Suggests orphaned package: 'ggmap'." This package is only used for a figure in the vignette and does not influence anything in the geodiv package functions.
 
-This update fixes minor issues with function documentation, simplifies the vignette, and fixes an error with a variable name in the vignette. We also updated the dependencies to include 'snow' to remove a note.
+"Uses the superseded package: snow." We use 'parallel' for all parallel operations, but 'parallel' depends on 'snow for some functions. We now include 'snow' because a user reported that it showed up as a warning during installation.
+
+This update fixes minor issues with function documentation, simplifies the vignette, and fixes an error with a variable name in the vignette. We also updated the dependencies to include 'snow.'
 
 ## Downstream dependencies
 There are currently no downstream dependencies for this package.
