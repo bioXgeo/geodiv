@@ -50,4 +50,4 @@ ssc(normforest) # mean summit curvature
 Vignette Data
 -------------
 
-The intermediate data for the vignette is available on figshare: https://doi.org/10.6084/m9.figshare.12834896.v4
+The intermediate data for the vignette is available on figshare: https://doi.org/10.6084/m9.figshare.12834896.v5
