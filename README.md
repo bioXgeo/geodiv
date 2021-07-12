@@ -12,7 +12,7 @@ Publications
 
 *geodiv* is featured in the following publications:
 
-Smith, AC, Dahlin KM, Record S, Costanza JK, Wilson AM, Zarnetske PL. 2021. The geodiv R package: tools for creating gradient surface metrics. Accepted in Methods in Ecology and Evolution.
+Smith, AC, Dahlin KM, Record S, Costanza JK, Wilson AM, Zarnetske PL. 2021. The geodiv R package: tools for creating gradient surface metrics. Accepted in *Methods in Ecology and Evolution*.
 
 Installation
 ------------
