@@ -7,6 +7,13 @@ geodiv
 <!-- badges: end -->
 *geodiv* calculates gradient surface metrics in R. These metrics are applied to continuous spatial data (i.e., rasters or matrices) and represent spatial heterogeneity.
 
+Publications
+------------
+
+*geodiv* is featured in the following publications:
+
+Smith, AC, Dahlin KM, Record S, Costanza JK, Wilson AM, Zarnetske PL. 2021. The geodiv R package: tools for creating gradient surface metrics. Accepted in Methods in Ecology and Evolution.
+
 Installation
 ------------
 
