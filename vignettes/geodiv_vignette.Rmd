@@ -191,10 +191,13 @@ EVI data that are available to use along with this vignette were prepared in Goo
 fs_data <- list("https://ndownloader.figshare.com/files/24366086",
                  "https://ndownloader.figshare.com/files/28259166")
 
+# Set timeout option to 1000s to make sure download succeeds.
+options(timeout = 1000)
+
 # Function to download rasters, including setting a tempfile.
 get_raster <- function(rasts) {
   tf <- tempfile()
-  download.file(rasts, destfile = tf, mode = 'wb', timeout = 1000)
+  download.file(rasts, destfile = tf, mode = 'wb')
   outrast <- raster(tf)
   return(outrast)
 }
@@ -293,7 +296,7 @@ The creation of the texture images can take a while (see above), so we have prov
 # The list of figshare files was completed above, so grab the appropriate files
 # for the csv of all texture image outputs for Oregon.
 tf <- tempfile()
-download.file(fs_data[[2]], destfile = tf, mode = 'wb', timeout = 1000)
+download.file(fs_data[[2]], destfile = tf, mode = 'wb')
 data_evi <- read.csv(tf, stringsAsFactors = FALSE)
 unlink(tf)
 

@@ -1,7 +1,7 @@
 ---
 title: "cran-comments.md"
 author: "Annie C. Smith"
-date: "June 3, 2021"
+date: "July 20, 2021"
 output: html_document
 ---
 
@@ -23,7 +23,7 @@ There were 2 NOTEs:
 
 "Uses the superseded package: snow." We use 'parallel' for all parallel operations, but 'parallel' depends on 'snow for some functions. We now include 'snow' because a user reported that it showed up as a warning during installation.
 
-This update fixes minor issues with function documentation, simplifies the vignette, and fixes an error with a variable name in the vignette. We also updated the dependencies to include 'snow.'
+This update fixes an issue with a failed download in the vignette by adding a longer timeout argument.
 
 ## Downstream dependencies
 There are currently no downstream dependencies for this package.

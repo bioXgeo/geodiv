@@ -35,3 +35,7 @@ Fixed a minor bug in the 'texture_image' and 'pad_edges' functions. Added text t
 ## geodiv 1.0.2
 
 Fixed errors in function descriptions and examples. Simplified the vignette.
+
+## geodiv 1.0.3
+
+Added a longer timeout argument to the download.file arguments in the vignette.
