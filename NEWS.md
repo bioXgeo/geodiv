@@ -38,4 +38,4 @@ Fixed errors in function descriptions and examples. Simplified the vignette.
 
 ## geodiv 1.0.3
 
-Added a longer timeout argument to the download.file arguments in the vignette.
+Added a longer timeout option before the download.file arguments in the vignette.

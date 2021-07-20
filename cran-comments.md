@@ -23,7 +23,7 @@ There were 2 NOTEs:
 
 "Uses the superseded package: snow." We use 'parallel' for all parallel operations, but 'parallel' depends on 'snow for some functions. We now include 'snow' because a user reported that it showed up as a warning during installation.
 
-This update fixes an issue with a failed download in the vignette by adding a longer timeout argument.
+This update fixes an issue with a failed download in the vignette by adding a longer timeout.
 
 ## Downstream dependencies
 There are currently no downstream dependencies for this package.
