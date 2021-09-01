@@ -17,13 +17,16 @@ knitr::opts_chunk$set(echo = TRUE)
 ## R CMD check results
 There were no ERRORS.
 
-There were 2 NOTEs: 
-
-"Suggests orphaned package: 'ggmap'." This package is only used for a figure in the vignette and does not influence anything in the geodiv package functions.
+There was 1 NOTE: 
 
 "Uses the superseded package: snow." We use 'parallel' for all parallel operations, but 'parallel' depends on 'snow for some functions. We now include 'snow' because a user reported that it showed up as a warning during installation.
 
 There is 1 WARNING.
+
+   Package was archived on CRAN
+   
+   CRAN repository db overrides:
+     X-CRAN-Comment: Archived on 2021-07-29 for repeated policy violation.
 
 The package was archived due to the download.file argument in the vignette not failing gracefully. The line in the vignette is now in a tryCatch function, which will produce a clean error message if the download doesn't work. We believe that this makes the package suitable for CRAN again.
 
