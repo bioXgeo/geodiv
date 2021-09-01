@@ -1,7 +1,7 @@
 ---
 title: "NEWS.md"
 author: "Annie C. Smith"
-date: "June 3, 2021"
+date: "September 1, 2021"
 output: html_document
 ---
 
@@ -39,3 +39,7 @@ Fixed errors in function descriptions and examples. Simplified the vignette.
 ## geodiv 1.0.3
 
 Added a longer timeout option before the download.file arguments in the vignette.
+
+## geodiv 1.0.4
+
+Added a tryCatch so that download.file in the vignette fails gracefully.

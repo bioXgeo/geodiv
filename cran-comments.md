@@ -1,7 +1,7 @@
 ---
 title: "cran-comments.md"
 author: "Annie C. Smith"
-date: "July 20, 2021"
+date: "September 1, 2021"
 output: html_document
 ---
 
@@ -15,7 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 * win-builder, R-devel
 
 ## R CMD check results
-There were no ERRORS or WARNINGS.
+There were no ERRORS.
 
 There were 2 NOTEs: 
 
@@ -23,7 +23,9 @@ There were 2 NOTEs:
 
 "Uses the superseded package: snow." We use 'parallel' for all parallel operations, but 'parallel' depends on 'snow for some functions. We now include 'snow' because a user reported that it showed up as a warning during installation.
 
-This update fixes an issue with a failed download in the vignette by adding a longer timeout.
+There is 1 WARNING.
+
+The package was archived due to the download.file argument in the vignette not failing gracefully. The line in the vignette is now in a tryCatch function, which will produce a clean error message if the download doesn't work. We believe that this makes the package suitable for CRAN again.
 
 ## Downstream dependencies
 There are currently no downstream dependencies for this package.
