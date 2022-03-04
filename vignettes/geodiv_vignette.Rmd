@@ -9,10 +9,8 @@ output:
     toc_depth: 2
 vignette: >
   %\VignetteIndexEntry{geodiv Examples}
-  %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
-editor_options: 
-  chunk_output_type: console
+  %\VignetteEncoding{UTF-8}
 ---
 
 
@@ -172,26 +170,6 @@ system.time(output_raster2 <- texture_image(orforest, window_type = 'square',
                                             nclumps = 100))
 print(output_raster2)
 ```
-<<<<<<< HEAD
-```{r, eval = TRUE}
-# Download rasters from figshare. The list of data returned here will be used
-# throughout the vignette.
-url <- fs_download(12834896, mine = FALSE, session = NULL)
-
-f1=tempfile()
-f2=tempfile()
-f3=tempfile()
-
-download.file(url=url[[5]],destfile = f1)
-download.file(url=url[[6]],destfile = f2)
-download.file(url=url[[7]],destfile = f3)
-
-output_rasters2 <- list()
-output_rasters2[[1]] <- raster(f1)
-output_rasters2[[2]] <- raster(f2)
-output_rasters2[[3]] <- raster(f3)
-=======
->>>>>>> master
 
 Plot the texture image raster.
 
@@ -210,17 +188,6 @@ EVI data that are available to use along with this vignette were prepared in Goo
 
 ```{r, eval = TRUE}
 # Download data from figshare. 
-<<<<<<< HEAD
-f4=tempfile()
-f5=tempfile()
-
-download.file(url=url[[4]],destfile = f4)
-download.file(url=url[[3]],destfile = f5)
-
-
-elev <- raster(f4)
-evi <- raster(f5) * 0.0001
-=======
 fs_data <- list("https://ndownloader.figshare.com/files/24366086",
                  "https://ndownloader.figshare.com/files/28259166")
 
@@ -241,7 +208,6 @@ get_raster <- function(rasts) {
 ```{r, warning=FALSE}
 # Download data from figshare.
 evi <- get_raster(fs_data[[1]]) * 0.0001
->>>>>>> master
 ```
 
 Aggregate the raster to ~1km resolution (440640 pixels) for comparison between datasets and to reduce computational time. The most appropriate resolution for any analysis should be based on the study goals and not computational efficiency. Here, we are demonstrating how metrics may vary across space, as well as how metrics relate to one another, and as such have chosen to use a relatively coarse resolution.
