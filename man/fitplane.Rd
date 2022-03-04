@@ -2,7 +2,7 @@
 % Please edit documentation in R/utilities.R
 \name{fitplane}
 \alias{fitplane}
-\title{Calculate a Least Squares Polynomial Plane}
+\title{Calculate a Least Squares Polynomial Surface}
 \usage{
 fitplane(x, order)
 }
@@ -15,7 +15,7 @@ fitplane(x, order)
 A matrix with values predicted from the polynomial fit.
 }
 \description{
-Fits a polynomial plane of order \code{n} to a raster
+Fits a polynomial surface of order \code{n} to a raster
 or matrix.
 }
 \examples{
@@ -24,7 +24,7 @@ library(raster)
 # import raster image
 data(orforest)
 
-# find the 2nd order least squares polynomial plane
+# find the 2nd order least squares polynomial surface
 polyfit <- fitplane(orforest, order = 2)
 
 # create raster of polyfit

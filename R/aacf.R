@@ -134,17 +134,8 @@ aacf <- function(x) {
 #' # import raster image
 #' data(normforest)
 #'
-#' # crop raster to much smaller area
-#' x <- crop(normforest, extent(-123, -122.99, 43, 43.01))
-#'
-#' # calculate aacf img or matrix
-#' aacf_out <- aacf(x)
-#'
-#' # estimate the fastest/slowest declines to 0.20 and 0.37 (1/e) autocorrelation
-#' sclvals <- scl(aacf_out)
-#'
 #' # calculate Scl20, the minimum distance to an autocorrelation value of 0.2 in the AACF
-#' Scl20 <- sclvals[1]
+#' Scl20 <- scl(normforest)[1]
 #' @export
 scl <- function(x, threshold = c(0.20, 1 / exp(1)), create_plot = FALSE) {
   if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
@@ -155,7 +146,7 @@ scl <- function(x, threshold = c(0.20, 1 / exp(1)), create_plot = FALSE) {
   # get aacf img
   aacfimg <- aacf(x)
 
-  if (!(class(aacfimg)[1] %in% c('matrix', 'RasterLayer'))) {
+  if (!(class(aacfimg)[1] %in% c('matrix', 'RasterLayer')) | sum(is.na(aacfimg)[]) == length(aacfimg)) {
     return(c(NA, NA, NA, NA))
   } else if (class(aacfimg)[1] %in% c('matrix', 'RasterLayer')) {
 
@@ -319,12 +310,9 @@ scl <- function(x, threshold = c(0.20, 1 / exp(1)), create_plot = FALSE) {
 #' # import raster image
 #' data(normforest)
 #'
-#' # crop raster to much smaller area
-#' x <- crop(normforest, extent(-123, -122.99, 43, 43.01))
-#'
 #' # estimate the texture aspect ratio for autocorrelation
 #' # thresholds of 0.20 and 0.37 (1/e)
-#' strvals <- stxr(x, threshold = c(0.20, 1 / exp(1)))
+#' strvals <- stxr(normforest, threshold = c(0.20, 1 / exp(1)))
 #'
 #' # calculate Str20, the texture aspect ratio for
 #' # autocorrelation value of 0.2 in the AACF
