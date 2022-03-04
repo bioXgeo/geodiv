@@ -25,7 +25,7 @@ sa <- function(x) {
   }
 
   zbar <- mean(z, na.rm = TRUE)
-  N <- length(z)
+  N <- length(na.rm(z))
 
   val <- sum(abs(z - zbar), na.rm = TRUE) / N
 
