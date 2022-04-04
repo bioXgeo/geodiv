@@ -96,7 +96,7 @@ ssk <- function(x, adj = TRUE) {
 
   zbar <- mean(z, na.rm = TRUE)
   s <- sd(z, na.rm = TRUE)
-  N <- length(z)
+  N <- length(na.omit(z))
 
   val_unadj <- (sum((z - zbar) ^ 3, na.rm = TRUE) / N) / (s ^ 3)
 
@@ -142,7 +142,7 @@ sku <- function(x, excess = TRUE) {
 
   zbar <- mean(z, na.rm = TRUE)
   s <- sd(z, na.rm = TRUE)
-  N <- length(z)
+  N <- length(na.omit(z))
 
   val_unadj <- (sum((z - zbar) ^ 4, na.rm = TRUE) / N) / (s ^ 4)
 
