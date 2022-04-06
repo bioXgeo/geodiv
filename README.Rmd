@@ -31,7 +31,12 @@ And the development version from [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("devtools")
+
+# install from master branch
 devtools::install_github("bioXgeo/geodiv")
+
+# install from development branch
+devtools::install_github("bioXgeo/geodiv",ref = "dev")
 ```
 On Mac OS X, you may need to install the development tools here to get the package to install:
 
