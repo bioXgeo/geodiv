@@ -1,7 +1,7 @@
 ---
 title: "cran-comments.md"
 author: "Annie C. Smith"
-date: "April 6, 2022"
+date: "April 7, 2022"
 output: html_document
 ---
 
@@ -19,7 +19,7 @@ There were no ERRORS or WARNINGS.
 
 There was 1 NOTE: 
 
-Uses the superseded package: 'snow (>= 0.4-3).' We use 'parallel' for all parallel operations, but 'parallel' depends on 'snow for some functions. We now include 'snow' because a user reported that it showed up as a warning during installation.
+Uses the superseded package: 'snow (>= 0.4-3).' We use 'parallel' for all parallel operations, but 'parallel' depends on 'snow for some functions. We include 'snow' because a user reported that it showed up as a warning during installation.
 
 ## Downstream dependencies
 There are currently no downstream dependencies for this package.

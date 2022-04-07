@@ -1,7 +1,7 @@
 ---
 title: "NEWS.md"
 author: "Annie C. Smith"
-date: "April 6, 2022"
+date: "April 7, 2022"
 output: html_document
 ---
 
