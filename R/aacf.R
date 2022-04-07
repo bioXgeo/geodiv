@@ -21,16 +21,16 @@
 #' plot(aacf_out)
 #' @export
 aacf <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
 
   # get raster dimensions
   M <- ncol(x)
   N <- nrow(x)
 
-  data_type <- if(class(x)[1] == 'matrix') {'matrix'} else {'RasterLayer'}
+  data_type <- if(inherits(x, "matrix") == TRUE) {'matrix'} else {'RasterLayer'}
 
   # convert matrix to raster if necessary (equal area)
-  if (class(x)[1] == 'matrix') {
+  if (inherits(x, "matrix") == TRUE) {
     x <- raster(x)
     extent(x) <- c(0, ncol(x), 0, nrow(x))
     crs(x) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
@@ -138,9 +138,9 @@ aacf <- function(x) {
 #' Scl20 <- scl(normforest)[1]
 #' @export
 scl <- function(x, threshold = c(0.20, 1 / exp(1)), create_plot = FALSE) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
-  if(class(create_plot) != 'logical') {stop('create_plot argument must be TRUE/FALSE.')}
-  if(class(threshold) != 'numeric') {stop('threshold must be numeric.')}
+  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
+  if(inherits(create_plot, "logical") == FALSE) {stop('create_plot argument must be TRUE/FALSE.')}
+  if(inherits(threshold, "numeric") == FALSE) {stop('threshold must be numeric.')}
   if(sum(threshold < 0) >= 1) {stop('threshold values cannot be less than 0.')}
 
   # get aacf img
@@ -150,7 +150,7 @@ scl <- function(x, threshold = c(0.20, 1 / exp(1)), create_plot = FALSE) {
     return(c(NA, NA, NA, NA))
   } else if (class(aacfimg)[1] %in% c('matrix', 'RasterLayer')) {
 
-    data_type <- if(class(x)[1] == 'matrix') {'matrix'} else {'RasterLayer'}
+    data_type <- if(inherits(x, "matrix") == TRUE) {'matrix'} else {'RasterLayer'}
 
     if (class(aacfimg)[1] == 'RasterLayer') {
       # take amplitude image, cut in half (y direction)
@@ -319,8 +319,8 @@ scl <- function(x, threshold = c(0.20, 1 / exp(1)), create_plot = FALSE) {
 #' Str20 <- strvals[1]
 #' @export
 stxr <- function(x, threshold = c(0.20, 1 / exp(1))) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
-  if(class(threshold) != 'numeric') {stop('threshold must be numeric.')}
+  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
+  if(inherits(threshold, "numeric") == FALSE) {stop('threshold must be numeric.')}
   if(sum(threshold < 0) >= 1) {stop('threshold values cannot be less than 0.')}
 
   sclvals <- scl(x, threshold = threshold, create_plot = FALSE)

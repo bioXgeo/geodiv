@@ -20,7 +20,7 @@
 #' flatsa(normforest)
 #' @export
 flatsa <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
 
   # In case the value area of the raster is an odd shape,
   # calculate the surface area of the flattened raster in the same way
@@ -30,7 +30,7 @@ flatsa <- function(x) {
   M <- dim(x)[2] # cols
 
   # convert matrix to raster if necessary (equal area)
-  if (class(x)[1] == 'matrix') {
+  if (inherits(x, "matrix") == TRUE) {
     x <- raster(x)
     extent(x) <- c(0, ncol(x), 0, nrow(x))
     crs(x) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
@@ -108,14 +108,14 @@ flatsa <- function(x) {
 #' surface_area(normforest)
 #' @export
 surface_area <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
 
   # get dimensions
   N <- dim(x)[1] # rows
   M <- dim(x)[2] # cols
 
   # convert matrix to raster if necessary (equal area)
-  if (class(x)[1] == 'matrix') {
+  if (inherits(x, "matrix") == TRUE) {
     x <- raster(x)
     extent(x) <- c(0, ncol(x), 0, nrow(x))
     crs(x) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
@@ -183,7 +183,7 @@ surface_area <- function(x) {
 #' Sdr <- sdr(normforest)
 #' @export
 sdr <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
 
   # get area of flat plane
   flat_area <- flatsa(x)

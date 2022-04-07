@@ -75,7 +75,7 @@ focal_metrics <- function(x,
     stop("The window must have uneven sides.", call. = FALSE)
   }
 
-  if (class(x)[1] == "matrix") {
+  if (inherits(x, "matrix") == TRUE) {
 
     x <- raster(x)
 

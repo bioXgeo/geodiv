@@ -41,12 +41,12 @@ zshift <- function(r, xdist = 0, ydist = 0, xrm, yrm, scale = FALSE) {
   try(if(missing(xrm)) (xrm = xdist))
   try(if(missing(yrm)) (yrm = ydist))
 
-  if(class(r)[1] != 'RasterLayer' & class(r)[1] != 'matrix') {stop('r must be a raster or matrix.')}
-  if(class(xdist) != 'numeric') {stop('xdist must be numeric.')}
-  if(class(ydist) != 'numeric') {stop('ydist must be numeric.')}
-  if(class(xrm) != 'numeric') {stop('xrm must be numeric.')}
-  if(class(yrm) != 'numeric') {stop('yrm must be numeric.')}
-  if(class(scale) != 'logical') {stop('scale must be logical.')}
+  if(inherits(r, "RasterLayer") == FALSE & inherits(r, "matrix") == FALSE) {stop('r must be a raster.')}
+  if(inherits(xdist, "numeric") == FALSE) {stop('xdist must be numeric.')}
+  if(inherits(ydist, "numeric") == FALSE) {stop('ydist must be numeric.')}
+  if(inherits(xrm, "numeric") == FALSE) {stop('xrm must be numeric.')}
+  if(inherits(yrm, "numeric") == FALSE) {stop('yrm must be numeric.')}
+  if(inherits(scale, "logical") == FALSE) {stop('scale must be logical.')}
   if(length(xdist) > 1) {stop('too many values supplied to xdist.')}
   if(length(ydist) > 1) {stop('too many values supplied to ydist.')}
 
@@ -55,9 +55,9 @@ zshift <- function(r, xdist = 0, ydist = 0, xrm, yrm, scale = FALSE) {
   M <- dim(r)[2] # cols
 
   # calculate zmat and coordinates
-  if (class(r)[1] == 'RasterLayer') {
+  if (inherits(r, "RasterLayer") == TRUE) {
     z <- getValues(r)
-  } else if (class(r) == 'matrix') {
+  } else if (inherits(r, "matrix") == TRUE) {
     z <- as.numeric(r)
   }
 

@@ -15,10 +15,11 @@
 #' # find the surface roughness
 #' roughness <- sa(normforest)
 #' @export
+#' @importFrom stats na.omit
 sa <- function(x) {
-  if(!('RasterLayer' %in% class(x)) & !('matrix' %in% class(x))) {stop('x must be a raster or matrix.')}
+  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
 
-  if ('RasterLayer' %in% class(x)) {
+  if (inherits(x, "RasterLayer") == TRUE) {
     z <- getValues(x)
   } else {
     z <- x
@@ -51,9 +52,9 @@ sa <- function(x) {
 #' roughness <- sq(normforest)
 #' @export
 sq <- function(x) {
-  if(!('RasterLayer' %in% class(x)) & !('matrix' %in% class(x))) {stop('x must be a raster or matrix.')}
+  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
 
-  if ('RasterLayer' %in% class(x)) {
+  if (inherits(x, "RasterLayer") == TRUE) {
     z <- getValues(x)
   } else {
     z <- x
@@ -85,10 +86,10 @@ sq <- function(x) {
 #' Ssk <- ssk(normforest, adj = TRUE)
 #' @export
 ssk <- function(x, adj = TRUE) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
-  if(class(adj) != 'logical') {stop('adj argument must be TRUE/FALSE.')}
+  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
+  if(inherits(adj, "logical") == FALSE) {stop('adj argument must be TRUE/FALSE.')}
 
-  if (class(x)[1] == 'RasterLayer') {
+  if (inherits(x, "RasterLayer") == TRUE) {
     z <- getValues(x)
   } else {
     z <- x
@@ -131,10 +132,10 @@ ssk <- function(x, adj = TRUE) {
 #' Sku <- sku(normforest, excess = TRUE)
 #' @export
 sku <- function(x, excess = TRUE) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
-  if(class(excess) != 'logical') {stop('excess argument must be TRUE/FALSE.')}
+  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
+  if(inherits(excess, "logical") == FALSE) {stop('excess argument must be TRUE/FALSE.')}
 
-  if (class(x)[1] == 'RasterLayer') {
+  if (inherits(x, "RasterLayer") == TRUE) {
     z <- getValues(x)
   } else {
     z <- x
@@ -171,9 +172,9 @@ sku <- function(x, excess = TRUE) {
 #' Sv <- sv(normforest)
 #' @export
 sv <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
 
-  if (class(x)[1] == 'RasterLayer') {
+  if (inherits(x, "RasterLayer") == TRUE) {
     z <- getValues(x)
   } else {
     z <- x
@@ -200,9 +201,9 @@ sv <- function(x) {
 #' Sph <- sph(normforest)
 #' @export
 sph <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
 
-  if (class(x)[1] == 'RasterLayer') {
+  if (inherits(x, "RasterLayer") == TRUE) {
     z <- getValues(x)
   } else {
     z <- x
@@ -229,9 +230,9 @@ sph <- function(x) {
 #' Smean <- smean(normforest)
 #' @export
 smean <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
 
-  if (class(x)[1] == 'RasterLayer') {
+  if (inherits(x, "RasterLayer") == TRUE) {
     z <- getValues(x)
   } else {
     z <- x

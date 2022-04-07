@@ -21,10 +21,10 @@
 #' @export
 sfd <- function(x, silent = FALSE) {
   # check type
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
 
   # if raster, convert to matrix
-  if (class(x)[1] == 'RasterLayer') {
+  if (inherits(x, "RasterLayer") == TRUE) {
     if (silent == FALSE) {
       # tell users that this will always reproject to equal area
       print('Warning: Raster will be converted to matrix format.')

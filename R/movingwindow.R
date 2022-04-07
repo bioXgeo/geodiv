@@ -72,10 +72,10 @@
 texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE,
                           metric, args = NULL, parallel = TRUE, ncores = NULL, nclumps = 100){
 
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
-  if(class(window_type) != 'character') {stop('window_type must be a string.')}
-  if(class(size) != 'numeric') {stop('size must be numeric.')}
-  if(class(metric) != 'character') {stop('metric must be a character.')}
+  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
+  if(inherits(window_type, "character") == FALSE) {stop('window_type must be a string.')}
+  if(inherits(size, "numeric") == FALSE) {stop('size must be numeric.')}
+  if(inherits(metric, "character") == FALSE) {stop('metric must be a character.')}
 
   if(length(metric) > 1) {stop('too many values provided for metric.')}
   if(length(size) > 1) {stop('too many values provided to size.')}

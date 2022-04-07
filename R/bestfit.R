@@ -23,8 +23,8 @@
 #' slopes <- slopecalc(x = x, h = 0.01, f = ba)
 #' @export
 slopecalc <- function(x, h, f) {
-  if(class(x) != 'numeric') {stop('x must be numeric.')}
-  if(class(h) != 'numeric') {stop('h must be numeric.')}
+  if(inherits(x, "numeric") == FALSE) {stop('x must be numeric.')}
+  if(inherits(h, "numeric") == FALSE) {stop('h must be numeric.')}
   if(sum(class(f) %in% c('ecdf', 'stepfun', 'function')) != 3) {stop('f was not produced with bearing_area function.')}
   if(length(h) > 1) {stop('too many values for h.')}
   if(h >= 1 | h <= 0) {stop('h must be less than 1 and greater than 0.')}
@@ -88,8 +88,8 @@ slopecalc <- function(x, h, f) {
 #' slopes_forty <- slopemeans(slopes = slopes, l = 0.4)
 #' @export
 slopemeans <- function(slopes, l = 0.4) {
-  if(class(slopes) != 'data.frame') {stop('slopes must be a dataframe.')}
-  if(class(l) != 'numeric') {stop('l must be numeric.')}
+  if(inherits(slopes, "data.frame") == FALSE) {stop('slopes must be a dataframe.')}
+  if(inherits(l, "numeric") == FALSE) {stop('l must be numeric.')}
   if(length(l) > 1) {stop('too many values for l.')}
   if(l >= 1 | l <= 0) {stop('l must be less than 1 and greater than 0.')}
   if(sum(names(slopes) %in% c('slope', 'x')) != 2) {stop('incorrect column names for slopes dataframe -- need slope and x.')}

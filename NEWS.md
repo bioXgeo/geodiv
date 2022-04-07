@@ -1,7 +1,7 @@
 ---
 title: "NEWS.md"
 author: "Annie C. Smith"
-date: "September 1, 2021"
+date: "April 6, 2022"
 output: html_document
 ---
 
@@ -43,3 +43,7 @@ Added a longer timeout option before the download.file arguments in the vignette
 ## geodiv 1.0.4
 
 Added a tryCatch so that download.file in the vignette fails gracefully.
+
+## geodiv 1.0.5
+
+Fixed a bug where length() did not omit NAs, but mean, min, and max calculations did. This affects the Sa, Ssk, and Sku functions. Additionally, class checks have been updated to use "inherits()" rather than if statements.

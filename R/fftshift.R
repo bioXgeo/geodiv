@@ -33,10 +33,10 @@ fftshift <- function(x, dim = -1) {
   if(length(base::class(x)) > 1) {
     if(!('matrix' %in% class(x))) {stop('x must be a matrix.')}
   } else {
-    if(base::class(x) != 'matrix') {stop('x must be a matrix.')}
+    if(inherits(x, "matrix") == FALSE) {stop('x must be a matrix.')}
   }
   if(length(dim) > 1) {stop('too many values provided for dim.')}
-  if(class(dim) != 'numeric') {stop('dim must be numeric.')}
+  if(inherits(dim, "numeric") == FALSE) {stop('dim must be numeric.')}
   if(dim != -1 & dim != 1 & dim != 2) {stop('invalid value for dim -- must be -1, 1, or 2.')}
 
   rows <- dim(x)[1]

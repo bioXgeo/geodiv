@@ -38,9 +38,9 @@
 #' plot(x)
 #' @export
 fitplane <- function(x, order) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
   if(length(order) > 1) {stop('too many values supplied to order.')}
-  if(class(order) != 'integer' & class(order) != 'numeric') {stop('order must be numeric or integer.')}
+  if(inherits(order, "integer") == FALSE & inherits(order, "numeric") == FALSE) {stop('order must be numeric or integer.')}
   if(order %% 1 > 0) {
     warning('order will be rounded to the nearest integer.')
     order <- as.integer(floor(order))}
@@ -48,7 +48,7 @@ fitplane <- function(x, order) {
 
   order <- as.integer(order)
 
-  if (class(x) == 'RasterLayer') {
+  if (inherits(x, "RasterLayer") == TRUE) {
     # extract coordinates and values
     xcoord <- sp::coordinates(x)[, 1]
     ycoord <- sp::coordinates(x)[, 2]
@@ -91,13 +91,13 @@ fitplane <- function(x, order) {
 #' plot(poly)
 #' @export
 bestfitplane <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
 
   # fit least squares plane for polynomials from orders 0-3
   mods <- lapply(seq(0, 3), FUN = function(i) fitplane(x, order = i))
 
   # convert raster to matrix
-  if (class(x)[1] == 'RasterLayer') {
+  if (inherits(x, "RasterLayer") == TRUE) {
     xmat <- matrix(x, nrow = nrow(x), ncol = ncol(x), byrow = TRUE)
   } else {
     xmat <- x
@@ -150,7 +150,7 @@ bestfitplane <- function(x) {
 #' plot(new_rast)
 #' @export
 remove_plane <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
 
   bfx <- bestfitplane(x)
 

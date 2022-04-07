@@ -27,7 +27,7 @@
 #' Sds <- nrow(peaks) / ((N - 1) * (M - 1))
 #' @export
 findpeaks <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
 
   N <- dim(x)[1] # rows
   M <- dim(x)[2] # cols
@@ -35,7 +35,7 @@ findpeaks <- function(x) {
   peaks <- data.frame(x = NA, y = NA, val = NA, ind = NA, row = NA, col = NA)
 
   # convert matrix to raster if necessary (equal area)
-  if (class(x)[1] == 'matrix') {
+  if (inherits(x, "matrix") == TRUE) {
     x <- raster(x)
     extent(x) <- c(0, ncol(x), 0, nrow(x))
     crs(x) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
@@ -109,7 +109,7 @@ findpeaks <- function(x) {
 #' S10z <- (sum(top_peaks$val) + sum(abs(bottom_valleys$val))) / 5
 #' @export
 findvalleys <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
 
   N <- dim(x)[1] # rows
   M <- dim(x)[2] # cols
@@ -117,7 +117,7 @@ findvalleys <- function(x) {
   peaks <- data.frame(x = NA, y = NA, val = NA, ind = NA, row = NA, col = NA)
 
   # convert matrix to raster if necessary (equal area)
-  if (class(x)[1] == 'matrix') {
+  if (inherits(x, "matrix") == TRUE) {
     x <- raster(x)
     extent(x) <- c(0, ncol(x), 0, nrow(x))
     crs(x) <- "+proj=aea +la
@@ -184,10 +184,10 @@ findvalleys <- function(x) {
 #' Ssc <- ssc(normforest)
 #' @export
 ssc <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
 
   # convert matrix to raster if necessary (equal area)
-  if (class(x)[1] == 'matrix') {
+  if (inherits(x, "matrix") == TRUE) {
     x <- raster(x)
     extent(x) <- c(0, ncol(x), 0, nrow(x))
     crs(x) <- "+proj=aea +la
@@ -266,7 +266,7 @@ ssc <- function(x) {
 #' Sds <- sds(normforest)
 #' @export
 sds <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
 
   M <- nrow(x)
   N <- ncol(x)
@@ -293,7 +293,7 @@ sds <- function(x) {
 #' S10z <- s10z(normforest)
 #' @export
 s10z <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
 
   peaks <- findpeaks(x)
   valleys <- findvalleys(x)
