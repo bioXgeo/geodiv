@@ -86,8 +86,6 @@ Metrics available from geodiv package:
 The total window size for square windows will be (size * 2) + 1.
 }
 \examples{
-library(raster)
-
 # import raster image
 data(normforest)
 

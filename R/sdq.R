@@ -16,9 +16,10 @@
 #'
 #' # calculate root mean square slope
 #' Sdq <- sdq(normforest)
+#' @import terra
 #' @export
 sdq <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
 
   deltax <- 1
   deltay <- 1
@@ -54,9 +55,10 @@ sdq <- function(x) {
 #'
 #' # calculate area root mean square slope
 #' Sdq6 <- sdq6(normforest)
+#' @import terra
 #' @export
 sdq6 <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
 
   deltax <- 1 # per unit, not per degree, etc.
   deltay <- 1

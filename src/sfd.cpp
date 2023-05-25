@@ -43,7 +43,7 @@ using namespace Rcpp;
 //' data(normforest)
 //'
 //' # convert to matrix
-//' mat <- raster::as.matrix(normforest)
+//' mat <- matrix(normforest[], ncol = ncol(normforest), nrow = nrow(normforest))
 //'
 //' # calculate the fractal dimension
 //' Sfd <- sfd_(mat)

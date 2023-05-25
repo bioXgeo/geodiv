@@ -21,6 +21,7 @@
 #' ba <- bearing_area(normforest)
 #' x <- seq(0, 1, length.out = 100000)
 #' slopes <- slopecalc(x = x, h = 0.01, f = ba)
+#' @import terra stats
 #' @export
 slopecalc <- function(x, h, f) {
   if(class(x) != 'numeric') {stop('x must be numeric.')}
@@ -86,6 +87,7 @@ slopecalc <- function(x, h, f) {
 #' x <- seq(0, 1, length.out = 10000)
 #' slopes <- slopecalc(x = x, h = 0.01, f = ba)
 #' slopes_forty <- slopemeans(slopes = slopes, l = 0.4)
+#' @import terra
 #' @export
 slopemeans <- function(slopes, l = 0.4) {
   if(class(slopes) != 'data.frame') {stop('slopes must be a dataframe.')}

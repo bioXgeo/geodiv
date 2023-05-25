@@ -60,8 +60,6 @@ Metrics available from geodiv package:
 }
 }
 \examples{
-library(raster)
-
 # import raster image
 data(normforest)
 

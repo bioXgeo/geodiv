@@ -21,8 +21,6 @@ A raster with edges padded \code{size} number of pixels on each edge.
 Extends edge values of a raster or matrix by a specified number of pixels.
 }
 \examples{
-library(raster)
-
 # import raster image
 data(normforest)
 

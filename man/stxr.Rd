@@ -25,8 +25,6 @@ the slowest decay lengths of the autocorrelation function to the
 defined autocorrelation values.
 }
 \examples{
-library(raster)
-
 # import raster image
 data(normforest)
 

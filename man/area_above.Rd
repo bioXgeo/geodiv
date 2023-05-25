@@ -36,8 +36,6 @@ using the trapezoid rule with n subdivisions. Assume
 \code{a < b} and \code{n} is a positive integer.
 }
 \examples{
-library(raster)
-
 # import raster image
 data(normforest)
 

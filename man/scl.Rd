@@ -29,8 +29,6 @@ values (e.g., 0.2) of the areal autocorrelation function (AACF). All 180
 degrees from the origin of the AACF image are considered for the calculation.
 }
 \examples{
-library(raster)
-
 # import raster image
 data(normforest)
 

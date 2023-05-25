@@ -18,12 +18,13 @@
 #' xval <- environment(ba_func)$y
 #' yval <- (1 - environment(ba_func)$x)
 #' plot(yval ~ xval)
+#' @import terra stats
 #' @export
 bearing_area <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
 
-  if (class(x)[1] == 'RasterLayer') {
-    z <- getValues(x)
+  if (class(x)[1] %in% c('RasterLayer', 'SpatRaster')) {
+    z <- x[]
   } else {
     z <- x
   }
@@ -65,9 +66,10 @@ bearing_area <- function(x) {
 #'
 #' # plot the bearing area curve
 #' plot_ba_curve(normforest, divisions = TRUE)
+#' @import terra stats graphics
 #' @export
 plot_ba_curve <- function(x, divisions = FALSE) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
   if(class(divisions) != 'logical') {stop('divisions argument must be TRUE/FALSE.')}
 
   f <- bearing_area(x)
@@ -117,9 +119,10 @@ plot_ba_curve <- function(x, divisions = FALSE) {
 #'
 #' # extract the equation of the line
 #' bf_line <- line_data[[1]]
+#' @import terra stats
 #' @export
 find_flat <- function(x, perc = 0.4) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
   if(class(perc) != 'numeric') {stop('perc must be numeric.')}
   if(length(perc) > 1) {stop('too many values supplied to perc.')}
   if(perc > 1 | perc < 0) {stop('perc must be between 0 and 1.')}
@@ -154,7 +157,8 @@ find_flat <- function(x, perc = 0.4) {
       ls_line <- stats::lm(y ~ x, data = lm_data)
 
       # get value of ls line between 0 and 1
-      pred_data <- tibble::remove_rownames(data.frame(x = even_x, y = even_y))
+      pred_data <- data.frame(x = even_x, y = even_y)
+      rownames(pred_data) <- NULL
       pred_data$y <- stats::predict(ls_line, newdata = pred_data)
 
       # what is the ls line y-value at x = 0, x = 1?
@@ -186,9 +190,10 @@ find_flat <- function(x, perc = 0.4) {
 #' # determine the bearing area function value
 #' # corresponding to an x value of 0.4
 #' val <- height_ba(normforest, 0.4)
+#' @import terra stats
 #' @export
 height_ba <- function(x, xval) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
   if(class(xval) != 'numeric') {stop('xval must be numeric.')}
   if(length(xval) > 1) {stop('too many values supplied to xval.')}
   if(xval > 1 | xval < 0) {stop('xval must be between 0 and 1.')}
@@ -224,9 +229,10 @@ height_ba <- function(x, xval) {
 #' # determine the 10-40% height interval of the
 #' # bearing area curve
 #' val <- sdc(normforest, 0.1, 0.4)
+#' @import terra
 #' @export
 sdc <- function(x, low, high) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
   if(class(low) != 'numeric') {stop('low value must be numeric.')}
   if(length(low) > 1) {stop('too many values supplied to low.')}
   if(low > 1 | low < 0) {stop('low value must be between 0 and 1.')}
@@ -258,9 +264,10 @@ sdc <- function(x, low, high) {
 #'
 #' # determine the surface bearing index
 #' Sbi <- sbi(normforest)
+#' @import terra
 #' @export
 sbi <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
 
   Sq <- sq(x)
   z05 <- height_ba(x, 0.05)
@@ -289,9 +296,10 @@ sbi <- function(x) {
 #'
 #' # determine the valley fluid retention index
 #' Svi <- svi(normforest)
+#' @import terra
 #' @export
 svi <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
 
   f <- bearing_area(x)
 
@@ -319,9 +327,10 @@ svi <- function(x) {
 #'
 #' # determine the core fluid retention index
 #' Sci <- sci(normforest)
+#' @import terra
 #' @export
 sci <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
 
   f <- bearing_area(x)
 
@@ -355,9 +364,10 @@ sci <- function(x) {
 #'
 #' # determine the core roughness depth
 #' Sk <- sk(normforest)
+#' @import terra
 #' @export
 sk <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
 
   line_info <- find_flat(x, perc = 0.4)
 
@@ -386,9 +396,10 @@ sk <- function(x) {
 #'
 #' # determine the reduced valley depth
 #' Svk <- svk(normforest)
+#' @import terra stats
 #' @export
 svk <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
 
   # find the bearing area curve
   f <- bearing_area(x)
@@ -424,9 +435,10 @@ svk <- function(x) {
 #'
 #' # determine the reduced peak height
 #' Spk <- spk(normforest)
+#' @import terra stats
 #' @export
 spk <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
 
   # find the bearing area curve
   f <- bearing_area(x)

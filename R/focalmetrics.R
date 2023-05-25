@@ -48,8 +48,6 @@
 #' landscapemetrics: an open-source R tool to calculate landscape metrics. - Ecography 42:1648-1657(ver. 0).}
 #' }
 #' @examples
-#' library(raster)
-#'
 #' # import raster image
 #' data(normforest)
 #'
@@ -62,6 +60,7 @@
 #'
 #' # plot the result
 #' plot(sa_img$sa)
+#' @import terra
 #' @export
 focal_metrics <- function(x,
                           window,
@@ -77,14 +76,21 @@ focal_metrics <- function(x,
 
   if (class(x)[1] == "matrix") {
 
-    x <- raster(x)
+    x <- rast(x)
+
+  }
+
+  if (class(x)[1] == 'RasterLayer') {
+
+    x <- rast(x)
 
   }
 
   number_metrics <- length(metrics)
 
   # get coordinates of cells
-  points <- landscapemetrics::raster_to_points(x)[, 2:4]
+  points <- cbind(crds(x, na.rm = FALSE), x[])
+  colnames(points)[3] <- 'z'
 
   # get dimensions of window
   n_row <- nrow(window)
@@ -97,19 +103,17 @@ focal_metrics <- function(x,
 
     # print progess using the non-internal name
     if (progress) {
-
       cat("\r> Progress metrics: ", current_metric, "/", number_metrics)
     }
 
-    raster::focal(x = x, w = window, fun = function(x) {
+    terra::focal(x = x, w = window, fun = function(x) {
 
       .calculate_met_focal(landscape = x,
-                          n_row = n_row,
-                          n_col = n_col,
-                          points = points,
-                          what = metrics[[current_metric]],
-                          ...)},
-      pad = TRUE, padValue = NA)
+                           n_row = n_row,
+                           n_col = n_col,
+                           points = points,
+                           what = metrics[[current_metric]],
+                           ...)})
   })},
   warning = function(cond) {
 
@@ -184,6 +188,7 @@ focal_metrics <- function(x,
 #' \item{Hesselbarth, M.H.K., Sciaini, M., With, K.A., Wiegand, K., Nowosad, J. 2019.
 #' landscapemetrics: an open-source R tool to calculate landscape metrics. - Ecography 42:1648-1657(ver. 0).}
 #' }
+#' @import terra
 #' @export
 .calculate_met_focal <- function(landscape,
                                 n_row,

@@ -18,9 +18,10 @@
 #'
 #' # calculate flattened surface area
 #' flatsa(normforest)
+#' @import terra
 #' @export
 flatsa <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
 
   # In case the value area of the raster is an odd shape,
   # calculate the surface area of the flattened raster in the same way
@@ -31,8 +32,7 @@ flatsa <- function(x) {
 
   # convert matrix to raster if necessary (equal area)
   if (class(x)[1] == 'matrix') {
-    x <- raster(x)
-    extent(x) <- c(0, ncol(x), 0, nrow(x))
+    x <- rast(x)
     crs(x) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
   }
 
@@ -41,7 +41,7 @@ flatsa <- function(x) {
   deltay <- res(x)[2]
 
   # create flat raster
-  z <- getValues(x)
+  z <- x[]
   z[!is.na(z)] <- 0
   fakerast <- x
   fakerast <- setValues(fakerast, z)
@@ -106,9 +106,10 @@ flatsa <- function(x) {
 #'
 #' # calculate surface area
 #' surface_area(normforest)
+#' @import terra
 #' @export
 surface_area <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
 
   # get dimensions
   N <- dim(x)[1] # rows
@@ -116,8 +117,7 @@ surface_area <- function(x) {
 
   # convert matrix to raster if necessary (equal area)
   if (class(x)[1] == 'matrix') {
-    x <- raster(x)
-    extent(x) <- c(0, ncol(x), 0, nrow(x))
+    x <- rast(x)
     crs(x) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
   }
 
@@ -181,9 +181,10 @@ surface_area <- function(x) {
 #'
 #' # calculate the surface area ratio
 #' Sdr <- sdr(normforest)
+#' @import terra
 #' @export
 sdr <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
 
   # get area of flat plane
   flat_area <- flatsa(x)

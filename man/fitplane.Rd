@@ -19,7 +19,6 @@ Fits a polynomial surface of order \code{n} to a raster
 or matrix.
 }
 \examples{
-library(raster)
 
 # import raster image
 data(orforest)

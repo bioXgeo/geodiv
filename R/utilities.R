@@ -23,7 +23,6 @@
 #' @param order Numeric. Indicates the polynomial order to be fit.
 #' @return A matrix with values predicted from the polynomial fit.
 #' @examples
-#' library(raster)
 #'
 #' # import raster image
 #' data(orforest)
@@ -36,9 +35,10 @@
 #'
 #' # plot the fit
 #' plot(x)
+#' @import terra spatial
 #' @export
 fitplane <- function(x, order) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
   if(length(order) > 1) {stop('too many values supplied to order.')}
   if(class(order) != 'integer' & class(order) != 'numeric') {stop('order must be numeric or integer.')}
   if(order %% 1 > 0) {
@@ -48,11 +48,15 @@ fitplane <- function(x, order) {
 
   order <- as.integer(order)
 
-  if (class(x) == 'RasterLayer') {
+  if (class(x)[1] %in% c('RasterLayer')) {
+    x <- rast(x)
+  }
+
+  if (class(x)[1] %in% c('RasterLayer', 'SpatRaster')) {
     # extract coordinates and values
-    xcoord <- sp::coordinates(x)[, 1]
-    ycoord <- sp::coordinates(x)[, 2]
-    z <- getValues(x)
+    xcoord <- crds(x, na.rm = FALSE)[, 1]
+    ycoord <- crds(x, na.rm = FALSE)[, 2]
+    z <- as.numeric(x[])
   } else {
     xcoord <- rep(seq(1, ncol(x)), nrow(x))
     ycoord <- rep(seq(1, nrow(x)), each = ncol(x))
@@ -60,7 +64,7 @@ fitplane <- function(x, order) {
   }
 
   # fit least squares polynomial with order = order
-  surfmod <- spatial::surf.ls(np = order, xcoord[!is.na(z)], ycoord[!is.na(z)], z[!is.na(z)])
+  surfmod <- spatial::surf.ls(np = order, x = xcoord[!is.na(z) & !is.na(xcoord)], y = ycoord[!is.na(z) & !is.na(xcoord)], z = z[!is.na(z) & !is.na(xcoord)])
 
   # predict polynomial model over raster
   surfvals <- matrix(predict(surfmod, xcoord, ycoord), nrow = nrow(x), ncol = ncol(x), byrow = TRUE)
@@ -79,7 +83,6 @@ fitplane <- function(x, order) {
 #' @return A raster or matrix of the same size as the input with values
 #'   predicted from the best polynomial fit.
 #' @examples
-#' library(raster)
 #'
 #' # import raster image
 #' data(orforest)
@@ -89,15 +92,16 @@ fitplane <- function(x, order) {
 #'
 #' # plot the fit
 #' plot(poly)
+#' @import terra
 #' @export
 bestfitplane <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
 
   # fit least squares plane for polynomials from orders 0-3
   mods <- lapply(seq(0, 3), FUN = function(i) fitplane(x, order = i))
 
   # convert raster to matrix
-  if (class(x)[1] == 'RasterLayer') {
+  if (class(x)[1] %in% c('RasterLayer', 'SpatRaster')) {
     xmat <- matrix(x, nrow = nrow(x), ncol = ncol(x), byrow = TRUE)
   } else {
     xmat <- x
@@ -138,8 +142,6 @@ bestfitplane <- function(x) {
 #'   equal to the difference between the original and bestfit
 #'   plane.
 #' @examples
-#' library(raster)
-#'
 #' # import raster image
 #' data(orforest)
 #'
@@ -148,9 +150,10 @@ bestfitplane <- function(x) {
 #'
 #' # plot
 #' plot(new_rast)
+#' @import terra
 #' @export
 remove_plane <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
 
   bfx <- bestfitplane(x)
 

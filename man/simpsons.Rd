@@ -30,8 +30,6 @@ Note that if y-values are negative, this returns the area
 above the function line.
 }
 \examples{
-library(raster)
-
 # import raster image
 data(normforest)
 

@@ -21,8 +21,6 @@
 #' @return A numeric value representing the area above the curve with
 #'   x bounds \code{a} and \code{b}.
 #' @examples
-#' library(raster)
-#'
 #' # import raster image
 #' data(normforest)
 #'
@@ -34,6 +32,7 @@
 #'
 #' # valley fluid retention index = void volume in 'valley' zone
 #' Svi <- area_above(f = mod, b = 1, a = 0.8, n = 500)
+#' @import terra stats
 #' @export
 area_above <- function(f, a, b, n = 100) {
   if(('function' %in% class(f)) != TRUE) {stop('f must be a function.')}
@@ -83,8 +82,6 @@ area_above <- function(f, a, b, n = 100) {
 #' @return A numeric value representing the area under the curve with
 #'   x bounds \code{a} and \code{b}.
 #' @examples
-#' library(raster)
-#'
 #' # import raster image
 #' data(normforest)
 #'
@@ -96,6 +93,7 @@ area_above <- function(f, a, b, n = 100) {
 #'
 #' # calculate integral
 #' int_area <- simpsons(f = mod, b = 1, a = 0.8, n = 500)
+#' @import terra stats
 #' @export
 simpsons <- function(f, a, b, n = 100) {
   if(('function' %in% class(f)) != TRUE) {stop('f must be a function.')}

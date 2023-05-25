@@ -21,8 +21,6 @@ where the actual values are higher than the surface and negative values
 where the actual value are lower than the surface.
 }
 \examples{
-library(raster)
-
 # import raster image
 data(orforest)
 

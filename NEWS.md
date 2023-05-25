@@ -43,3 +43,11 @@ Added a longer timeout option before the download.file arguments in the vignette
 ## geodiv 1.0.4
 
 Added a tryCatch so that download.file in the vignette fails gracefully.
+
+## geodiv 1.0.5
+
+Fixed a bug where length() did not omit NAs, but mean, min, and max calculations did. This affects the Sa, Ssk, and Sku functions. Additionally, class checks have been updated to use "inherits()" rather than if statements.
+
+## geodiv 1.1.0
+
+Removed dependencies on raster, rgdal, rgeos, sp, and landscapemetrics. Converted all raster and vector functions to use terra and sf. Also fixed a bug in sfd that returned NaNs.

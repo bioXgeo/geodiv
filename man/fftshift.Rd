@@ -21,8 +21,6 @@ This function serves to shift the zero-frequency component of the
 Fourier transform to the center of the matrix.
 }
 \examples{
-library(raster)
-
 # import raster image
 data(normforest)
 

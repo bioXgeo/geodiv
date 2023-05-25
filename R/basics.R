@@ -14,12 +14,13 @@
 #'
 #' # find the surface roughness
 #' roughness <- sa(normforest)
+#' @import terra
 #' @export
 sa <- function(x) {
-  if(!('RasterLayer' %in% class(x)) & !('matrix' %in% class(x))) {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
 
-  if ('RasterLayer' %in% class(x)) {
-    z <- getValues(x)
+  if (class(x)[1] %in% c('RasterLayer', 'SpatRaster')) {
+    z <- x[]
   } else {
     z <- x
   }
@@ -49,12 +50,13 @@ sa <- function(x) {
 #'
 #' # find the surface roughness
 #' roughness <- sq(normforest)
+#' @import terra
 #' @export
 sq <- function(x) {
-  if(!('RasterLayer' %in% class(x)) & !('matrix' %in% class(x))) {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
 
-  if ('RasterLayer' %in% class(x)) {
-    z <- getValues(x)
+  if (class(x)[1] %in% c('RasterLayer', 'SpatRaster')) {
+    z <- x[]
   } else {
     z <- x
   }
@@ -83,13 +85,14 @@ sq <- function(x) {
 #'
 #' # find the adjusted coefficient of skewness
 #' Ssk <- ssk(normforest, adj = TRUE)
+#' @import terra
 #' @export
 ssk <- function(x, adj = TRUE) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
   if(class(adj) != 'logical') {stop('adj argument must be TRUE/FALSE.')}
 
-  if (class(x)[1] == 'RasterLayer') {
-    z <- getValues(x)
+  if (class(x)[1] %in% c('RasterLayer', 'SpatRaster')) {
+    z <- x[]
   } else {
     z <- x
   }
@@ -129,13 +132,14 @@ ssk <- function(x, adj = TRUE) {
 #'
 #' # find the excess kurtosis of the raster distribution
 #' Sku <- sku(normforest, excess = TRUE)
+#' @import terra
 #' @export
 sku <- function(x, excess = TRUE) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
   if(class(excess) != 'logical') {stop('excess argument must be TRUE/FALSE.')}
 
-  if (class(x)[1] == 'RasterLayer') {
-    z <- getValues(x)
+  if (class(x)[1] %in% c('RasterLayer', 'SpatRaster')) {
+    z <- x[]
   } else {
     z <- x
   }
@@ -169,12 +173,13 @@ sku <- function(x, excess = TRUE) {
 #'
 #' # find the maximum valley depth
 #' Sv <- sv(normforest)
+#' @import terra
 #' @export
 sv <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
 
-  if (class(x)[1] == 'RasterLayer') {
-    z <- getValues(x)
+  if (class(x)[1] %in% c('RasterLayer', 'SpatRaster')) {
+    z <- x[]
   } else {
     z <- x
   }
@@ -198,12 +203,13 @@ sv <- function(x) {
 #'
 #' # find the maximum peak height
 #' Sph <- sph(normforest)
+#' @import terra
 #' @export
 sph <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
 
-  if (class(x)[1] == 'RasterLayer') {
-    z <- getValues(x)
+  if (class(x)[1] %in% c('RasterLayer', 'SpatRaster')) {
+    z <- x[]
   } else {
     z <- x
   }
@@ -227,12 +233,13 @@ sph <- function(x) {
 #'
 #' # find the maximum peak height
 #' Smean <- smean(normforest)
+#' @import terra
 #' @export
 smean <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
 
-  if (class(x)[1] == 'RasterLayer') {
-    z <- getValues(x)
+  if (class(x)[1] %in% c('RasterLayer', 'SpatRaster')) {
+    z <- x[]
   } else {
     z <- x
   }

@@ -53,8 +53,6 @@
 #'    \item{\code{'sdc'}: bearing area curve height interval}
 #' }
 #' @examples
-#' library(raster)
-#'
 #' # import raster image
 #' data(normforest)
 #'
@@ -68,11 +66,12 @@
 #'
 #' # plot the result
 #' plot(sa_img)
+#' @import terra parallel snow
 #' @export
 texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE,
                           metric, args = NULL, parallel = TRUE, ncores = NULL, nclumps = 100){
 
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
   if(class(window_type) != 'character') {stop('window_type must be a string.')}
   if(class(size) != 'numeric') {stop('size must be numeric.')}
   if(class(metric) != 'character') {stop('metric must be a character.')}
@@ -218,7 +217,7 @@ texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE
   for (i in 1:nresult) {
     temp <- data.frame(newvals = result[seq(i, length(result), nresult)], ind = pixlist)
     outfinal[[i]] <- x
-    if ('RasterLayer' %in% base::class(x)) {
+    if (class(x)[1] %in% c('RasterLayer', 'SpatRaster')) {
       outfinal[[i]] <- setValues(x, matrix(temp$newvals, nrow = nrow(x), ncol = ncol(x)))
     } else {
       outfinal[[i]] <- matrix(temp$newvals, nrow = nrow(x), ncol = ncol(x))
@@ -279,6 +278,7 @@ texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE
 #'    \item{\code{'scl'}: correlation length}
 #'    \item{\code{'sdc'}: bearing area curve height interval}
 #' }
+#' @import terra
 #' @export
 window_metric <- function(x, coords, window_type = 'square', size = 11, metric, args = NULL) {
 
@@ -321,19 +321,18 @@ window_metric <- function(x, coords, window_type = 'square', size = 11, metric, 
 #' out. If not null, this value will be used for the extended cells.
 #' @return A raster with edges padded \code{size} number of pixels on each edge.
 #' @examples
-#' library(raster)
-#'
 #' # import raster image
 #' data(normforest)
 #'
 #' # crop raster to much smaller area
 #' x <- pad_edges(as.matrix(normforest), 3, val = NA)
+#' @import terra zoo
 #' @export
 pad_edges <- function(x, size, val = NULL) {
 
   # add padding to matrix
   # continue values to edges to account for edge effect (# pixels radius/edge)
-  x[is.na(x)] <- -9999999 # change NA values for now
+  x[is.na(x)] <- -999999999 # change NA values for now
 
   if (is.null(val)) {
     # first, get edge values that will be extended
@@ -373,7 +372,7 @@ pad_edges <- function(x, size, val = NULL) {
   }
 
   # If the values were NA before (-9999999 now), convert them back to NA.
-  ext_x_mat[ext_x_mat == -9999999] <- NA
+  ext_x_mat[ext_x_mat == -999999999] <- NA
 
   return(ext_x_mat)
 }

@@ -11,8 +11,6 @@
 #' @references #' This function was created from code posted by rayryeng at:
 #' https://stackoverflow.com/questions/38230794/how-to-write-fftshift-and-ifftshift-in-r.
 #' @examples
-#' library(raster)
-#'
 #' # import raster image
 #' data(normforest)
 #'
@@ -28,6 +26,7 @@
 #' # plot real component
 #' r <- setValues(normforest, Re(ftshift))
 #' plot(r)
+#' @import terra
 #' @export
 fftshift <- function(x, dim = -1) {
   if(length(base::class(x)) > 1) {

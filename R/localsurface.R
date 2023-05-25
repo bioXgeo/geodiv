@@ -25,9 +25,10 @@
 #' N <- ncol(normforest)
 #' M <- nrow(normforest)
 #' Sds <- nrow(peaks) / ((N - 1) * (M - 1))
+#' @import terra
 #' @export
 findpeaks <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
 
   N <- dim(x)[1] # rows
   M <- dim(x)[2] # cols
@@ -36,15 +37,14 @@ findpeaks <- function(x) {
 
   # convert matrix to raster if necessary (equal area)
   if (class(x)[1] == 'matrix') {
-    x <- raster(x)
-    extent(x) <- c(0, ncol(x), 0, nrow(x))
+    x <- rast(x)
     crs(x) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
   }
 
   # center values, indices, and coordinates
-  centers <- getValues(x)
-  xcoords <- sp::coordinates(x)[, 1]
-  ycoords <- sp::coordinates(x)[, 2]
+  centers <- x[]
+  xcoords <- crds(x, na.rm = FALSE)[, 1]
+  ycoords <- crds(x, na.rm = FALSE)[, 2]
 
   # create matrix of centers to get surrounding from
   zmat <- matrix(centers, nrow = N, ncol = M, byrow = TRUE)
@@ -107,9 +107,10 @@ findpeaks <- function(x) {
 #'
 #' # calculate the ten-point height
 #' S10z <- (sum(top_peaks$val) + sum(abs(bottom_valleys$val))) / 5
+#' @import terra
 #' @export
 findvalleys <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
 
   N <- dim(x)[1] # rows
   M <- dim(x)[2] # cols
@@ -118,17 +119,15 @@ findvalleys <- function(x) {
 
   # convert matrix to raster if necessary (equal area)
   if (class(x)[1] == 'matrix') {
-    x <- raster(x)
-    extent(x) <- c(0, ncol(x), 0, nrow(x))
-    crs(x) <- "+proj=aea +la
-    t_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+    x <- rast(x)
+    crs(x) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
   }
 
   # center values, indices, and coordinates
-  centers <- getValues(x)
+  centers <- x[]
   ind <- seq(1, length(centers))
-  xcoords <- sp::coordinates(x)[, 1]
-  ycoords <- sp::coordinates(x)[, 2]
+  xcoords <- crds(x, na.rm = FALSE)[, 1]
+  ycoords <- crds(x, na.rm = FALSE)[, 2]
 
   # create matrix of centers to get surrounding from
   zmat <- matrix(centers, nrow = N, ncol = M)
@@ -182,22 +181,21 @@ findvalleys <- function(x) {
 #'
 #' # calculate mean summit curvature
 #' Ssc <- ssc(normforest)
+#' @import terra
 #' @export
 ssc <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
 
   # convert matrix to raster if necessary (equal area)
   if (class(x)[1] == 'matrix') {
-    x <- raster(x)
-    extent(x) <- c(0, ncol(x), 0, nrow(x))
-    crs(x) <- "+proj=aea +la
-    t_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+    x <- rast(x)
+    crs(x) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
   }
 
   # z values, coordinates, and resolution (change in x, y)
-  z <- getValues(x)
-  xcoords <- sp::coordinates(x)[, 1]
-  ycoords <- sp::coordinates(x)[, 2]
+  z <- x[]
+  xcoords <- crds(x, na.rm = FALSE)[, 1]
+  ycoords <- crds(x, na.rm = FALSE)[, 2]
   deltax <- res(x)[1] / mean(res(x)[1], res(x)[2])
   deltay <- res(x)[2] / mean(res(x)[1], res(x)[2])
 
@@ -264,9 +262,10 @@ ssc <- function(x) {
 #'
 #' # calculate summit density.
 #' Sds <- sds(normforest)
+#' @import terra
 #' @export
 sds <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
 
   M <- nrow(x)
   N <- ncol(x)
@@ -291,9 +290,10 @@ sds <- function(x) {
 #'
 #' # calculate ten-point height.
 #' S10z <- s10z(normforest)
+#' @import terra
 #' @export
 s10z <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix') {stop('x must be a raster or matrix.')}
+  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
 
   peaks <- findpeaks(x)
   valleys <- findvalleys(x)
