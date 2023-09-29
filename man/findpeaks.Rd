@@ -22,6 +22,7 @@ has a positive value.
 \examples{
 # import raster image
 data(normforest)
+normforest <- terra::unwrap(normforest)
 
 # locate peaks
 peaks <- findpeaks(normforest)

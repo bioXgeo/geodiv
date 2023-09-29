@@ -25,24 +25,8 @@ Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1
 Suggests: 
-    raster,
-    sp,
     testthat,
-    ggplot2,
-    rmarkdown,
-    rasterVis,
-    mapdata,
-    maptools,
-    maps,
-    tidyr,
-    ggmap,
-    corrplot,
-    cowplot,
-    gridExtra,
-    factoextra,
-    cluster,
-    knitr,
-    rfigshare
+    R.rsp
 LinkingTo: 
     Rcpp, RcppArmadillo
-VignetteBuilder: knitr
+VignetteBuilder: R.rsp

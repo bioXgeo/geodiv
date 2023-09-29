@@ -41,6 +41,7 @@ using namespace Rcpp;
 //'
 //' # import raster image
 //' data(normforest)
+//' normforest <- terra::unwrap(normforest)
 //'
 //' # convert to matrix
 //' mat <- matrix(normforest[], ncol = ncol(normforest), nrow = nrow(normforest))

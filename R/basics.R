@@ -11,6 +11,7 @@
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # find the surface roughness
 #' roughness <- sa(normforest)
@@ -47,6 +48,7 @@ sa <- function(x) {
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # find the surface roughness
 #' roughness <- sq(normforest)
@@ -82,6 +84,7 @@ sq <- function(x) {
 #' @return A numeric value representing skewness.
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # find the adjusted coefficient of skewness
 #' Ssk <- ssk(normforest, adj = TRUE)
@@ -129,6 +132,7 @@ ssk <- function(x, adj = TRUE) {
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # find the excess kurtosis of the raster distribution
 #' Sku <- sku(normforest, excess = TRUE)
@@ -170,6 +174,7 @@ sku <- function(x, excess = TRUE) {
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # find the maximum valley depth
 #' Sv <- sv(normforest)
@@ -200,6 +205,7 @@ sv <- function(x) {
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # find the maximum peak height
 #' Sph <- sph(normforest)
@@ -230,6 +236,7 @@ sph <- function(x) {
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # find the maximum peak height
 #' Smean <- smean(normforest)

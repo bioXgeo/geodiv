@@ -28,6 +28,7 @@ their x values.
 \examples{
 # import raster image
 data(normforest)
+normforest <- terra::unwrap(normforest)
 
 # determine the 10-40\% height interval of the
 # bearing area curve

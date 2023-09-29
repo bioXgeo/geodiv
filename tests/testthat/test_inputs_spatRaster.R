@@ -1,7 +1,7 @@
 context("Correct inputs to functions")
 library(geodiv)
 data(normforest)
-normforest <- rast(normforest)
+normforest <- terra::unwrap(normforest)
 ba_func <- bearing_area(normforest)
 
 test_that("incorrect inputs return errors in aacf", {
@@ -74,9 +74,9 @@ test_that("incorrect inputs return errors in bestfit", {
 
 test_that("incorrect inputs return errors in fftshift", {
   expect_error(fftshift('a', dim = -1), 'x must be a matrix.')
-  expect_error(fftshift(fft(raster::as.matrix(normforest)), dim = 'a'), 'dim must be numeric.')
-  expect_error(fftshift(fft(raster::as.matrix(normforest)), dim = c(-1, 1)), 'too many values provided for dim.')
-  expect_error(fftshift(base::Re(stats::fft(raster::as.matrix(normforest))), dim = 8), 'invalid value for dim -- must be -1, 1, or 2.')
+  expect_error(fftshift(fft(terra::as.matrix(normforest)), dim = 'a'), 'dim must be numeric.')
+  expect_error(fftshift(fft(terra::as.matrix(normforest)), dim = c(-1, 1)), 'too many values provided for dim.')
+  expect_error(fftshift(base::Re(stats::fft(terra::as.matrix(normforest))), dim = 8), 'invalid value for dim -- must be -1, 1, or 2.')
 })
 
 test_that("incorrect inputs return errors in fourier", {

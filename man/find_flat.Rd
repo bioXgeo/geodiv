@@ -29,6 +29,7 @@ calculations.
 \examples{
 # import raster image
 data(normforest)
+normforest <- terra::unwrap(normforest)
 
 # locate the flattest 40\% of the bearing area curve
 line_data <- find_flat(normforest, perc = 0.4)

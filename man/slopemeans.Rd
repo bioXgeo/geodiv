@@ -30,6 +30,7 @@ area curve.
 \examples{
 # import raster image
 data(normforest)
+normforest <- terra::unwrap(normforest)
 
 # find the average slope of segments of the bearing area
 # curve.

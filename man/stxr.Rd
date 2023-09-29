@@ -27,6 +27,7 @@ defined autocorrelation values.
 \examples{
 # import raster image
 data(normforest)
+normforest <- terra::unwrap(normforest)
 
 # estimate the texture aspect ratio for autocorrelation
 # thresholds of 0.20 and 0.37 (1/e)

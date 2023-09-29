@@ -55,9 +55,10 @@
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # crop raster to smaller area
-#' x <- crop(normforest, extent(normforest, 1, 100, 1, 100))
+#' x <- terra::crop(normforest, terra::ext(normforest[1:100, 1:100, drop = FALSE]))
 #'
 #' # get a surface of root mean square roughness
 #' sa_img <- texture_image(x = x, window = 'square',
@@ -65,7 +66,7 @@
 #' parallel = TRUE, ncores = 2, nclumps = 20)
 #'
 #' # plot the result
-#' plot(sa_img)
+#' terra::plot(sa_img)
 #' @import terra parallel snow
 #' @export
 texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE,
@@ -195,7 +196,7 @@ texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE
                                           'window_metric'),
                             envir = environment())
     parallel::clusterEvalQ(cl, library('geodiv'))
-    parallel::clusterEvalQ(cl, library('raster'))
+    parallel::clusterEvalQ(cl, library('terra'))
     # for each list in new_pixlist, run lapply
     result <- parallel::parLapply(cl, new_pixlist, fun = function(l) {
       lapply(l, FUN = function(i) {window_metric(x = ext_x, coords = coord_list[i, ],
@@ -323,6 +324,7 @@ window_metric <- function(x, coords, window_type = 'square', size = 11, metric, 
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # crop raster to much smaller area
 #' x <- pad_edges(as.matrix(normforest), 3, val = NA)

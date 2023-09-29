@@ -15,6 +15,7 @@
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # calculate Std and Stdi
 #' stdvals <- std(normforest)
@@ -146,9 +147,9 @@ std <- function(x, create_plot = FALSE, option = c(1, 2)) {
       lines <- linelist %>%
         st_as_sf(coords = c("x", "y"), na.fail = FALSE, crs = crs(amp_img)) %>%
         group_by(id) %>%
-        summarize() %>%
-        filter(st_geometry_type(.) == "MULTIPOINT") %>%
-        st_cast("LINESTRING")
+        summarize()
+      multi_inds <- which(st_geometry_type(lines$geometry) == 'MULTIPOINT')
+      lines <- st_cast(lines[multi_inds, ], "LINESTRING")
 
       # plot and calculate amplitude sums along rays
       plot(amp_img)
@@ -218,6 +219,7 @@ std <- function(x, create_plot = FALSE, option = c(1, 2)) {
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # calculate metrics
 #' srwvals <- srw(normforest)
@@ -345,9 +347,9 @@ srw <- function(x, create_plot = FALSE, option = c(1, 2, 3)) {
       lines <- linelist %>%
         st_as_sf(coords = c("x", "y"), na.fail = FALSE, crs = crs(amp_img)) %>%
         group_by(id) %>%
-        summarize() %>%
-        filter(st_geometry_type(.) == "MULTIPOINT") %>%
-        st_cast("LINESTRING")
+        summarize()
+      multi_inds <- which(st_geometry_type(lines$geometry) == 'MULTIPOINT')
+      lines <- st_cast(lines[multi_inds, ], "LINESTRING")
 
       # plot and get amplitude sums within each radius
       plot(amp_img)

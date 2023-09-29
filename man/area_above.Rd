@@ -38,9 +38,10 @@ using the trapezoid rule with n subdivisions. Assume
 \examples{
 # import raster image
 data(normforest)
+normforest <- terra::unwrap(normforest)
 
 # basic values
-z <- getValues(normforest)
+z <- terra::values(normforest)
 
 # calculate cumulative probability density function of surface 'height' (= ndvi)
 mod <- ecdf((1 - z))

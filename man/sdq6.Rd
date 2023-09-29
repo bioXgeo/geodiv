@@ -21,6 +21,7 @@ surface using the seven-point method.
 \examples{
 # import raster image
 data(normforest)
+normforest <- terra::unwrap(normforest)
 
 # calculate area root mean square slope
 Sdq6 <- sdq6(normforest)

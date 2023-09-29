@@ -20,6 +20,7 @@ of bearing area (z05).
 \examples{
 # import raster image
 data(normforest)
+normforest <- terra::unwrap(normforest)
 
 # determine the surface bearing index
 Sbi <- sbi(normforest)

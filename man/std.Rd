@@ -28,6 +28,7 @@ from a raster image (see Kedron et al. 2018).
 \examples{
 # import raster image
 data(normforest)
+normforest <- terra::unwrap(normforest)
 
 # calculate Std and Stdi
 stdvals <- std(normforest)

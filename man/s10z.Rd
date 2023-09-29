@@ -19,6 +19,7 @@ plus the average height below the mean surface for the five lowest local minima.
 \examples{
 # import raster image
 data(normforest)
+normforest <- terra::unwrap(normforest)
 
 # calculate ten-point height.
 S10z <- s10z(normforest)

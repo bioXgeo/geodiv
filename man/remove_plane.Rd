@@ -23,10 +23,11 @@ where the actual value are lower than the surface.
 \examples{
 # import raster image
 data(orforest)
+orforest <- terra::unwrap(orforest)
 
 # remove the least squares polynomial surface
 new_rast <- remove_plane(orforest)
 
 # plot
-plot(new_rast)
+terra::plot(new_rast)
 }

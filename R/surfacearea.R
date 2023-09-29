@@ -15,6 +15,7 @@
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # calculate flattened surface area
 #' flatsa(normforest)
@@ -103,6 +104,7 @@ flatsa <- function(x) {
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # calculate surface area
 #' surface_area(normforest)
@@ -178,6 +180,7 @@ surface_area <- function(x) {
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # calculate the surface area ratio
 #' Sdr <- sdr(normforest)

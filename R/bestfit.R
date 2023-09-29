@@ -16,6 +16,7 @@
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # find the slopes along the bearing area curve
 #' ba <- bearing_area(normforest)
@@ -80,6 +81,7 @@ slopecalc <- function(x, h, f) {
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # find the average slope of segments of the bearing area
 #' # curve.

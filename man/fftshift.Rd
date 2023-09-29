@@ -23,19 +23,20 @@ Fourier transform to the center of the matrix.
 \examples{
 # import raster image
 data(normforest)
+normforest <- terra::unwrap(normforest)
 
 # convert to matrix form
 M <- ncol(normforest)
 N <- nrow(normforest)
-zmat <- matrix(raster::getValues(normforest), ncol = M, nrow = N, byrow = TRUE)
+zmat <- matrix(terra::values(normforest), ncol = M, nrow = N, byrow = TRUE)
 
 # calculate fourier transform and shift
 ftmat <- fft(zmat)
 ftshift <- fftshift(ftmat)
 
 # plot real component
-r <- setValues(normforest, Re(ftshift))
-plot(r)
+r <- terra::setValues(normforest, Re(ftshift))
+terra::plot(r)
 }
 \references{
 #' This function was created from code posted by rayryeng at:

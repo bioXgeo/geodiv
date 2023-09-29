@@ -31,6 +31,7 @@ degrees from the origin of the AACF image are considered for the calculation.
 \examples{
 # import raster image
 data(normforest)
+normforest <- terra::unwrap(normforest)
 
 # calculate Scl20, the minimum distance to an autocorrelation value of 0.2 in the AACF
 Scl20 <- scl(normforest)[1]

@@ -17,6 +17,7 @@
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # locate peaks
 #' peaks <- findpeaks(normforest)
@@ -96,6 +97,7 @@ findpeaks <- function(x) {
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # locate peaks and valleys
 #' peaks <- findpeaks(normforest)
@@ -178,6 +180,7 @@ findvalleys <- function(x) {
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # calculate mean summit curvature
 #' Ssc <- ssc(normforest)
@@ -259,6 +262,7 @@ ssc <- function(x) {
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # calculate summit density.
 #' Sds <- sds(normforest)
@@ -287,6 +291,7 @@ sds <- function(x) {
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # calculate ten-point height.
 #' S10z <- s10z(normforest)

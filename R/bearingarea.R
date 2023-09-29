@@ -10,6 +10,7 @@
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # find the rotated Bearing Area curve.
 #' ba_func <- bearing_area(normforest)
@@ -63,6 +64,7 @@ bearing_area <- function(x) {
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # plot the bearing area curve
 #' plot_ba_curve(normforest, divisions = TRUE)
@@ -113,6 +115,7 @@ plot_ba_curve <- function(x, divisions = FALSE) {
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # locate the flattest 40% of the bearing area curve
 #' line_data <- find_flat(normforest, perc = 0.4)
@@ -186,6 +189,7 @@ find_flat <- function(x, perc = 0.4) {
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # determine the bearing area function value
 #' # corresponding to an x value of 0.4
@@ -225,6 +229,7 @@ height_ba <- function(x, xval) {
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # determine the 10-40% height interval of the
 #' # bearing area curve
@@ -261,6 +266,7 @@ sdc <- function(x, low, high) {
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # determine the surface bearing index
 #' Sbi <- sbi(normforest)
@@ -293,6 +299,7 @@ sbi <- function(x) {
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # determine the valley fluid retention index
 #' Svi <- svi(normforest)
@@ -324,6 +331,7 @@ svi <- function(x) {
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # determine the core fluid retention index
 #' Sci <- sci(normforest)
@@ -361,6 +369,7 @@ sci <- function(x) {
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # determine the core roughness depth
 #' Sk <- sk(normforest)
@@ -393,6 +402,7 @@ sk <- function(x) {
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # determine the reduced valley depth
 #' Svk <- svk(normforest)
@@ -432,6 +442,7 @@ svk <- function(x) {
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # determine the reduced peak height
 #' Spk <- spk(normforest)

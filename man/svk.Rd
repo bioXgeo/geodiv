@@ -23,6 +23,7 @@ See Figure 2a from Kedron et al. (2018) for more details.
 \examples{
 # import raster image
 data(normforest)
+normforest <- terra::unwrap(normforest)
 
 # determine the reduced valley depth
 Svk <- svk(normforest)

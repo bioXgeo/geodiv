@@ -28,6 +28,7 @@ See Kedron et al. (2018) for more detailed description.
 \examples{
 # import raster image
 data(normforest)
+normforest <- terra::unwrap(normforest)
 
 # calculate metrics
 srwvals <- srw(normforest)

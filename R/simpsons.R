@@ -23,9 +23,10 @@
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # basic values
-#' z <- getValues(normforest)
+#' z <- terra::values(normforest)
 #'
 #' # calculate cumulative probability density function of surface 'height' (= ndvi)
 #' mod <- ecdf((1 - z))
@@ -84,9 +85,10 @@ area_above <- function(f, a, b, n = 100) {
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # basic values
-#' z <- getValues(normforest)
+#' z <- terra::values(normforest)
 #'
 #' # calculate cumulative probability density function of surface 'height' (= ndvi)
 #' mod <- ecdf((1 - z))

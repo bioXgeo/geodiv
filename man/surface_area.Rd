@@ -28,6 +28,7 @@ but should not have any missing values within the main area.
 \examples{
 # import raster image
 data(normforest)
+normforest <- terra::unwrap(normforest)
 
 # calculate surface area
 surface_area(normforest)

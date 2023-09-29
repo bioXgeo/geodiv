@@ -28,6 +28,7 @@
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # remove right and bottom borders 2 deep
 #' noborder <- zshift(normforest, xdist = 2, ydist = 2)
@@ -42,7 +43,7 @@ zshift <- function(r, xdist = 0, ydist = 0, xrm, yrm, scale = FALSE) {
   try(if(missing(xrm)) (xrm = xdist))
   try(if(missing(yrm)) (yrm = ydist))
 
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
+  if(class(r)[1] != 'RasterLayer' & class(r)[1] != 'matrix' & class(r)[1] != 'SpatRaster') {stop('r must be a raster or matrix.')}
   if(class(xdist) != 'numeric') {stop('xdist must be numeric.')}
   if(class(ydist) != 'numeric') {stop('ydist must be numeric.')}
   if(class(xrm) != 'numeric') {stop('xrm must be numeric.')}

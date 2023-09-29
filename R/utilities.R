@@ -26,15 +26,16 @@
 #'
 #' # import raster image
 #' data(orforest)
+#' orforest <- terra::unwrap(orforest)
 #'
 #' # find the 2nd order least squares polynomial surface
 #' polyfit <- fitplane(orforest, order = 2)
 #'
 #' # create raster of polyfit
-#' x <- setValues(orforest, polyfit)
+#' x <- terra::setValues(orforest, polyfit)
 #'
 #' # plot the fit
-#' plot(x)
+#' terra::plot(x)
 #' @import terra spatial
 #' @export
 fitplane <- function(x, order) {
@@ -86,12 +87,13 @@ fitplane <- function(x, order) {
 #'
 #' # import raster image
 #' data(orforest)
+#' orforest <- terra::unwrap(orforest)
 #'
 #' # find the least squares polynomial surface
 #' poly <- bestfitplane(orforest)
 #'
 #' # plot the fit
-#' plot(poly)
+#' terra::plot(poly)
 #' @import terra
 #' @export
 bestfitplane <- function(x) {
@@ -120,8 +122,8 @@ bestfitplane <- function(x) {
   }
 
   # fill in raster with best fit values
-  if (class(x)[1] == 'RasterLayer'){
-    bfx <- setValues(x, mods[[bestfit]])
+  if (class(x)[1] == 'RasterLayer' | class(x)[1] == 'SpatRaster'){
+    bfx <- terra::setValues(x, mods[[bestfit]])
   } else {
     bfx <- matrix(mods[[bestfit]], nrow = nrow(x), ncol = ncol(x), byrow = TRUE)
   }
@@ -144,12 +146,13 @@ bestfitplane <- function(x) {
 #' @examples
 #' # import raster image
 #' data(orforest)
+#' orforest <- terra::unwrap(orforest)
 #'
 #' # remove the least squares polynomial surface
 #' new_rast <- remove_plane(orforest)
 #'
 #' # plot
-#' plot(new_rast)
+#' terra::plot(new_rast)
 #' @import terra
 #' @export
 remove_plane <- function(x) {

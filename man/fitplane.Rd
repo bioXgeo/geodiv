@@ -22,13 +22,14 @@ or matrix.
 
 # import raster image
 data(orforest)
+orforest <- terra::unwrap(orforest)
 
 # find the 2nd order least squares polynomial surface
 polyfit <- fitplane(orforest, order = 2)
 
 # create raster of polyfit
-x <- setValues(orforest, polyfit)
+x <- terra::setValues(orforest, polyfit)
 
 # plot the fit
-plot(x)
+terra::plot(x)
 }

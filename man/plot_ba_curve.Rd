@@ -30,6 +30,7 @@ of that line.
 \examples{
 # import raster image
 data(normforest)
+normforest <- terra::unwrap(normforest)
 
 # plot the bearing area curve
 plot_ba_curve(normforest, divisions = TRUE)

@@ -11,12 +11,13 @@
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # calculate aacf img and matrix
 #' aacf_out <- aacf(normforest)
 #'
 #' # plot resulting aacf image
-#' plot(aacf_out)
+#' terra::plot(aacf_out)
 #' @import terra e1071 pracma stats
 #' @export
 aacf <- function(x) {
@@ -57,7 +58,7 @@ aacf <- function(x) {
     potentials$na <- sapply(seq(1, nrow(potentials)), FUN = function(i) {
       xmin <-
       newrast <- terra::crop(x, ext(potentials$xmin[i], potentials$xmax[i], potentials$ymin[i], potentials$ymax[i]))
-      return(sum(is.na(newRast[])))
+      return(sum(is.na(newrast[])))
     })
 
     max_dim <- potentials[max(which(potentials$na <= 0)),]
@@ -134,6 +135,7 @@ aacf <- function(x) {
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # calculate Scl20, the minimum distance to an autocorrelation value of 0.2 in the AACF
 #' Scl20 <- scl(normforest)[1]
@@ -196,9 +198,9 @@ scl <- function(x, threshold = c(0.20, 1 / exp(1)), create_plot = FALSE) {
       lines <- linelist %>%
         st_as_sf(coords = c("x", "y"), na.fail = FALSE, crs = crs(aacfimg)) %>%
         group_by(id) %>%
-        summarize() %>%
-        filter(st_geometry_type(.) == "MULTIPOINT") %>%
-        st_cast("LINESTRING")
+        summarize()
+      multi_inds <- which(st_geometry_type(lines$geometry) == 'MULTIPOINT')
+      lines <- st_cast(lines[multi_inds, ], "LINESTRING")
 
       # plot and calculate amplitude sums along rays
       plot(aacfimg)
@@ -311,6 +313,7 @@ scl <- function(x, threshold = c(0.20, 1 / exp(1)), create_plot = FALSE) {
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # estimate the texture aspect ratio for autocorrelation
 #' # thresholds of 0.20 and 0.37 (1/e)

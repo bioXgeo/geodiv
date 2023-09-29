@@ -27,6 +27,7 @@ necessarily represent actual height.
 \examples{
 # import raster image
 data(normforest)
+normforest <- terra::unwrap(normforest)
 
 # find the excess kurtosis of the raster distribution
 Sku <- sku(normforest, excess = TRUE)

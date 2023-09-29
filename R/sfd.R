@@ -15,6 +15,7 @@
 #'
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # calculate the fractal dimension
 #' Sfd <- sfd(normforest)
