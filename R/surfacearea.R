@@ -22,7 +22,7 @@
 #' @import terra
 #' @export
 flatsa <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
   # In case the value area of the raster is an odd shape,
   # calculate the surface area of the flattened raster in the same way
@@ -111,7 +111,7 @@ flatsa <- function(x) {
 #' @import terra
 #' @export
 surface_area <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
   # get dimensions
   N <- dim(x)[1] # rows
@@ -187,7 +187,7 @@ surface_area <- function(x) {
 #' @import terra
 #' @export
 sdr <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
   # get area of flat plane
   flat_area <- flatsa(x)

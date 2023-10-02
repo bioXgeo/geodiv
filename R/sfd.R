@@ -23,7 +23,7 @@
 #' @export
 sfd <- function(x, silent = FALSE) {
   # check type
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
   # if raster, convert to matrix
   if (class(x)[1] %in% c('RasterLayer', 'SpatRaster')) {

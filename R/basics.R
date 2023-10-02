@@ -18,7 +18,7 @@
 #' @import terra
 #' @export
 sa <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
   if (class(x)[1] %in% c('RasterLayer', 'SpatRaster')) {
     z <- x[]
@@ -55,7 +55,7 @@ sa <- function(x) {
 #' @import terra
 #' @export
 sq <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
   if (class(x)[1] %in% c('RasterLayer', 'SpatRaster')) {
     z <- x[]
@@ -91,8 +91,8 @@ sq <- function(x) {
 #' @import terra
 #' @export
 ssk <- function(x, adj = TRUE) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
-  if(class(adj) != 'logical') {stop('adj argument must be TRUE/FALSE.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
+  stopifnot('adj argument must be TRUE/FALSE.' = inherits(adj, 'logical'))
 
   if (class(x)[1] %in% c('RasterLayer', 'SpatRaster')) {
     z <- x[]
@@ -139,8 +139,8 @@ ssk <- function(x, adj = TRUE) {
 #' @import terra
 #' @export
 sku <- function(x, excess = TRUE) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
-  if(class(excess) != 'logical') {stop('excess argument must be TRUE/FALSE.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
+  stopifnot('excess argument must be TRUE/FALSE.' = inherits(excess, 'logical'))
 
   if (class(x)[1] %in% c('RasterLayer', 'SpatRaster')) {
     z <- x[]
@@ -181,7 +181,7 @@ sku <- function(x, excess = TRUE) {
 #' @import terra
 #' @export
 sv <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
   if (class(x)[1] %in% c('RasterLayer', 'SpatRaster')) {
     z <- x[]
@@ -212,7 +212,7 @@ sv <- function(x) {
 #' @import terra
 #' @export
 sph <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
   if (class(x)[1] %in% c('RasterLayer', 'SpatRaster')) {
     z <- x[]
@@ -243,7 +243,7 @@ sph <- function(x) {
 #' @import terra
 #' @export
 smean <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
   if (class(x)[1] %in% c('RasterLayer', 'SpatRaster')) {
     z <- x[]

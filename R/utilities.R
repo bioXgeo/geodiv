@@ -39,9 +39,9 @@
 #' @import terra spatial
 #' @export
 fitplane <- function(x, order) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
   if(length(order) > 1) {stop('too many values supplied to order.')}
-  if(class(order) != 'integer' & class(order) != 'numeric') {stop('order must be numeric or integer.')}
+  stopifnot('order must be numeric or integer.' = inherits(order, c('numeric', 'integer')))
   if(order %% 1 > 0) {
     warning('order will be rounded to the nearest integer.')
     order <- as.integer(floor(order))}
@@ -97,7 +97,7 @@ fitplane <- function(x, order) {
 #' @import terra
 #' @export
 bestfitplane <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
   # fit least squares plane for polynomials from orders 0-3
   mods <- lapply(seq(0, 3), FUN = function(i) fitplane(x, order = i))
@@ -156,7 +156,7 @@ bestfitplane <- function(x) {
 #' @import terra
 #' @export
 remove_plane <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
   bfx <- bestfitplane(x)
 

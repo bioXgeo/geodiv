@@ -1,7 +1,7 @@
 ---
 title: "NEWS.md"
 author: "Annie C. Smith"
-date: "September 1, 2021"
+date: "October 2, 2023"
 output: html_document
 ---
 
@@ -50,4 +50,4 @@ Fixed a bug where length() did not omit NAs, but mean, min, and max calculations
 
 ## geodiv 1.1.0
 
-Removed dependencies on raster, rgdal, rgeos, sp, and landscapemetrics. Converted all raster and vector functions to use terra and sf. Also fixed a bug in sfd that returned NaNs.
+Removed dependencies on raster, rgdal, rgeos, sp, maptools, and landscapemetrics. Converted all raster and vector functions to use terra and sf. Also fixed a bug in sfd that returned NaNs.

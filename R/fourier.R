@@ -25,8 +25,8 @@
 #' Stdi <- stdvals[2]
 #' @export
 std <- function(x, create_plot = FALSE, option = c(1, 2)) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
-  if(class(create_plot) != 'logical') {stop('create_plot must be logical.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
+  stopifnot('create_plot must be logical.' = inherits(create_plot, 'logical'))
 
   # get raster dimensions
   M <- ncol(x)
@@ -231,8 +231,8 @@ std <- function(x, create_plot = FALSE, option = c(1, 2)) {
 #' @import terra dplyr sf
 #' @export
 srw <- function(x, create_plot = FALSE, option = c(1, 2, 3)) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
-  if(class(create_plot) != 'logical') {stop('create_plot must be logical.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
+  stopifnot('create_plot must be logical.' = inherits(create_plot, 'logical'))
 
   # get raster dimensions
   M <- ncol(x)

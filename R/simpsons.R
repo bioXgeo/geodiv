@@ -36,10 +36,10 @@
 #' @import terra stats
 #' @export
 area_above <- function(f, a, b, n = 100) {
-  if(('function' %in% class(f)) != TRUE) {stop('f must be a function.')}
-  if(class(a) != 'numeric') {stop('a must be numeric.')}
-  if(class(b) != 'numeric') {stop('b must be numeric.')}
-  if(class(n) != 'numeric') {stop('n must be numeric.')}
+  stopifnot('f must be a function.' = inherits(f, 'function'))
+  stopifnot('a must be numeric.' = inherits(a, 'numeric'))
+  stopifnot('b must be numeric.' = inherits(b, 'numeric'))
+  stopifnot('n must be numeric.' = inherits(n, 'numeric'))
   if(length(a) > 1) {stop('too many values supplied to a.')}
   if(length(b) > 1) {stop('too many values supplied to b.')}
   if(length(n) > 1) {stop('too many values supplied to n.')}
@@ -98,10 +98,10 @@ area_above <- function(f, a, b, n = 100) {
 #' @import terra stats
 #' @export
 simpsons <- function(f, a, b, n = 100) {
-  if(('function' %in% class(f)) != TRUE) {stop('f must be a function.')}
-  if(class(a) != 'numeric') {stop('a must be numeric.')}
-  if(class(b) != 'numeric') {stop('b must be numeric.')}
-  if(class(n) != 'numeric') {stop('n must be numeric.')}
+  stopifnot('f must be a function.' = inherits(f, 'function'))
+  stopifnot('a must be numeric.' = inherits(a, 'numeric'))
+  stopifnot('b must be numeric.' = inherits(b, 'numeric'))
+  stopifnot('n must be numeric.' = inherits(n, 'numeric'))
   if(length(a) > 1) {stop('too many values supplied to a.')}
   if(length(b) > 1) {stop('too many values supplied to b.')}
   if(length(n) > 1) {stop('too many values supplied to n.')}

@@ -21,7 +21,7 @@
 #' @import terra e1071 pracma stats
 #' @export
 aacf <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
   # get raster dimensions
   M <- ncol(x)
@@ -142,9 +142,9 @@ aacf <- function(x) {
 #' @import terra dplyr
 #' @export
 scl <- function(x, threshold = c(0.20, 1 / exp(1)), create_plot = FALSE) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
-  if(class(create_plot) != 'logical') {stop('create_plot argument must be TRUE/FALSE.')}
-  if(class(threshold) != 'numeric') {stop('threshold must be numeric.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
+  stopifnot('create_plot argument must be TRUE/FALSE.' = inherits(create_plot, 'logical'))
+  stopifnot('threshold must be numeric.' = inherits(threshold, 'numeric'))
   if(sum(threshold < 0) >= 1) {stop('threshold values cannot be less than 0.')}
 
   # get aacf img
@@ -325,8 +325,8 @@ scl <- function(x, threshold = c(0.20, 1 / exp(1)), create_plot = FALSE) {
 #' @import terra
 #' @export
 stxr <- function(x, threshold = c(0.20, 1 / exp(1))) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
-  if(class(threshold) != 'numeric') {stop('threshold must be numeric.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
+  stopifnot('threshold must be numeric.' = inherits(threshold, 'numeric'))
   if(sum(threshold < 0) >= 1) {stop('threshold values cannot be less than 0.')}
 
   sclvals <- scl(x, threshold = threshold, create_plot = FALSE)

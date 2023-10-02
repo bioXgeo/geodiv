@@ -31,12 +31,12 @@
 #' @export
 fftshift <- function(x, dim = -1) {
   if(length(base::class(x)) > 1) {
-    if(!('matrix' %in% class(x))) {stop('x must be a matrix.')}
+    stopifnot('x must be a matrix.' = inherits(x, 'matrix'))
   } else {
-    if(base::class(x) != 'matrix') {stop('x must be a matrix.')}
+    stopifnot('x must be a matrix.' = inherits(x, 'matrix'))
   }
   if(length(dim) > 1) {stop('too many values provided for dim.')}
-  if(class(dim) != 'numeric') {stop('dim must be numeric.')}
+  stopifnot('dim must be numeric.' = inherits(dim, 'numeric'))
   if(dim != -1 & dim != 1 & dim != 2) {stop('invalid value for dim -- must be -1, 1, or 2.')}
 
   rows <- dim(x)[1]

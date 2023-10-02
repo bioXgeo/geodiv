@@ -29,7 +29,7 @@
 #' @import terra
 #' @export
 findpeaks <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
   N <- dim(x)[1] # rows
   M <- dim(x)[2] # cols
@@ -112,7 +112,7 @@ findpeaks <- function(x) {
 #' @import terra
 #' @export
 findvalleys <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
   N <- dim(x)[1] # rows
   M <- dim(x)[2] # cols
@@ -187,7 +187,7 @@ findvalleys <- function(x) {
 #' @import terra
 #' @export
 ssc <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
   # convert matrix to raster if necessary (equal area)
   if (class(x)[1] == 'matrix') {
@@ -269,7 +269,7 @@ ssc <- function(x) {
 #' @import terra
 #' @export
 sds <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
   M <- nrow(x)
   N <- ncol(x)
@@ -298,7 +298,7 @@ sds <- function(x) {
 #' @import terra
 #' @export
 s10z <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
   peaks <- findpeaks(x)
   valleys <- findvalleys(x)

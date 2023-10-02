@@ -20,7 +20,7 @@
 #' @import terra
 #' @export
 sdq <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
   deltax <- 1
   deltay <- 1
@@ -60,7 +60,7 @@ sdq <- function(x) {
 #' @import terra
 #' @export
 sdq6 <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
   deltax <- 1 # per unit, not per degree, etc.
   deltay <- 1

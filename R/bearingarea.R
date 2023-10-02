@@ -22,7 +22,7 @@
 #' @import terra stats
 #' @export
 bearing_area <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
   if (class(x)[1] %in% c('RasterLayer', 'SpatRaster')) {
     z <- x[]
@@ -71,8 +71,8 @@ bearing_area <- function(x) {
 #' @import terra stats graphics
 #' @export
 plot_ba_curve <- function(x, divisions = FALSE) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
-  if(class(divisions) != 'logical') {stop('divisions argument must be TRUE/FALSE.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
+  stopifnot('divisions argument must be TRUE/FALSE.' = inherits(divisions, 'logical'))
 
   f <- bearing_area(x)
 
@@ -125,8 +125,8 @@ plot_ba_curve <- function(x, divisions = FALSE) {
 #' @import terra stats
 #' @export
 find_flat <- function(x, perc = 0.4) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
-  if(class(perc) != 'numeric') {stop('perc must be numeric.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
+  stopifnot('perc must be numeric.' = inherits(perc, 'numeric'))
   if(length(perc) > 1) {stop('too many values supplied to perc.')}
   if(perc > 1 | perc < 0) {stop('perc must be between 0 and 1.')}
 
@@ -197,8 +197,8 @@ find_flat <- function(x, perc = 0.4) {
 #' @import terra stats
 #' @export
 height_ba <- function(x, xval) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
-  if(class(xval) != 'numeric') {stop('xval must be numeric.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
+  stopifnot('xval must be numeric.' = inherits(xval, 'numeric'))
   if(length(xval) > 1) {stop('too many values supplied to xval.')}
   if(xval > 1 | xval < 0) {stop('xval must be between 0 and 1.')}
 
@@ -237,11 +237,11 @@ height_ba <- function(x, xval) {
 #' @import terra
 #' @export
 sdc <- function(x, low, high) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
-  if(class(low) != 'numeric') {stop('low value must be numeric.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
+  stopifnot('low value must be numeric.' = inherits(low, 'numeric'))
   if(length(low) > 1) {stop('too many values supplied to low.')}
   if(low > 1 | low < 0) {stop('low value must be between 0 and 1.')}
-  if(class(high) != 'numeric') {stop('high value must be numeric.')}
+  stopifnot('high value must be numeric.' = inherits(high, 'numeric'))
   if(length(high) > 1) {stop('too many values supplied to high.')}
   if(high > 1 | high < 0) {stop('high value must be between 0 and 1.')}
   if(high <= low) {stop('high value must be greater than low value.')}
@@ -273,7 +273,7 @@ sdc <- function(x, low, high) {
 #' @import terra
 #' @export
 sbi <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
   Sq <- sq(x)
   z05 <- height_ba(x, 0.05)
@@ -306,7 +306,7 @@ sbi <- function(x) {
 #' @import terra
 #' @export
 svi <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
   f <- bearing_area(x)
 
@@ -338,7 +338,7 @@ svi <- function(x) {
 #' @import terra
 #' @export
 sci <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
   f <- bearing_area(x)
 
@@ -376,7 +376,7 @@ sci <- function(x) {
 #' @import terra
 #' @export
 sk <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
   line_info <- find_flat(x, perc = 0.4)
 
@@ -409,7 +409,7 @@ sk <- function(x) {
 #' @import terra stats
 #' @export
 svk <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
   # find the bearing area curve
   f <- bearing_area(x)
@@ -449,7 +449,7 @@ svk <- function(x) {
 #' @import terra stats
 #' @export
 spk <- function(x) {
-  if(class(x)[1] != 'RasterLayer' & class(x)[1] != 'matrix' & class(x)[1] != 'SpatRaster') {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
   # find the bearing area curve
   f <- bearing_area(x)
