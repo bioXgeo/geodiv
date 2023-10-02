@@ -33,7 +33,8 @@
 #'
 #' # valley fluid retention index = void volume in 'valley' zone
 #' Svi <- area_above(f = mod, b = 1, a = 0.8, n = 500)
-#' @import terra stats
+#' @importFrom terra rast
+#' @importFrom stats quantile ecdf
 #' @export
 area_above <- function(f, a, b, n = 100) {
   stopifnot('f must be a function.' = inherits(f, 'function'))
@@ -95,7 +96,8 @@ area_above <- function(f, a, b, n = 100) {
 #'
 #' # calculate integral
 #' int_area <- simpsons(f = mod, b = 1, a = 0.8, n = 500)
-#' @import terra stats
+#' @importFrom terra rast
+#' @importFrom stats quantile ecdf
 #' @export
 simpsons <- function(f, a, b, n = 100) {
   stopifnot('f must be a function.' = inherits(f, 'function'))

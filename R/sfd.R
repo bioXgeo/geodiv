@@ -19,7 +19,8 @@
 #'
 #' # calculate the fractal dimension
 #' Sfd <- sfd(normforest)
-#' @import terra Rcpp
+#' @importFrom terra rast
+#' @import Rcpp
 #' @export
 sfd <- function(x, silent = FALSE) {
   # check type

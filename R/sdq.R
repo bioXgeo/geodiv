@@ -17,7 +17,7 @@
 #'
 #' # calculate root mean square slope
 #' Sdq <- sdq(normforest)
-#' @import terra
+#' @importFrom terra rast
 #' @export
 sdq <- function(x) {
   stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
@@ -57,7 +57,7 @@ sdq <- function(x) {
 #'
 #' # calculate area root mean square slope
 #' Sdq6 <- sdq6(normforest)
-#' @import terra
+#' @importFrom terra rast
 #' @export
 sdq6 <- function(x) {
   stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))

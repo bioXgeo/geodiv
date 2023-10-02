@@ -63,11 +63,13 @@
 #' # get a surface of root mean square roughness
 #' sa_img <- texture_image(x = x, window = 'square',
 #' size = 5, metric = 'sa',
-#' parallel = TRUE, ncores = 2, nclumps = 20)
+#' parallel = TRUE, ncores = 1, nclumps = 20)
 #'
 #' # plot the result
 #' terra::plot(sa_img)
-#' @import terra parallel snow
+#' @importFrom terra rast crop crds
+#' @importFrom parallel mclapply clusterExport clusterEvalQ parLapply
+#' @importFrom snow makeCluster stopCluster
 #' @export
 texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE,
                           metric, args = NULL, parallel = TRUE, ncores = NULL, nclumps = 100){
@@ -188,7 +190,7 @@ texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE
     print('Beginning calculation of metrics over windows...')
     start <- Sys.time()
     # make and start cluster
-    try(stopCluster(cl), silent = TRUE)
+    try(snow::stopCluster(cl), silent = TRUE)
     cl <- snow::makeCluster(ncores, type = 'SOCK')
     parallel::clusterExport(cl = cl, list('ext_x', 'coord_list', 'size',
                                           'window_type',
@@ -204,7 +206,7 @@ texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE
                                                      size = size, metric = metric,
                                                      args = input_args)})
     })
-    stopCluster(cl)
+    snow::stopCluster(cl)
     end <- Sys.time()
     cat('Total time to calculate metrics: ', end - start, '\n', sep = '')
 
@@ -279,7 +281,7 @@ texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE
 #'    \item{\code{'scl'}: correlation length}
 #'    \item{\code{'sdc'}: bearing area curve height interval}
 #' }
-#' @import terra
+#' @importFrom terra crds crop rast
 #' @export
 window_metric <- function(x, coords, window_type = 'square', size = 11, metric, args = NULL) {
 
@@ -328,7 +330,7 @@ window_metric <- function(x, coords, window_type = 'square', size = 11, metric, 
 #'
 #' # crop raster to much smaller area
 #' x <- pad_edges(as.matrix(normforest), 3, val = NA)
-#' @import terra zoo
+#' @importFrom zoo na.approx
 #' @export
 pad_edges <- function(x, size, val = NULL) {
 

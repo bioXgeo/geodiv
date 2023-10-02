@@ -27,7 +27,7 @@
 #' # plot real component
 #' r <- terra::setValues(normforest, Re(ftshift))
 #' terra::plot(r)
-#' @import terra
+#' @importFrom terra rast
 #' @export
 fftshift <- function(x, dim = -1) {
   if(length(base::class(x)) > 1) {

@@ -36,7 +36,8 @@
 #'
 #' # plot the fit
 #' terra::plot(x)
-#' @import terra spatial
+#' @importFrom terra rast crop crds
+#' @importFrom spatial surf.ls
 #' @export
 fitplane <- function(x, order) {
   stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
@@ -94,7 +95,7 @@ fitplane <- function(x, order) {
 #'
 #' # plot the fit
 #' terra::plot(poly)
-#' @import terra
+#' @importFrom terra rast setValues crop
 #' @export
 bestfitplane <- function(x) {
   stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
@@ -153,7 +154,7 @@ bestfitplane <- function(x) {
 #'
 #' # plot
 #' terra::plot(new_rast)
-#' @import terra
+#' @importFrom terra rast
 #' @export
 remove_plane <- function(x) {
   stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))

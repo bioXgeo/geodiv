@@ -18,7 +18,10 @@
 #'
 #' # plot resulting aacf image
 #' terra::plot(aacf_out)
-#' @import terra e1071 pracma stats
+#' @importFrom terra rast crds crop setValues crs
+#' @importFrom e1071 hanning.window
+#' @importFrom pracma meshgrid
+#' @importFrom stats fft
 #' @export
 aacf <- function(x) {
   stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
@@ -32,7 +35,7 @@ aacf <- function(x) {
   # convert matrix to raster if necessary (equal area)
   if (data_type == 'matrix') {
     x <- rast(x)
-    crs(x) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+    terra::crs(x) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
   }
 
   # convert RasterLayer to SpatRaster
@@ -139,7 +142,10 @@ aacf <- function(x) {
 #'
 #' # calculate Scl20, the minimum distance to an autocorrelation value of 0.2 in the AACF
 #' Scl20 <- scl(normforest)[1]
-#' @import terra dplyr
+#' @importFrom dplyr %>% summarize group_by
+#' @importFrom terra crop rast xmin xmax ymin ymax unwrap crs values
+#' @importFrom sf st_geometry_type
+#' @importFrom rlang .data
 #' @export
 scl <- function(x, threshold = c(0.20, 1 / exp(1)), create_plot = FALSE) {
   stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
@@ -178,7 +184,7 @@ scl <- function(x, threshold = c(0.20, 1 / exp(1)), create_plot = FALSE) {
     # convert matrix to raster if necessary
     if (data_type == 'matrix') {
       aacf_rast <- rast(aacfimg)
-      crs(aacf_rast) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+      terra::crs(aacf_rast) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
       aacfimg <- aacf_rast
     }
 
@@ -196,8 +202,8 @@ scl <- function(x, threshold = c(0.20, 1 / exp(1)), create_plot = FALSE) {
                                                            id = paste('l', i, sep = ''))})
       linelist <- bind_rows(linelist)
       lines <- linelist %>%
-        st_as_sf(coords = c("x", "y"), na.fail = FALSE, crs = crs(aacfimg)) %>%
-        group_by(id) %>%
+        st_as_sf(coords = c("x", "y"), na.fail = FALSE, crs = terra::crs(aacfimg)) %>%
+        group_by(.data$id) %>%
         summarize()
       multi_inds <- which(st_geometry_type(lines$geometry) == 'MULTIPOINT')
       lines <- st_cast(lines[multi_inds, ], "LINESTRING")
@@ -209,7 +215,7 @@ scl <- function(x, threshold = c(0.20, 1 / exp(1)), create_plot = FALSE) {
 
     # calculate distances from center to all other points
     dist_rast <- aacfimg
-    values(dist_rast) <- NA
+    terra::values(dist_rast) <- NA
     center <- ceiling(dim(x) / 2)
     nce <- ifelse(ncol(aacfimg) / 2 == round(ncol(aacfimg) / 2), 1, 0)
     dist_rast[nrow(aacfimg), center[2] + nce] <- 1
@@ -322,7 +328,7 @@ scl <- function(x, threshold = c(0.20, 1 / exp(1)), create_plot = FALSE) {
 #' # calculate Str20, the texture aspect ratio for
 #' # autocorrelation value of 0.2 in the AACF
 #' Str20 <- strvals[1]
-#' @import terra
+#' @importFrom terra rast
 #' @export
 stxr <- function(x, threshold = c(0.20, 1 / exp(1))) {
   stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))

@@ -26,7 +26,7 @@
 #' N <- ncol(normforest)
 #' M <- nrow(normforest)
 #' Sds <- nrow(peaks) / ((N - 1) * (M - 1))
-#' @import terra
+#' @importFrom terra rast crds crs
 #' @export
 findpeaks <- function(x) {
   stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
@@ -39,7 +39,7 @@ findpeaks <- function(x) {
   # convert matrix to raster if necessary (equal area)
   if (class(x)[1] == 'matrix') {
     x <- rast(x)
-    crs(x) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+    terra::crs(x) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
   }
 
   # center values, indices, and coordinates
@@ -109,7 +109,7 @@ findpeaks <- function(x) {
 #'
 #' # calculate the ten-point height
 #' S10z <- (sum(top_peaks$val) + sum(abs(bottom_valleys$val))) / 5
-#' @import terra
+#' @importFrom terra rast crds crs
 #' @export
 findvalleys <- function(x) {
   stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
@@ -122,7 +122,7 @@ findvalleys <- function(x) {
   # convert matrix to raster if necessary (equal area)
   if (class(x)[1] == 'matrix') {
     x <- rast(x)
-    crs(x) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+    terra::crs(x) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
   }
 
   # center values, indices, and coordinates
@@ -184,7 +184,7 @@ findvalleys <- function(x) {
 #'
 #' # calculate mean summit curvature
 #' Ssc <- ssc(normforest)
-#' @import terra
+#' @importFrom terra rast crds crs
 #' @export
 ssc <- function(x) {
   stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
@@ -192,7 +192,7 @@ ssc <- function(x) {
   # convert matrix to raster if necessary (equal area)
   if (class(x)[1] == 'matrix') {
     x <- rast(x)
-    crs(x) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+    terra::crs(x) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
   }
 
   # z values, coordinates, and resolution (change in x, y)
@@ -266,7 +266,7 @@ ssc <- function(x) {
 #'
 #' # calculate summit density.
 #' Sds <- sds(normforest)
-#' @import terra
+#' @importFrom terra rast
 #' @export
 sds <- function(x) {
   stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
@@ -295,7 +295,7 @@ sds <- function(x) {
 #'
 #' # calculate ten-point height.
 #' S10z <- s10z(normforest)
-#' @import terra
+#' @importFrom terra rast
 #' @export
 s10z <- function(x) {
   stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))

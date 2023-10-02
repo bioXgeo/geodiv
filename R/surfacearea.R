@@ -19,7 +19,7 @@
 #'
 #' # calculate flattened surface area
 #' flatsa(normforest)
-#' @import terra
+#' @importFrom terra rast res crds setValues crs
 #' @export
 flatsa <- function(x) {
   stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
@@ -34,7 +34,7 @@ flatsa <- function(x) {
   # convert matrix to raster if necessary (equal area)
   if (class(x)[1] == 'matrix') {
     x <- rast(x)
-    crs(x) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+    terra::crs(x) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
   }
 
   # coordinates and resolution (change in x, y)
@@ -108,7 +108,7 @@ flatsa <- function(x) {
 #'
 #' # calculate surface area
 #' surface_area(normforest)
-#' @import terra
+#' @importFrom terra rast crop res crs
 #' @export
 surface_area <- function(x) {
   stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
@@ -120,7 +120,7 @@ surface_area <- function(x) {
   # convert matrix to raster if necessary (equal area)
   if (class(x)[1] == 'matrix') {
     x <- rast(x)
-    crs(x) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+    terra::crs(x) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
   }
 
   # coordinates and resolution (change in x, y)
@@ -184,7 +184,7 @@ surface_area <- function(x) {
 #'
 #' # calculate the surface area ratio
 #' Sdr <- sdr(normforest)
-#' @import terra
+#' @importFrom terra rast
 #' @export
 sdr <- function(x) {
   stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))

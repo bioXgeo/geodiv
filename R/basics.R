@@ -15,7 +15,8 @@
 #'
 #' # find the surface roughness
 #' roughness <- sa(normforest)
-#' @import terra
+#' @importFrom terra rast
+#' @importFrom stats na.omit
 #' @export
 sa <- function(x) {
   stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
@@ -52,7 +53,7 @@ sa <- function(x) {
 #'
 #' # find the surface roughness
 #' roughness <- sq(normforest)
-#' @import terra
+#' @importFrom terra rast
 #' @export
 sq <- function(x) {
   stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
@@ -88,7 +89,8 @@ sq <- function(x) {
 #'
 #' # find the adjusted coefficient of skewness
 #' Ssk <- ssk(normforest, adj = TRUE)
-#' @import terra
+#' @importFrom terra rast
+#' @importFrom stats na.omit
 #' @export
 ssk <- function(x, adj = TRUE) {
   stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
@@ -136,7 +138,8 @@ ssk <- function(x, adj = TRUE) {
 #'
 #' # find the excess kurtosis of the raster distribution
 #' Sku <- sku(normforest, excess = TRUE)
-#' @import terra
+#' @importFrom terra rast
+#' @importFrom stats na.omit
 #' @export
 sku <- function(x, excess = TRUE) {
   stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
@@ -178,7 +181,7 @@ sku <- function(x, excess = TRUE) {
 #'
 #' # find the maximum valley depth
 #' Sv <- sv(normforest)
-#' @import terra
+#' @importFrom terra rast
 #' @export
 sv <- function(x) {
   stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
@@ -209,7 +212,7 @@ sv <- function(x) {
 #'
 #' # find the maximum peak height
 #' Sph <- sph(normforest)
-#' @import terra
+#' @importFrom terra rast
 #' @export
 sph <- function(x) {
   stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
@@ -240,7 +243,7 @@ sph <- function(x) {
 #'
 #' # find the maximum peak height
 #' Smean <- smean(normforest)
-#' @import terra
+#' @importFrom terra rast
 #' @export
 smean <- function(x) {
   stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))

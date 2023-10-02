@@ -22,7 +22,8 @@
 #' ba <- bearing_area(normforest)
 #' x <- seq(0, 1, length.out = 100000)
 #' slopes <- slopecalc(x = x, h = 0.01, f = ba)
-#' @import terra stats
+#' @importFrom terra rast
+#' @importFrom stats quantile
 #' @export
 slopecalc <- function(x, h, f) {
   stopifnot('x must be numeric.' = inherits(x, 'numeric'))
@@ -89,7 +90,7 @@ slopecalc <- function(x, h, f) {
 #' x <- seq(0, 1, length.out = 10000)
 #' slopes <- slopecalc(x = x, h = 0.01, f = ba)
 #' slopes_forty <- slopemeans(slopes = slopes, l = 0.4)
-#' @import terra
+#' @importFrom terra rast
 #' @export
 slopemeans <- function(slopes, l = 0.4) {
   stopifnot('slopes must be a dataframe.' = inherits(slopes, 'data.frame'))

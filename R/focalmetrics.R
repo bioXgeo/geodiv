@@ -61,7 +61,7 @@
 #'
 #' # plot the result
 #' terra::plot(sa_img$sa)
-#' @import terra
+#' @importFrom terra rast crds ext focal
 #' @export
 focal_metrics <- function(x,
                           window,
@@ -189,7 +189,7 @@ focal_metrics <- function(x,
 #' \item{Hesselbarth, M.H.K., Sciaini, M., With, K.A., Wiegand, K., Nowosad, J. 2019.
 #' landscapemetrics: an open-source R tool to calculate landscape metrics. - Ecography 42:1648-1657(ver. 0).}
 #' }
-#' @import terra
+#' @importFrom terra rast crds ext focal
 #' @export
 .calculate_met_focal <- function(landscape,
                                 n_row,

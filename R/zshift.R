@@ -32,7 +32,7 @@
 #'
 #' # remove right and bottom borders 2 deep
 #' noborder <- zshift(normforest, xdist = 2, ydist = 2)
-#' @import terra
+#' @importFrom terra rast crop
 #' @export
 zshift <- function(r, xdist = 0, ydist = 0, xrm, yrm, scale = FALSE) {
   # xdist is distance away in x direction
@@ -59,7 +59,7 @@ zshift <- function(r, xdist = 0, ydist = 0, xrm, yrm, scale = FALSE) {
   # calculate zmat and coordinates
   if (class(r)[1] %in% c('RasterLayer', 'SpatRaster')) {
     z <- r[]
-  } else if (class(r) == 'matrix') {
+  } else if (inherits(r, 'matrix')) {
     z <- as.numeric(r)
   }
 
