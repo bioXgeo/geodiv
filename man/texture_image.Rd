@@ -93,11 +93,11 @@ normforest <- terra::unwrap(normforest)
 # crop raster to smaller area
 x <- terra::crop(normforest, terra::ext(normforest[1:100, 1:100, drop = FALSE]))
 
-# get a surface of root mean square roughness (uncomment to run)
-#sa_img <- texture_image(x = x, window = 'square',
-#size = 5, metric = 'sa',
-#parallel = TRUE, ncores = 1, nclumps = 20)
+# get a surface of root mean square roughness
+sa_img <- texture_image(x = x, window = 'square',
+size = 5, metric = 'sa',
+parallel = TRUE, ncores = 1, nclumps = 20)
 
-# plot the result (uncomment to run)
-#terra::plot(sa_img)
+# plot the result
+terra::plot(sa_img)
 }
