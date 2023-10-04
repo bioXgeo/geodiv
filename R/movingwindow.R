@@ -68,8 +68,7 @@
 #' # plot the result
 #' terra::plot(sa_img)
 #' @importFrom terra rast crop crds
-#' @importFrom parallel mclapply clusterExport clusterEvalQ parLapply
-#' @importFrom snow makeCluster stopCluster
+#' @importFrom parallel mclapply clusterExport clusterEvalQ parLapply makeCluster stopCluster
 #' @export
 texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE,
                           metric, args = NULL, parallel = TRUE, ncores = NULL, nclumps = 100){
@@ -190,8 +189,8 @@ texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE
     print('Beginning calculation of metrics over windows...')
     start <- Sys.time()
     # make and start cluster
-    try(snow::stopCluster(cl), silent = TRUE)
-    cl <- snow::makeCluster(ncores, type = 'SOCK')
+    try(parallel::stopCluster(cl), silent = TRUE)
+    cl <- parallel::makeCluster(ncores, type = 'PSOCK')
     parallel::clusterExport(cl = cl, list('ext_x', 'coord_list', 'size',
                                           'window_type',
                                           'new_pixlist', 'metric', 'input_args',
@@ -206,7 +205,7 @@ texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE
                                                      size = size, metric = metric,
                                                      args = input_args)})
     })
-    snow::stopCluster(cl)
+    parallel::stopCluster(cl)
     end <- Sys.time()
     cat('Total time to calculate metrics: ', end - start, '\n', sep = '')
 
