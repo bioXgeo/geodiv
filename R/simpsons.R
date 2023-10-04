@@ -41,6 +41,7 @@ area_above <- function(f, a, b, n = 100) {
   stopifnot('a must be numeric.' = inherits(a, 'numeric'))
   stopifnot('b must be numeric.' = inherits(b, 'numeric'))
   stopifnot('n must be numeric.' = inherits(n, 'numeric'))
+
   if(length(a) > 1) {stop('too many values supplied to a.')}
   if(length(b) > 1) {stop('too many values supplied to b.')}
   if(length(n) > 1) {stop('too many values supplied to n.')}
@@ -104,6 +105,7 @@ simpsons <- function(f, a, b, n = 100) {
   stopifnot('a must be numeric.' = inherits(a, 'numeric'))
   stopifnot('b must be numeric.' = inherits(b, 'numeric'))
   stopifnot('n must be numeric.' = inherits(n, 'numeric'))
+
   if(length(a) > 1) {stop('too many values supplied to a.')}
   if(length(b) > 1) {stop('too many values supplied to b.')}
   if(length(n) > 1) {stop('too many values supplied to n.')}

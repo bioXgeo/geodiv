@@ -151,6 +151,7 @@ scl <- function(x, threshold = c(0.20, 1 / exp(1)), create_plot = FALSE) {
   stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
   stopifnot('create_plot argument must be TRUE/FALSE.' = inherits(create_plot, 'logical'))
   stopifnot('threshold must be numeric.' = inherits(threshold, 'numeric'))
+
   if(sum(threshold < 0) >= 1) {stop('threshold values cannot be less than 0.')}
 
   # get aacf img
@@ -333,6 +334,7 @@ scl <- function(x, threshold = c(0.20, 1 / exp(1)), create_plot = FALSE) {
 stxr <- function(x, threshold = c(0.20, 1 / exp(1))) {
   stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
   stopifnot('threshold must be numeric.' = inherits(threshold, 'numeric'))
+
   if(sum(threshold < 0) >= 1) {stop('threshold values cannot be less than 0.')}
 
   sclvals <- scl(x, threshold = threshold, create_plot = FALSE)

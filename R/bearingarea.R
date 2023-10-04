@@ -131,6 +131,7 @@ plot_ba_curve <- function(x, divisions = FALSE) {
 find_flat <- function(x, perc = 0.4) {
   stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
   stopifnot('perc must be numeric.' = inherits(perc, 'numeric'))
+
   if(length(perc) > 1) {stop('too many values supplied to perc.')}
   if(perc > 1 | perc < 0) {stop('perc must be between 0 and 1.')}
 
@@ -204,6 +205,7 @@ find_flat <- function(x, perc = 0.4) {
 height_ba <- function(x, xval) {
   stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
   stopifnot('xval must be numeric.' = inherits(xval, 'numeric'))
+
   if(length(xval) > 1) {stop('too many values supplied to xval.')}
   if(xval > 1 | xval < 0) {stop('xval must be between 0 and 1.')}
 
@@ -247,6 +249,7 @@ sdc <- function(x, low, high) {
   if(length(low) > 1) {stop('too many values supplied to low.')}
   if(low > 1 | low < 0) {stop('low value must be between 0 and 1.')}
   stopifnot('high value must be numeric.' = inherits(high, 'numeric'))
+
   if(length(high) > 1) {stop('too many values supplied to high.')}
   if(high > 1 | high < 0) {stop('high value must be between 0 and 1.')}
   if(high <= low) {stop('high value must be greater than low value.')}

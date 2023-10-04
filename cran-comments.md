@@ -15,7 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 * win-builder, R-devel
 
 ## R CMD check results
-There were no ERRORS.
+There were no ERRORS or WARNINGS.
 
 There was 1 NOTE: 
 

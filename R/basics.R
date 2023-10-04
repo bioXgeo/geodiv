@@ -18,6 +18,7 @@
 #' @importFrom terra rast
 #' @importFrom stats na.omit
 #' @export
+#' @importFrom stats na.omit
 sa <- function(x) {
   stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 

@@ -49,6 +49,7 @@ zshift <- function(r, xdist = 0, ydist = 0, xrm, yrm, scale = FALSE) {
   stopifnot('xrm must be numeric.' = inherits(xrm, 'numeric'))
   stopifnot('yrm must be numeric.' = inherits(yrm, 'numeric'))
   stopifnot('scale must be logical.' = inherits(scale, 'logical'))
+
   if(length(xdist) > 1) {stop('too many values supplied to xdist.')}
   if(length(ydist) > 1) {stop('too many values supplied to ydist.')}
 

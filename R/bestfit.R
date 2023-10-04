@@ -28,6 +28,7 @@
 slopecalc <- function(x, h, f) {
   stopifnot('x must be numeric.' = inherits(x, 'numeric'))
   stopifnot('h must be numeric.' = inherits(h, 'numeric'))
+
   if(sum(class(f) %in% c('ecdf', 'stepfun', 'function')) != 3) {stop('f was not produced with bearing_area function.')}
   if(length(h) > 1) {stop('too many values for h.')}
   if(h >= 1 | h <= 0) {stop('h must be less than 1 and greater than 0.')}
@@ -95,6 +96,7 @@ slopecalc <- function(x, h, f) {
 slopemeans <- function(slopes, l = 0.4) {
   stopifnot('slopes must be a dataframe.' = inherits(slopes, 'data.frame'))
   stopifnot('l must be numeric.' = inherits(l, 'numeric'))
+
   if(length(l) > 1) {stop('too many values for l.')}
   if(l >= 1 | l <= 0) {stop('l must be less than 1 and greater than 0.')}
   if(sum(names(slopes) %in% c('slope', 'x')) != 2) {stop('incorrect column names for slopes dataframe -- need slope and x.')}
