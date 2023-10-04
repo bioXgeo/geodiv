@@ -26,10 +26,9 @@ direction index of the Fourier spectrum image calculated
 from a raster image (see Kedron et al. 2018).
 }
 \examples{
-library(raster)
-
 # import raster image
 data(normforest)
+normforest <- terra::unwrap(normforest)
 
 # calculate Std and Stdi
 stdvals <- std(normforest)

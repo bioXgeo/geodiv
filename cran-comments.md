@@ -1,7 +1,7 @@
 ---
 title: "cran-comments.md"
 author: "Annie C. Smith"
-date: "April 7, 2022"
+date: "October 2, 2023"
 output: html_document
 ---
 
@@ -19,7 +19,12 @@ There were no ERRORS or WARNINGS.
 
 There was 1 NOTE: 
 
-Uses the superseded package: 'snow (>= 0.4-3).' We use 'parallel' for all parallel operations, but 'parallel' depends on 'snow for some functions. We include 'snow' because a user reported that it showed up as a warning during installation.
+"Uses the superseded package: snow." We use 'parallel' for all parallel operations, but 'parallel' depends on 'snow for some functions. We now include 'snow' because a user reported that it showed up as a warning during installation.
+
+There is 1 WARNING.
+
+Two functions of "parallel" are superceded by "snow." The functions are specified (as snow::makeCluster) in the geodiv functions in which they are called. This warning does not impact the functionality 
+of geodiv.
 
 ## Downstream dependencies
 There are currently no downstream dependencies for this package.

@@ -10,6 +10,7 @@
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # find the rotated Bearing Area curve.
 #' ba_func <- bearing_area(normforest)
@@ -18,12 +19,14 @@
 #' xval <- environment(ba_func)$y
 #' yval <- (1 - environment(ba_func)$x)
 #' plot(yval ~ xval)
+#' @importFrom terra rast
+#' @importFrom stats ecdf sd
 #' @export
 bearing_area <- function(x) {
-  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
-  if (inherits(x, "RasterLayer") == TRUE) {
-    z <- getValues(x)
+  if (class(x)[1] %in% c('RasterLayer', 'SpatRaster')) {
+    z <- x[]
   } else {
     z <- x
   }
@@ -62,13 +65,17 @@ bearing_area <- function(x) {
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # plot the bearing area curve
 #' plot_ba_curve(normforest, divisions = TRUE)
+#' @importFrom terra rast
+#' @importFrom stats lm quantile predict
+#' @importFrom graphics abline
 #' @export
 plot_ba_curve <- function(x, divisions = FALSE) {
-  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
-  if(inherits(divisions, "logical") == FALSE) {stop('divisions argument must be TRUE/FALSE.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
+  stopifnot('divisions argument must be TRUE/FALSE.' = inherits(divisions, 'logical'))
 
   f <- bearing_area(x)
 
@@ -111,16 +118,20 @@ plot_ba_curve <- function(x, divisions = FALSE) {
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # locate the flattest 40% of the bearing area curve
 #' line_data <- find_flat(normforest, perc = 0.4)
 #'
 #' # extract the equation of the line
 #' bf_line <- line_data[[1]]
+#' @importFrom terra rast
+#' @importFrom stats quantile predict lm
 #' @export
 find_flat <- function(x, perc = 0.4) {
-  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
-  if(inherits(perc, "numeric") == FALSE) {stop('perc must be numeric.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
+  stopifnot('perc must be numeric.' = inherits(perc, 'numeric'))
+
   if(length(perc) > 1) {stop('too many values supplied to perc.')}
   if(perc > 1 | perc < 0) {stop('perc must be between 0 and 1.')}
 
@@ -154,7 +165,8 @@ find_flat <- function(x, perc = 0.4) {
       ls_line <- stats::lm(y ~ x, data = lm_data)
 
       # get value of ls line between 0 and 1
-      pred_data <- tibble::remove_rownames(data.frame(x = even_x, y = even_y))
+      pred_data <- data.frame(x = even_x, y = even_y)
+      rownames(pred_data) <- NULL
       pred_data$y <- stats::predict(ls_line, newdata = pred_data)
 
       # what is the ls line y-value at x = 0, x = 1?
@@ -182,14 +194,18 @@ find_flat <- function(x, perc = 0.4) {
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # determine the bearing area function value
 #' # corresponding to an x value of 0.4
 #' val <- height_ba(normforest, 0.4)
+#' @importFrom terra rast
+#' @importFrom stats quantile predict lm
 #' @export
 height_ba <- function(x, xval) {
-  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
-  if(inherits(xval, "numeric") == FALSE) {stop('xval must be numeric.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
+  stopifnot('xval must be numeric.' = inherits(xval, 'numeric'))
+
   if(length(xval) > 1) {stop('too many values supplied to xval.')}
   if(xval > 1 | xval < 0) {stop('xval must be between 0 and 1.')}
 
@@ -220,17 +236,20 @@ height_ba <- function(x, xval) {
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # determine the 10-40% height interval of the
 #' # bearing area curve
 #' val <- sdc(normforest, 0.1, 0.4)
+#' @importFrom terra rast
 #' @export
 sdc <- function(x, low, high) {
-  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
-  if(inherits(low, "numeric") == FALSE) {stop('low value must be numeric.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
+  stopifnot('low value must be numeric.' = inherits(low, 'numeric'))
   if(length(low) > 1) {stop('too many values supplied to low.')}
   if(low > 1 | low < 0) {stop('low value must be between 0 and 1.')}
-  if(inherits(high, "numeric") == FALSE) {stop('high value must be numeric.')}
+  stopifnot('high value must be numeric.' = inherits(high, 'numeric'))
+
   if(length(high) > 1) {stop('too many values supplied to high.')}
   if(high > 1 | high < 0) {stop('high value must be between 0 and 1.')}
   if(high <= low) {stop('high value must be greater than low value.')}
@@ -255,12 +274,14 @@ sdc <- function(x, low, high) {
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # determine the surface bearing index
 #' Sbi <- sbi(normforest)
+#' @importFrom terra rast
 #' @export
 sbi <- function(x) {
-  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
   Sq <- sq(x)
   z05 <- height_ba(x, 0.05)
@@ -286,12 +307,14 @@ sbi <- function(x) {
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # determine the valley fluid retention index
 #' Svi <- svi(normforest)
+#' @importFrom terra rast
 #' @export
 svi <- function(x) {
-  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
   f <- bearing_area(x)
 
@@ -316,12 +339,14 @@ svi <- function(x) {
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # determine the core fluid retention index
 #' Sci <- sci(normforest)
+#' @importFrom terra rast
 #' @export
 sci <- function(x) {
-  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
   f <- bearing_area(x)
 
@@ -352,12 +377,14 @@ sci <- function(x) {
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # determine the core roughness depth
 #' Sk <- sk(normforest)
+#' @importFrom terra rast
 #' @export
 sk <- function(x) {
-  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
   line_info <- find_flat(x, perc = 0.4)
 
@@ -383,12 +410,15 @@ sk <- function(x) {
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # determine the reduced valley depth
 #' Svk <- svk(normforest)
+#' @importFrom terra rast
+#' @importFrom stats quantile
 #' @export
 svk <- function(x) {
-  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
   # find the bearing area curve
   f <- bearing_area(x)
@@ -421,12 +451,15 @@ svk <- function(x) {
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # determine the reduced peak height
 #' Spk <- spk(normforest)
+#' @importFrom terra rast
+#' @importFrom stats quantile
 #' @export
 spk <- function(x) {
-  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
   # find the bearing area curve
   f <- bearing_area(x)

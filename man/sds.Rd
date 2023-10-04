@@ -19,6 +19,7 @@ peaks per unit area.
 \examples{
 # import raster image
 data(normforest)
+normforest <- terra::unwrap(normforest)
 
 # calculate summit density.
 Sds <- sds(normforest)

@@ -21,9 +21,10 @@ triangular prism surface area method.
 
 # import raster image
 data(normforest)
+normforest <- terra::unwrap(normforest)
 
 # convert to matrix
-mat <- raster::as.matrix(normforest)
+mat <- matrix(normforest[], ncol = ncol(normforest), nrow = nrow(normforest))
 
 # calculate the fractal dimension
 Sfd <- sfd_(mat)

@@ -53,29 +53,31 @@
 #'    \item{\code{'sdc'}: bearing area curve height interval}
 #' }
 #' @examples
-#' library(raster)
-#'
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # crop raster to smaller area
-#' x <- crop(normforest, extent(normforest, 1, 100, 1, 100))
+#' x <- terra::crop(normforest, terra::ext(normforest[1:100, 1:100, drop = FALSE]))
 #'
 #' # get a surface of root mean square roughness
 #' sa_img <- texture_image(x = x, window = 'square',
 #' size = 5, metric = 'sa',
-#' parallel = TRUE, ncores = 2, nclumps = 20)
+#' parallel = TRUE, ncores = 1, nclumps = 20)
 #'
 #' # plot the result
-#' plot(sa_img)
+#' terra::plot(sa_img)
+#' @importFrom terra rast crop crds
+#' @importFrom parallel mclapply clusterExport clusterEvalQ parLapply
+#' @importFrom snow makeCluster stopCluster
 #' @export
 texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE,
                           metric, args = NULL, parallel = TRUE, ncores = NULL, nclumps = 100){
 
-  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
-  if(inherits(window_type, "character") == FALSE) {stop('window_type must be a string.')}
-  if(inherits(size, "numeric") == FALSE) {stop('size must be numeric.')}
-  if(inherits(metric, "character") == FALSE) {stop('metric must be a character.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
+  stopifnot('window_type must be a string.' = inherits(window_type, 'character'))
+  stopifnot('size must be numeric.' = inherits(size, 'numeric'))
+  stopifnot('metric must be a character.' = inherits(metric, 'character'))
 
   if(length(metric) > 1) {stop('too many values provided for metric.')}
   if(length(size) > 1) {stop('too many values provided to size.')}
@@ -188,7 +190,7 @@ texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE
     print('Beginning calculation of metrics over windows...')
     start <- Sys.time()
     # make and start cluster
-    try(stopCluster(cl), silent = TRUE)
+    try(snow::stopCluster(cl), silent = TRUE)
     cl <- snow::makeCluster(ncores, type = 'SOCK')
     parallel::clusterExport(cl = cl, list('ext_x', 'coord_list', 'size',
                                           'window_type',
@@ -196,7 +198,7 @@ texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE
                                           'window_metric'),
                             envir = environment())
     parallel::clusterEvalQ(cl, library('geodiv'))
-    parallel::clusterEvalQ(cl, library('raster'))
+    parallel::clusterEvalQ(cl, library('terra'))
     # for each list in new_pixlist, run lapply
     result <- parallel::parLapply(cl, new_pixlist, fun = function(l) {
       lapply(l, FUN = function(i) {window_metric(x = ext_x, coords = coord_list[i, ],
@@ -204,7 +206,7 @@ texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE
                                                      size = size, metric = metric,
                                                      args = input_args)})
     })
-    stopCluster(cl)
+    snow::stopCluster(cl)
     end <- Sys.time()
     cat('Total time to calculate metrics: ', end - start, '\n', sep = '')
 
@@ -218,7 +220,7 @@ texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE
   for (i in 1:nresult) {
     temp <- data.frame(newvals = result[seq(i, length(result), nresult)], ind = pixlist)
     outfinal[[i]] <- x
-    if ('RasterLayer' %in% base::class(x)) {
+    if (class(x)[1] %in% c('RasterLayer', 'SpatRaster')) {
       outfinal[[i]] <- setValues(x, matrix(temp$newvals, nrow = nrow(x), ncol = ncol(x)))
     } else {
       outfinal[[i]] <- matrix(temp$newvals, nrow = nrow(x), ncol = ncol(x))
@@ -279,6 +281,7 @@ texture_image <- function(x, window_type = 'square', size = 5, in_meters = FALSE
 #'    \item{\code{'scl'}: correlation length}
 #'    \item{\code{'sdc'}: bearing area curve height interval}
 #' }
+#' @importFrom terra crds crop rast
 #' @export
 window_metric <- function(x, coords, window_type = 'square', size = 11, metric, args = NULL) {
 
@@ -321,19 +324,19 @@ window_metric <- function(x, coords, window_type = 'square', size = 11, metric, 
 #' out. If not null, this value will be used for the extended cells.
 #' @return A raster with edges padded \code{size} number of pixels on each edge.
 #' @examples
-#' library(raster)
-#'
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # crop raster to much smaller area
 #' x <- pad_edges(as.matrix(normforest), 3, val = NA)
+#' @importFrom zoo na.approx
 #' @export
 pad_edges <- function(x, size, val = NULL) {
 
   # add padding to matrix
   # continue values to edges to account for edge effect (# pixels radius/edge)
-  x[is.na(x)] <- -9999999 # change NA values for now
+  x[is.na(x)] <- -999999999 # change NA values for now
 
   if (is.null(val)) {
     # first, get edge values that will be extended
@@ -373,7 +376,7 @@ pad_edges <- function(x, size, val = NULL) {
   }
 
   # If the values were NA before (-9999999 now), convert them back to NA.
-  ext_x_mat[ext_x_mat == -9999999] <- NA
+  ext_x_mat[ext_x_mat == -999999999] <- NA
 
   return(ext_x_mat)
 }

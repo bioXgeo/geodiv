@@ -21,6 +21,7 @@ Area curve.
 \examples{
 # import raster image
 data(normforest)
+normforest <- terra::unwrap(normforest)
 
 # find the rotated Bearing Area curve.
 ba_func <- bearing_area(normforest)

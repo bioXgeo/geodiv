@@ -28,9 +28,11 @@
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # remove right and bottom borders 2 deep
 #' noborder <- zshift(normforest, xdist = 2, ydist = 2)
+#' @importFrom terra rast crop
 #' @export
 zshift <- function(r, xdist = 0, ydist = 0, xrm, yrm, scale = FALSE) {
   # xdist is distance away in x direction
@@ -41,12 +43,13 @@ zshift <- function(r, xdist = 0, ydist = 0, xrm, yrm, scale = FALSE) {
   try(if(missing(xrm)) (xrm = xdist))
   try(if(missing(yrm)) (yrm = ydist))
 
-  if(inherits(r, "RasterLayer") == FALSE & inherits(r, "matrix") == FALSE) {stop('r must be a raster.')}
-  if(inherits(xdist, "numeric") == FALSE) {stop('xdist must be numeric.')}
-  if(inherits(ydist, "numeric") == FALSE) {stop('ydist must be numeric.')}
-  if(inherits(xrm, "numeric") == FALSE) {stop('xrm must be numeric.')}
-  if(inherits(yrm, "numeric") == FALSE) {stop('yrm must be numeric.')}
-  if(inherits(scale, "logical") == FALSE) {stop('scale must be logical.')}
+  stopifnot('r must be a raster or matrix.' = inherits(r, c('RasterLayer', 'matrix', 'SpatRaster')))
+  stopifnot('xdist must be numeric.' = inherits(xdist, 'numeric'))
+  stopifnot('ydist must be numeric.' = inherits(ydist, 'numeric'))
+  stopifnot('xrm must be numeric.' = inherits(xrm, 'numeric'))
+  stopifnot('yrm must be numeric.' = inherits(yrm, 'numeric'))
+  stopifnot('scale must be logical.' = inherits(scale, 'logical'))
+
   if(length(xdist) > 1) {stop('too many values supplied to xdist.')}
   if(length(ydist) > 1) {stop('too many values supplied to ydist.')}
 
@@ -55,9 +58,9 @@ zshift <- function(r, xdist = 0, ydist = 0, xrm, yrm, scale = FALSE) {
   M <- dim(r)[2] # cols
 
   # calculate zmat and coordinates
-  if (inherits(r, "RasterLayer") == TRUE) {
-    z <- getValues(r)
-  } else if (inherits(r, "matrix") == TRUE) {
+  if (class(r)[1] %in% c('RasterLayer', 'SpatRaster')) {
+    z <- r[]
+  } else if (inherits(r, 'matrix')) {
     z <- as.numeric(r)
   }
 

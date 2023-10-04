@@ -23,6 +23,7 @@ represent actual height.
 \examples{
 # import raster image
 data(normforest)
+normforest <- terra::unwrap(normforest)
 
 # find the surface roughness
 roughness <- sq(normforest)

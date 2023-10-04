@@ -11,32 +11,33 @@
 #' @references #' This function was created from code posted by rayryeng at:
 #' https://stackoverflow.com/questions/38230794/how-to-write-fftshift-and-ifftshift-in-r.
 #' @examples
-#' library(raster)
-#'
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # convert to matrix form
 #' M <- ncol(normforest)
 #' N <- nrow(normforest)
-#' zmat <- matrix(raster::getValues(normforest), ncol = M, nrow = N, byrow = TRUE)
+#' zmat <- matrix(terra::values(normforest), ncol = M, nrow = N, byrow = TRUE)
 #'
 #' # calculate fourier transform and shift
 #' ftmat <- fft(zmat)
 #' ftshift <- fftshift(ftmat)
 #'
 #' # plot real component
-#' r <- setValues(normforest, Re(ftshift))
-#' plot(r)
+#' r <- terra::setValues(normforest, Re(ftshift))
+#' terra::plot(r)
+#' @importFrom terra rast
 #' @export
 fftshift <- function(x, dim = -1) {
   if(length(base::class(x)) > 1) {
-    if(!('matrix' %in% class(x))) {stop('x must be a matrix.')}
+    stopifnot('x must be a matrix.' = inherits(x, 'matrix'))
   } else {
-    if(inherits(x, "matrix") == FALSE) {stop('x must be a matrix.')}
+    stopifnot('x must be a matrix.' = inherits(x, 'matrix'))
   }
   if(length(dim) > 1) {stop('too many values provided for dim.')}
-  if(inherits(dim, "numeric") == FALSE) {stop('dim must be numeric.')}
+  stopifnot('dim must be numeric.' = inherits(dim, 'numeric'))
+
   if(dim != -1 & dim != 1 & dim != 2) {stop('invalid value for dim -- must be -1, 1, or 2.')}
 
   rows <- dim(x)[1]

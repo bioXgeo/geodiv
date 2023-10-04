@@ -27,6 +27,7 @@ Surface area is calculated over the sample area (N-1, M-1).
 \examples{
 # import raster image
 data(normforest)
+normforest <- terra::unwrap(normforest)
 
 # calculate flattened surface area
 flatsa(normforest)

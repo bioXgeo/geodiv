@@ -22,6 +22,7 @@ has a negative value.
 \examples{
 # import raster image
 data(normforest)
+normforest <- terra::unwrap(normforest)
 
 # locate peaks and valleys
 peaks <- findpeaks(normforest)

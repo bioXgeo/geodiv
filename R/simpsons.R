@@ -21,25 +21,27 @@
 #' @return A numeric value representing the area above the curve with
 #'   x bounds \code{a} and \code{b}.
 #' @examples
-#' library(raster)
-#'
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # basic values
-#' z <- getValues(normforest)
+#' z <- terra::values(normforest)
 #'
 #' # calculate cumulative probability density function of surface 'height' (= ndvi)
 #' mod <- ecdf((1 - z))
 #'
 #' # valley fluid retention index = void volume in 'valley' zone
 #' Svi <- area_above(f = mod, b = 1, a = 0.8, n = 500)
+#' @importFrom terra rast
+#' @importFrom stats quantile ecdf
 #' @export
 area_above <- function(f, a, b, n = 100) {
-  if(('function' %in% class(f)) != TRUE) {stop('f must be a function.')}
-  if(inherits(a, "numeric") == FALSE) {stop('a must be numeric.')}
-  if(inherits(b, "numeric") == FALSE) {stop('b must be numeric.')}
-  if(inherits(n, "numeric") == FALSE) {stop('n must be numeric.')}
+  stopifnot('f must be a function.' = inherits(f, 'function'))
+  stopifnot('a must be numeric.' = inherits(a, 'numeric'))
+  stopifnot('b must be numeric.' = inherits(b, 'numeric'))
+  stopifnot('n must be numeric.' = inherits(n, 'numeric'))
+
   if(length(a) > 1) {stop('too many values supplied to a.')}
   if(length(b) > 1) {stop('too many values supplied to b.')}
   if(length(n) > 1) {stop('too many values supplied to n.')}
@@ -83,25 +85,27 @@ area_above <- function(f, a, b, n = 100) {
 #' @return A numeric value representing the area under the curve with
 #'   x bounds \code{a} and \code{b}.
 #' @examples
-#' library(raster)
-#'
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # basic values
-#' z <- getValues(normforest)
+#' z <- terra::values(normforest)
 #'
 #' # calculate cumulative probability density function of surface 'height' (= ndvi)
 #' mod <- ecdf((1 - z))
 #'
 #' # calculate integral
 #' int_area <- simpsons(f = mod, b = 1, a = 0.8, n = 500)
+#' @importFrom terra rast
+#' @importFrom stats quantile ecdf
 #' @export
 simpsons <- function(f, a, b, n = 100) {
-  if(('function' %in% class(f)) != TRUE) {stop('f must be a function.')}
-  if(inherits(a, "numeric") == FALSE) {stop('a must be numeric.')}
-  if(inherits(b, "numeric") == FALSE) {stop('b must be numeric.')}
-  if(inherits(n, "numeric") == FALSE) {stop('n must be numeric.')}
+  stopifnot('f must be a function.' = inherits(f, 'function'))
+  stopifnot('a must be numeric.' = inherits(a, 'numeric'))
+  stopifnot('b must be numeric.' = inherits(b, 'numeric'))
+  stopifnot('n must be numeric.' = inherits(n, 'numeric'))
+
   if(length(a) > 1) {stop('too many values supplied to a.')}
   if(length(b) > 1) {stop('too many values supplied to b.')}
   if(length(n) > 1) {stop('too many values supplied to n.')}

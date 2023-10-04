@@ -30,13 +30,12 @@ Note that if y-values are negative, this returns the area
 above the function line.
 }
 \examples{
-library(raster)
-
 # import raster image
 data(normforest)
+normforest <- terra::unwrap(normforest)
 
 # basic values
-z <- getValues(normforest)
+z <- terra::values(normforest)
 
 # calculate cumulative probability density function of surface 'height' (= ndvi)
 mod <- ecdf((1 - z))

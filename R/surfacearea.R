@@ -15,12 +15,14 @@
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # calculate flattened surface area
 #' flatsa(normforest)
+#' @importFrom terra rast res crds setValues crs
 #' @export
 flatsa <- function(x) {
-  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
   # In case the value area of the raster is an odd shape,
   # calculate the surface area of the flattened raster in the same way
@@ -30,10 +32,9 @@ flatsa <- function(x) {
   M <- dim(x)[2] # cols
 
   # convert matrix to raster if necessary (equal area)
-  if (inherits(x, "matrix") == TRUE) {
-    x <- raster(x)
-    extent(x) <- c(0, ncol(x), 0, nrow(x))
-    crs(x) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+  if (class(x)[1] == 'matrix') {
+    x <- rast(x)
+    terra::crs(x) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
   }
 
   # coordinates and resolution (change in x, y)
@@ -41,7 +42,7 @@ flatsa <- function(x) {
   deltay <- res(x)[2]
 
   # create flat raster
-  z <- getValues(x)
+  z <- x[]
   z[!is.na(z)] <- 0
   fakerast <- x
   fakerast <- setValues(fakerast, z)
@@ -103,22 +104,23 @@ flatsa <- function(x) {
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # calculate surface area
 #' surface_area(normforest)
+#' @importFrom terra rast crop res crs
 #' @export
 surface_area <- function(x) {
-  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
   # get dimensions
   N <- dim(x)[1] # rows
   M <- dim(x)[2] # cols
 
   # convert matrix to raster if necessary (equal area)
-  if (inherits(x, "matrix") == TRUE) {
-    x <- raster(x)
-    extent(x) <- c(0, ncol(x), 0, nrow(x))
-    crs(x) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+  if (class(x)[1] == 'matrix') {
+    x <- rast(x)
+    terra::crs(x) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
   }
 
   # coordinates and resolution (change in x, y)
@@ -178,12 +180,14 @@ surface_area <- function(x) {
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # calculate the surface area ratio
 #' Sdr <- sdr(normforest)
+#' @importFrom terra rast
 #' @export
 sdr <- function(x) {
-  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
   # get area of flat plane
   flat_area <- flatsa(x)

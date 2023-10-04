@@ -13,12 +13,14 @@
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # calculate root mean square slope
 #' Sdq <- sdq(normforest)
+#' @importFrom terra rast
 #' @export
 sdq <- function(x) {
-  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
   deltax <- 1
   deltay <- 1
@@ -51,12 +53,14 @@ sdq <- function(x) {
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # calculate area root mean square slope
 #' Sdq6 <- sdq6(normforest)
+#' @importFrom terra rast
 #' @export
 sdq6 <- function(x) {
-  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
   deltax <- 1 # per unit, not per degree, etc.
   deltay <- 1

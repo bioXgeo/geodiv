@@ -86,19 +86,18 @@ Metrics available from geodiv package:
 The total window size for square windows will be (size * 2) + 1.
 }
 \examples{
-library(raster)
-
 # import raster image
 data(normforest)
+normforest <- terra::unwrap(normforest)
 
 # crop raster to smaller area
-x <- crop(normforest, extent(normforest, 1, 100, 1, 100))
+x <- terra::crop(normforest, terra::ext(normforest[1:100, 1:100, drop = FALSE]))
 
 # get a surface of root mean square roughness
 sa_img <- texture_image(x = x, window = 'square',
 size = 5, metric = 'sa',
-parallel = TRUE, ncores = 2, nclumps = 20)
+parallel = TRUE, ncores = 1, nclumps = 20)
 
 # plot the result
-plot(sa_img)
+terra::plot(sa_img)
 }

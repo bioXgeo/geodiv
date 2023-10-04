@@ -27,6 +27,7 @@ from point x - h to x + h.
 \examples{
 # import raster image
 data(normforest)
+normforest <- terra::unwrap(normforest)
 
 # find the slopes along the bearing area curve
 ba <- bearing_area(normforest)

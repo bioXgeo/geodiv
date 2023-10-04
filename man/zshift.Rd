@@ -44,6 +44,7 @@ or positive, x or y, offset.
 \examples{
 # import raster image
 data(normforest)
+normforest <- terra::unwrap(normforest)
 
 # remove right and bottom borders 2 deep
 noborder <- zshift(normforest, xdist = 2, ydist = 2)

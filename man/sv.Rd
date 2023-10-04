@@ -20,6 +20,7 @@ representing a surface.
 \examples{
 # import raster image
 data(normforest)
+normforest <- terra::unwrap(normforest)
 
 # find the maximum valley depth
 Sv <- sv(normforest)

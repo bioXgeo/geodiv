@@ -9,39 +9,46 @@
 #'   of the AACF. Both raster and matrix values are normalized
 #'   so that the maximum is equal to 1.
 #' @examples
-#' library(raster)
-#'
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # calculate aacf img and matrix
 #' aacf_out <- aacf(normforest)
 #'
 #' # plot resulting aacf image
-#' plot(aacf_out)
+#' terra::plot(aacf_out)
+#' @importFrom terra rast crds crop setValues crs
+#' @importFrom e1071 hanning.window
+#' @importFrom pracma meshgrid
+#' @importFrom stats fft
 #' @export
 aacf <- function(x) {
-  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
   # get raster dimensions
   M <- ncol(x)
   N <- nrow(x)
 
-  data_type <- if(inherits(x, "matrix") == TRUE) {'matrix'} else {'RasterLayer'}
+  data_type <- if(class(x)[1] == 'matrix') {'matrix'} else if (class(x)[1] == 'RasterLayer') {'RasterLayer'} else {'SpatRaster'}
 
   # convert matrix to raster if necessary (equal area)
-  if (inherits(x, "matrix") == TRUE) {
-    x <- raster(x)
-    extent(x) <- c(0, ncol(x), 0, nrow(x))
-    crs(x) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+  if (data_type == 'matrix') {
+    x <- rast(x)
+    terra::crs(x) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+  }
+
+  # convert RasterLayer to SpatRaster
+  if (data_type == 'RasterLayer') {
+    x <- rast(x)
   }
 
   # get matrix of values
-  zmat <- matrix(getValues(x), ncol = M, nrow = N, byrow = TRUE)
+  zmat <- matrix(x[], ncol = M, nrow = N, byrow = TRUE)
 
   # if irregular non-na area, cut to biggest square possible
   if (sum(is.na(zmat)) != 0) {
-    origin <- c(mean(sp::coordinates(x)[, 1]), mean(sp::coordinates(x)[, 2]))
+    origin <- c(mean(crds(x, na.rm = FALSE)[, 1]), mean(crds(x, na.rm = FALSE)[, 2]))
     potentials <- data.frame(xmin = rep(origin[1], floor(N / 2)),
                              xmax = origin[1],
                              ymin = origin[2],
@@ -53,8 +60,8 @@ aacf <- function(x) {
 
     potentials$na <- sapply(seq(1, nrow(potentials)), FUN = function(i) {
       xmin <-
-      newrast <- crop(x, extent(potentials$xmin[i], potentials$xmax[i], potentials$ymin[i], potentials$ymax[i]))
-      return(sum(is.na(getValues(newrast))))
+      newrast <- terra::crop(x, ext(potentials$xmin[i], potentials$xmax[i], potentials$ymin[i], potentials$ymax[i]))
+      return(sum(is.na(newrast[])))
     })
 
     max_dim <- potentials[max(which(potentials$na <= 0)),]
@@ -62,14 +69,14 @@ aacf <- function(x) {
     if (sum(is.na(max_dim$xmin)) != 0) {
       zmat <- zmat
     } else if (sum(is.na(max_dim$xmin)) == 0) {
-      x <- crop(x, extent(max_dim$xmin, max_dim$xmax, max_dim$ymin, max_dim$ymax))
+      x <- terra::crop(x, ext(max_dim$xmin, max_dim$xmax, max_dim$ymin, max_dim$ymax))
 
       # get raster dimensions
       M <- ncol(x)
       N <- nrow(x)
 
       # get matrix of values
-      zmat <- matrix(getValues(x), ncol = M, nrow = N, byrow = TRUE)
+      zmat <- matrix(x[], ncol = M, nrow = N, byrow = TRUE)
     }
   }
 
@@ -101,9 +108,9 @@ aacf <- function(x) {
     # normalize to max 1
     af_norm <- af_shift / max(as.numeric(af_shift), na.rm = TRUE)
 
-    if (data_type == 'RasterLayer') {
+    if (data_type == 'RasterLayer' | data_type == 'SpatRaster') {
       # set values of new raster
-      af_img <- setValues(x, af_norm)
+      af_img <- terra::setValues(x, af_norm)
       return(af_img)
     } else {
       return(af_norm)
@@ -129,37 +136,41 @@ aacf <- function(x) {
 #'   than one threshold value is specified, the order of this list will be
 #'   \code{[minval(t1), minval(t2), maxval(t1), maxval(t2)]}.
 #' @examples
-#' library(raster)
-#'
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # calculate Scl20, the minimum distance to an autocorrelation value of 0.2 in the AACF
 #' Scl20 <- scl(normforest)[1]
+#' @importFrom dplyr %>% summarize group_by
+#' @importFrom terra crop rast xmin xmax ymin ymax unwrap crs values
+#' @importFrom sf st_geometry_type
+#' @importFrom rlang .data
 #' @export
 scl <- function(x, threshold = c(0.20, 1 / exp(1)), create_plot = FALSE) {
-  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
-  if(inherits(create_plot, "logical") == FALSE) {stop('create_plot argument must be TRUE/FALSE.')}
-  if(inherits(threshold, "numeric") == FALSE) {stop('threshold must be numeric.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
+  stopifnot('create_plot argument must be TRUE/FALSE.' = inherits(create_plot, 'logical'))
+  stopifnot('threshold must be numeric.' = inherits(threshold, 'numeric'))
+
   if(sum(threshold < 0) >= 1) {stop('threshold values cannot be less than 0.')}
 
   # get aacf img
   aacfimg <- aacf(x)
 
-  if (!(class(aacfimg)[1] %in% c('matrix', 'RasterLayer')) | sum(is.na(aacfimg)[]) == length(aacfimg)) {
+  if (!(class(aacfimg)[1] %in% c('matrix', 'RasterLayer', 'SpatRaster')) | sum(is.na(aacfimg)[]) == length(aacfimg)) {
     return(c(NA, NA, NA, NA))
-  } else if (class(aacfimg)[1] %in% c('matrix', 'RasterLayer')) {
+  } else if (class(aacfimg)[1] %in% c('matrix', 'RasterLayer', 'SpatRaster')) {
 
-    data_type <- if(inherits(x, "matrix") == TRUE) {'matrix'} else {'RasterLayer'}
+    data_type <- if(class(x)[1] == 'matrix') {'matrix'} else if (class(x)[1] == 'RasterLayer') {'RasterLayer'} else {'SpatRaster'}
 
-    if (class(aacfimg)[1] == 'RasterLayer') {
+    if (data_type %in% c('RasterLayer', 'SpatRaster')) {
       # take amplitude image, cut in half (y direction)
       half_dist <- (ymax(aacfimg) - ymin(aacfimg)) / 2
       ymin <- ymax(aacfimg) - half_dist
-      aacfimg <- crop(aacfimg, c(xmin(aacfimg), xmax(aacfimg), ymin, ymax(aacfimg)))
+      aacfimg <- terra::crop(aacfimg, c(xmin(aacfimg), xmax(aacfimg), ymin, ymax(aacfimg)))
 
       # get origin of image (actually bottom center)
-      origin <- c(mean(sp::coordinates(aacfimg)[, 1]), ymin(aacfimg))
+      origin <- c(mean(crds(aacfimg, na.rm = FALSE)[, 1]), ymin(aacfimg))
 
     } else {
       # take amplitude image, cut in half (y direction)
@@ -171,39 +182,41 @@ scl <- function(x, threshold = c(0.20, 1 / exp(1)), create_plot = FALSE) {
       origin <- c(nrow(aacfimg), round(ncol(aacfimg) / 2))
     }
 
+    # convert matrix to raster if necessary
+    if (data_type == 'matrix') {
+      aacf_rast <- rast(aacfimg)
+      terra::crs(aacf_rast) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+      aacfimg <- aacf_rast
+    }
+
     ### line calculations are taken from the plotrix function draw.radial.line
     # calculate rays extending from origin
     if (create_plot == TRUE) {
-      if (data_type == 'matrix') {
-        print("cannot draw lines for object of class 'matrix.'")
-      }
       M <- 180
       j <- seq(0, (M - 1))
       alpha <- (pi * j) / M # angles
       px <- c(0, half_dist) # line length
       linex <- unlist(lapply(seq(1, length(alpha)), function(x) origin[1] + px * cos(alpha[x])))
       liney <- unlist(lapply(seq(1, length(alpha)), function(x) origin[2] + px * sin(alpha[x])))
-      linelist <- lapply(seq(1, length(linex), 2),
-                        FUN = function(i) sp::Lines(sp::Line(cbind(linex[i:(i + 1)], liney[i:(i + 1)])),
-                                                ID = paste('l', i, sep = '')))
-      lines <- sp::SpatialLines(linelist, proj4string = sp::CRS(sp::proj4string(aacfimg)))
+      linelist <- lapply(seq(1, length(linex), 2), FUN = function(i) {
+        data.frame(x = linex[i:(i + 1)], y = liney[i:(i + 1)],
+                                                           id = paste('l', i, sep = ''))})
+      linelist <- bind_rows(linelist)
+      lines <- linelist %>%
+        st_as_sf(coords = c("x", "y"), na.fail = FALSE, crs = terra::crs(aacfimg)) %>%
+        group_by(.data$id) %>%
+        summarize()
+      multi_inds <- which(st_geometry_type(lines$geometry) == 'MULTIPOINT')
+      lines <- st_cast(lines[multi_inds, ], "LINESTRING")
 
       # plot and calculate amplitude sums along rays
       plot(aacfimg)
       lines(lines)
     }
 
-    # convert matrix to raster if necessary
-    if (data_type == 'matrix') {
-      aacf_rast <- raster(aacfimg)
-      extent(aacf_rast) <- c(0, ncol(aacfimg), 0, nrow(aacfimg))
-      crs(aacf_rast) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
-      aacfimg <- aacf_rast
-    }
-
     # calculate distances from center to all other points
     dist_rast <- aacfimg
-    values(dist_rast) <- NA
+    terra::values(dist_rast) <- NA
     center <- ceiling(dim(x) / 2)
     nce <- ifelse(ncol(aacfimg) / 2 == round(ncol(aacfimg) / 2), 1, 0)
     dist_rast[nrow(aacfimg), center[2] + nce] <- 1
@@ -246,7 +259,7 @@ scl <- function(x, threshold = c(0.20, 1 / exp(1)), create_plot = FALSE) {
 #'   raster::distance documentation for more details).
 .mindist <- function(threshold, aacfimg, distimg) {
   # get indices where value <= threshold value
-  decay_ind <- which(getValues(aacfimg) <= threshold)
+  decay_ind <- which(aacfimg[] <= threshold)
 
   # find distances associated with aacf values less than threshold
   decay_dist <- distimg[decay_ind]
@@ -279,7 +292,7 @@ scl <- function(x, threshold = c(0.20, 1 / exp(1)), create_plot = FALSE) {
 #'   raster::distance documentation for more details).
 .maxdist <- function(threshold, aacfimg, distimg) {
   # get indices where value <= threshold value
-  decay_ind <- which(getValues(aacfimg) <= threshold)
+  decay_ind <- which(aacfimg[] <= threshold)
 
   # find distances associated with aacf values less than threshold
   decay_dist <- distimg[decay_ind]
@@ -305,10 +318,9 @@ scl <- function(x, threshold = c(0.20, 1 / exp(1)), create_plot = FALSE) {
 #'   containing the texture aspect ratio(s) for the input autocorrelation
 #'   value(s).
 #' @examples
-#' library(raster)
-#'
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # estimate the texture aspect ratio for autocorrelation
 #' # thresholds of 0.20 and 0.37 (1/e)
@@ -317,10 +329,12 @@ scl <- function(x, threshold = c(0.20, 1 / exp(1)), create_plot = FALSE) {
 #' # calculate Str20, the texture aspect ratio for
 #' # autocorrelation value of 0.2 in the AACF
 #' Str20 <- strvals[1]
+#' @importFrom terra rast
 #' @export
 stxr <- function(x, threshold = c(0.20, 1 / exp(1))) {
-  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
-  if(inherits(threshold, "numeric") == FALSE) {stop('threshold must be numeric.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
+  stopifnot('threshold must be numeric.' = inherits(threshold, 'numeric'))
+
   if(sum(threshold < 0) >= 1) {stop('threshold values cannot be less than 0.')}
 
   sclvals <- scl(x, threshold = threshold, create_plot = FALSE)

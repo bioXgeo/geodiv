@@ -21,6 +21,7 @@ surface using the two-point method.
 \examples{
 # import raster image
 data(normforest)
+normforest <- terra::unwrap(normforest)
 
 # calculate root mean square slope
 Sdq <- sdq(normforest)

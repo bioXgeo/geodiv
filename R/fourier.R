@@ -13,10 +13,9 @@
 #' @return A vector containing numeric values for the angle of
 #'   dominating texture and the texture direction index.
 #' @examples
-#' library(raster)
-#'
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # calculate Std and Stdi
 #' stdvals <- std(normforest)
@@ -24,31 +23,38 @@
 #' # extract each value
 #' Std <- stdvals[1]
 #' Stdi <- stdvals[2]
+#' @importFrom terra crds rast crop ext xmin xmax ymin ymax res setValues crs distance values cellFromRowCol
+#' @importFrom dplyr %>% filter group_by summarize near bind_rows
+#' @importFrom sf st_as_sf st_cast st_geometry_type
+#' @importFrom rlang .data
 #' @export
 std <- function(x, create_plot = FALSE, option = c(1, 2)) {
-  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
-  if(inherits(create_plot, "logical") == FALSE) {stop('create_plot must be logical.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
+  stopifnot('create_plot must be logical.' = inherits(create_plot, 'logical'))
 
   # get raster dimensions
   M <- ncol(x)
   N <- nrow(x)
 
-  data_type <- if(inherits(x, "matrix") == TRUE) {'matrix'} else {'RasterLayer'}
+  data_type <- if(class(x)[1] == 'matrix') {'matrix'} else if (class(x)[1] == 'RasterLayer') {'RasterLayer'} else {'SpatRaster'}
 
   # convert matrix to raster if necessary (equal area)
   if (data_type == 'matrix') {
-    x <- raster(x)
-    extent(x) <- c(0, M, 0, N)
-    crs(x) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+    x <- rast(x)
+    terra::crs(x) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+  }
+
+  if (data_type == 'RasterLayer') {
+    x <- rast(x)
   }
 
   # get matrix of values
-  zmat <- matrix(getValues(x), ncol = M, nrow = N, byrow = TRUE)
+  zmat <- matrix(x[], ncol = M, nrow = N, byrow = TRUE)
 
   # if irregular non-na area, cut to biggest square possible
   if (sum(is.na(zmat)) != 0) {
-    coords <- sp::coordinates(x)
-    origin <- c(mean(coords[, 1]), mean(coords[, 2]))
+    coords <- crds(x, na.rm = FALSE)
+    origin <- c(mean(coords[, 1], na.rm = TRUE), mean(coords[, 2], na.rm = TRUE))
 
     potentials <- data.frame(xmin = rep(origin[1], floor(N / 2)),
                              xmax = origin[1],
@@ -65,8 +71,8 @@ std <- function(x, create_plot = FALSE, option = c(1, 2)) {
     potentials$na <- sapply(seq(1, nrow(potentials)), FUN = function(i) {
 
       xmin <-
-      newrast <- crop(x, extent(potentials$xmin[i], potentials$xmax[i], potentials$ymin[i], potentials$ymax[i]))
-      return(sum(is.na(getValues(newrast))))
+      newrast <- terra::crop(x, ext(potentials$xmin[i], potentials$xmax[i], potentials$ymin[i], potentials$ymax[i]))
+      return(sum(is.na(newrast[])))
 
     })
 
@@ -78,14 +84,14 @@ std <- function(x, create_plot = FALSE, option = c(1, 2)) {
 
     } else {#if (sum(is.na(max_dim$xmin)) == 0) {
 
-      x <- crop(x, extent(max_dim$xmin, max_dim$xmax, max_dim$ymin, max_dim$ymax))
+      x <- terra::crop(x, ext(max_dim$xmin, max_dim$xmax, max_dim$ymin, max_dim$ymax))
 
       # get raster dimensions
       M <- ncol(x)
       N <- nrow(x)
 
       # get matrix of values
-      zmat <- matrix(getValues(x), ncol = M, nrow = N, byrow = TRUE)
+      zmat <- matrix(x[], ncol = M, nrow = N, byrow = TRUE)
 
     }
   }
@@ -105,7 +111,7 @@ std <- function(x, create_plot = FALSE, option = c(1, 2)) {
     amplitude <- sqrt((Re(ft_shift) ^ 2) + (Im(ft_shift) ^ 2))
 
     # create amplitude image
-    amp_img <- setValues(x, amplitude)
+    amp_img <- terra::setValues(x, amplitude)
 
     # take amplitude image, cut in half (y direction)
     ymin_amp <- ymin(amp_img)
@@ -114,12 +120,12 @@ std <- function(x, create_plot = FALSE, option = c(1, 2)) {
     xmax_amp <- xmax(amp_img)
     half_dist <- (ymax_amp - ymin_amp) / 2
     ymin <- ymax_amp - half_dist
-    amp_img <- crop(amp_img, c(xmin_amp, xmax_amp, ymin, ymax_amp))
+    amp_img <- terra::crop(amp_img, c(xmin_amp, xmax_amp, ymin, ymax_amp))
 
     # get origin of image (actually bottom center)
-    coords <- sp::coordinates(amp_img)
+    coords <- crds(amp_img, na.rm = FALSE)
 
-    origin <- c(mean(coords[, 1]), ymin)
+    origin <- c(mean(coords[, 1], na.rm = TRUE), ymin)
 
     if(create_plot == TRUE) {
 
@@ -138,14 +144,20 @@ std <- function(x, create_plot = FALSE, option = c(1, 2)) {
       a_len <- length(alpha)
       linex <- unlist(lapply(seq(1, a_len), function(x) origin[1] + px * cos(alpha[x])))
       liney <- unlist(lapply(seq(1, a_len), function(x) origin[2] + px * sin(alpha[x])))
-      linelist <- lapply(seq(1, length(linex), 2),
-                        FUN = function(i) sp::Lines(sp::Line(cbind(linex[i:(i + 1)], liney[i:(i + 1)])),
-                                                    ID = paste('l', i, sep = '')))
-      lines <- sp::SpatialLines(linelist, proj4string = sp::CRS(sp::proj4string(amp_img)))
+      linelist <- lapply(seq(1, length(linex), 2), FUN = function(i) {
+        data.frame(x = linex[i:(i + 1)], y = liney[i:(i + 1)],
+                   id = paste('l', i, sep = ''))})
+      linelist <- bind_rows(linelist)
+      lines <- linelist %>%
+        st_as_sf(coords = c("x", "y"), na.fail = FALSE, crs = terra::crs(amp_img)) %>%
+        group_by(.data$id) %>%
+        summarize()
+      multi_inds <- which(st_geometry_type(lines$geometry) == 'MULTIPOINT')
+      lines <- st_cast(lines[multi_inds, ], "LINESTRING")
 
       # plot and calculate amplitude sums along rays
-      plot(amp_img)
-      lines(lines)
+      terra::plot(amp_img)
+      terra::lines(lines)
 
     }
 
@@ -156,26 +168,26 @@ std <- function(x, create_plot = FALSE, option = c(1, 2)) {
     ncol_amp2 <- ncol(amp_img) / 2
     nce <- ifelse(ncol_amp2 == round(ncol_amp2), 1, 0)
     dist_rast <- amp_img
-    values(dist_rast) <- NA
+    terra::values(dist_rast) <- NA
     dist_rast[nrow(amp_img), center[2] + nce] <- 1
     dist_rast <- distance(dist_rast)
     min_dist <- min(max(dist_rast[nrow(dist_rast),]), max(dist_rast[center[2] + nce]))
 
     # calculate angles from center to all points
     angle_rast <- amp_img
-    values(angle_rast) <- NA
+    terra::values(angle_rast) <- NA
     nce <- ifelse(ncol_amp2 == round(ncol_amp2), 1, 0)
     center_ind <- cellFromRowCol(angle_rast, nrow(amp_img), center[2])
     angles <- atan2(coords[, 2] - coords[center_ind, 2], coords[, 1] - coords[center_ind, 1])
     angles <- pracma::rad2deg(angles)
-    angle_rast <- setValues(angle_rast, angles)
+    angle_rast <- terra::setValues(angle_rast, angles)
 
     # angles at which you want to sum values
     alpha <- seq(0, 180, 0.5)
 
     # sum values along lines
-    vals <- getValues(angle_rast)
-    vals_dist <- getValues(dist_rast)
+    vals <- angle_rast[]
+    vals_dist <- dist_rast[]
     # cut off at shortest distance to edge (so all rays are the same length)
     good_cells <- which(vals_dist <= min_dist)
     Aalpha <- sapply(alpha, FUN = function(i) {
@@ -209,10 +221,9 @@ std <- function(x, create_plot = FALSE, option = c(1, 2)) {
 #'   radial wavelength, radial wavelength index, and mean half
 #'   wavelength.
 #' @examples
-#' library(raster)
-#'
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # calculate metrics
 #' srwvals <- srw(normforest)
@@ -221,32 +232,35 @@ std <- function(x, create_plot = FALSE, option = c(1, 2)) {
 #' Srw <- srwvals[1]
 #' Srwi <- srwvals[2]
 #' Shw <- srwvals[3]
+#' @importFrom dplyr %>% filter group_by summarize near bind_rows
+#' @importFrom sf st_as_sf st_cast st_geometry_type
+#' @importFrom terra crds rast crop ext xmin xmax ymin ymax res setValues values crs distance
+#' @importFrom rlang .data
 #' @export
 srw <- function(x, create_plot = FALSE, option = c(1, 2, 3)) {
-  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
-  if(inherits(create_plot, "logical") == FALSE) {stop('create_plot must be logical.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
+  stopifnot('create_plot must be logical.' = inherits(create_plot, 'logical'))
 
   # get raster dimensions
   M <- ncol(x)
   N <- nrow(x)
 
-  data_type <- if(inherits(x, "matrix") == TRUE) {'matrix'} else {'RasterLayer'}
+  data_type <- if(class(x)[1] == 'matrix') {'matrix'} else if (class(x)[1] == 'RasterLayer') {'RasterLayer'} else {'SpatRaster'}
 
   # convert matrix to raster if necessary (equal area)
   if (data_type == 'matrix') {
-    x <- raster(x)
-    extent(x) <- c(0, M, 0, N)
-    crs(x) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+    x <- rast(x)
+    terra::crs(x) <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
   }
 
   # get matrix of values
-  zmat <- matrix(getValues(x), ncol = M, nrow = N, byrow = TRUE)
+  zmat <- matrix(x[], ncol = M, nrow = N, byrow = TRUE)
 
   # if irregular non-na area, cut to biggest square possible
   if (sum(is.na(zmat)) != 0) {
 
-    coords <- sp::coordinates(x)
-    origin <- c(mean(coords[, 1]), mean(coords[, 2]))
+    coords <- crds(x, na.rm = FALSE)
+    origin <- c(mean(coords[, 1], na.rm = TRUE), mean(coords[, 2], na.rm = TRUE))
     potentials <- data.frame(xmin = rep(origin[1], floor(N / 2)),
                              xmax = origin[1],
                              ymin = origin[2],
@@ -261,8 +275,8 @@ srw <- function(x, create_plot = FALSE, option = c(1, 2, 3)) {
 
     potentials$na <- sapply(seq(1, nrow(potentials)), FUN = function(i) {
       xmin <-
-        newrast <- crop(x, extent(potentials$xmin[i], potentials$xmax[i], potentials$ymin[i], potentials$ymax[i]))
-      return(sum(is.na(getValues(newrast))))
+        newrast <- terra::crop(x, ext(potentials$xmin[i], potentials$xmax[i], potentials$ymin[i], potentials$ymax[i]))
+      return(sum(is.na(newrast[])))
     })
 
     max_dim <- potentials[max(which(potentials$na <= 0)),]
@@ -273,14 +287,14 @@ srw <- function(x, create_plot = FALSE, option = c(1, 2, 3)) {
 
     } else {#if (sum(is.na(max_dim$xmin)) == 0) {
 
-      x <- crop(x, extent(max_dim$xmin, max_dim$xmax, max_dim$ymin, max_dim$ymax))
+      x <- terra::crop(x, ext(max_dim$xmin, max_dim$xmax, max_dim$ymin, max_dim$ymax))
 
       # get raster dimensions
       M <- ncol(x)
       N <- nrow(x)
 
       # get matrix of values
-      zmat <- matrix(getValues(x), ncol = M, nrow = N, byrow = TRUE)
+      zmat <- matrix(x[], ncol = M, nrow = N, byrow = TRUE)
     }
   }
 
@@ -298,16 +312,16 @@ srw <- function(x, create_plot = FALSE, option = c(1, 2, 3)) {
     amplitude <- sqrt((Re(ft_shift) ^ 2) + (Im(ft_shift) ^ 2))
 
     # take amplitude image, cut in half (y direction)
-    amp_img <- setValues(x, amplitude)
+    amp_img <- terra::setValues(x, amplitude)
     ymax_amp <- ymax(amp_img)
     ymin_amp <- ymin(amp_img)
     half_dist <- (ymax_amp - ymin_amp) / 2
     ymin <- ymax(amp_img) - half_dist
-    amp_img <- crop(amp_img, c(xmin(amp_img), xmax(amp_img), ymin, ymax_amp))
+    amp_img <- terra::crop(amp_img, c(xmin(amp_img), xmax(amp_img), ymin, ymax_amp))
 
     # get origin of image (actually bottom center)
-    coords_amp <- sp::coordinates(amp_img)
-    origin <- c(mean(coords_amp[, 1]), ymin_amp)
+    coords_amp <- terra::crds(amp_img, na.rm = FALSE)
+    origin <- c(mean(coords_amp[, 1], na.rm = TRUE), ymin_amp)
 
     # figure out number of circles
     if ((0.5 * ncol(amp_img)) <= 100) {
@@ -333,19 +347,26 @@ srw <- function(x, create_plot = FALSE, option = c(1, 2, 3)) {
       liney <- unlist(lapply(seq(1, length(radius)), function(x) origin[2] + radius[x] * sin(angles)))
       # number points per line
       npts <- length(linex) / ncircles
-      linelist <- lapply(round(seq(1, length(linex) - npts, length.out = ncircles)),
-                        FUN = function(i) sp::Lines(list(sp::Line(cbind(linex[i:(i + (npts - 1))], liney[i:(i + (npts - 1))]))), ID = paste('p', i, sep = '')))
-      lines <- sp::SpatialLines(linelist, proj4string = sp::CRS(sp::proj4string(amp_img)))
+      linelist <- lapply(round(seq(1, length(linex) - npts, length.out = ncircles)), FUN = function(i) {
+        data.frame(x = linex[i:(i + (npts - 1))], y = liney[i:(i + (npts - 1))],
+                   id = paste('p', i, sep = ''))})
+      linelist <- bind_rows(linelist)
+      lines <- linelist %>%
+        st_as_sf(coords = c("x", "y"), na.fail = FALSE, crs = terra::crs(amp_img)) %>%
+        group_by(.data$id) %>%
+        summarize()
+      multi_inds <- which(st_geometry_type(lines$geometry) == 'MULTIPOINT')
+      lines <- st_cast(lines[multi_inds, ], "LINESTRING")
 
       # plot and get amplitude sums within each radius
-      plot(amp_img)
-      plot(lines, add = TRUE)
+      terra::plot(amp_img)
+      terra::plot(lines, add = TRUE)
 
     }
 
     # calculate distances from center to all other points
     dist_rast <- amp_img
-    values(dist_rast) <- NA
+    terra::values(dist_rast) <- NA
     center <- ceiling(dim(x) / 2)
     nce <- ifelse(ncol(amp_img) / 2 == round(ncol(amp_img) / 2), 1, 0)
     dist_rast[nrow(amp_img), center[2] + nce] <- 1
@@ -358,7 +379,7 @@ srw <- function(x, create_plot = FALSE, option = c(1, 2, 3)) {
     # get all points some distance away from center, then
     # sum all values at that distance and add to Br list
     tolerance <- (radius[3] - radius[2]) / 2
-    dist_vals <- getValues(dist_rast)
+    dist_vals <- dist_rast[]
     Br <- sapply(radius, FUN = function(i) {
       radius_inds <- which(dplyr::near(dist_vals, i, tol = tolerance))
       return(sum(amp_img[radius_inds], na.rm = TRUE))

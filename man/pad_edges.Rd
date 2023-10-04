@@ -21,10 +21,9 @@ A raster with edges padded \code{size} number of pixels on each edge.
 Extends edge values of a raster or matrix by a specified number of pixels.
 }
 \examples{
-library(raster)
-
 # import raster image
 data(normforest)
+normforest <- terra::unwrap(normforest)
 
 # crop raster to much smaller area
 x <- pad_edges(as.matrix(normforest), 3, val = NA)

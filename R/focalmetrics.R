@@ -48,20 +48,20 @@
 #' landscapemetrics: an open-source R tool to calculate landscape metrics. - Ecography 42:1648-1657(ver. 0).}
 #' }
 #' @examples
-#' library(raster)
-#'
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # crop raster to smaller area
-#' x <- crop(normforest, extent(normforest, 1, 100, 1, 100))
+#' x <- terra::crop(normforest, terra::ext(normforest[1:100, 1:100, drop = FALSE]))
 #'
 #' # get a surface of root mean square roughness
 #' sa_img <- focal_metrics(x = x, window = matrix(1, 5, 5),
 #'                         metrics = list('sa'), progress = TRUE)
 #'
 #' # plot the result
-#' plot(sa_img$sa)
+#' terra::plot(sa_img$sa)
+#' @importFrom terra rast crds ext focal
 #' @export
 focal_metrics <- function(x,
                           window,
@@ -77,14 +77,21 @@ focal_metrics <- function(x,
 
   if (inherits(x, "matrix") == TRUE) {
 
-    x <- raster(x)
+    x <- rast(x)
+
+  }
+
+  if (class(x)[1] == 'RasterLayer') {
+
+    x <- rast(x)
 
   }
 
   number_metrics <- length(metrics)
 
   # get coordinates of cells
-  points <- landscapemetrics::raster_to_points(x)[, 2:4]
+  points <- cbind(crds(x, na.rm = FALSE), x[])
+  colnames(points)[3] <- 'z'
 
   # get dimensions of window
   n_row <- nrow(window)
@@ -97,19 +104,17 @@ focal_metrics <- function(x,
 
     # print progess using the non-internal name
     if (progress) {
-
       cat("\r> Progress metrics: ", current_metric, "/", number_metrics)
     }
 
-    raster::focal(x = x, w = window, fun = function(x) {
+    terra::focal(x = x, w = window, fun = function(x) {
 
       .calculate_met_focal(landscape = x,
-                          n_row = n_row,
-                          n_col = n_col,
-                          points = points,
-                          what = metrics[[current_metric]],
-                          ...)},
-      pad = TRUE, padValue = NA)
+                           n_row = n_row,
+                           n_col = n_col,
+                           points = points,
+                           what = metrics[[current_metric]],
+                           ...)})
   })},
   warning = function(cond) {
 
@@ -184,6 +189,7 @@ focal_metrics <- function(x,
 #' \item{Hesselbarth, M.H.K., Sciaini, M., With, K.A., Wiegand, K., Nowosad, J. 2019.
 #' landscapemetrics: an open-source R tool to calculate landscape metrics. - Ecography 42:1648-1657(ver. 0).}
 #' }
+#' @importFrom terra rast crds ext focal
 #' @export
 .calculate_met_focal <- function(landscape,
                                 n_row,

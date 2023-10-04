@@ -23,24 +23,27 @@
 #' @param order Numeric. Indicates the polynomial order to be fit.
 #' @return A matrix with values predicted from the polynomial fit.
 #' @examples
-#' library(raster)
 #'
 #' # import raster image
 #' data(orforest)
+#' orforest <- terra::unwrap(orforest)
 #'
 #' # find the 2nd order least squares polynomial surface
 #' polyfit <- fitplane(orforest, order = 2)
 #'
 #' # create raster of polyfit
-#' x <- setValues(orforest, polyfit)
+#' x <- terra::setValues(orforest, polyfit)
 #'
 #' # plot the fit
-#' plot(x)
+#' terra::plot(x)
+#' @importFrom terra rast crop crds
+#' @importFrom spatial surf.ls
 #' @export
 fitplane <- function(x, order) {
-  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
   if(length(order) > 1) {stop('too many values supplied to order.')}
-  if(inherits(order, "integer") == FALSE & inherits(order, "numeric") == FALSE) {stop('order must be numeric or integer.')}
+  stopifnot('order must be numeric or integer.' = inherits(order, c('numeric', 'integer')))
+
   if(order %% 1 > 0) {
     warning('order will be rounded to the nearest integer.')
     order <- as.integer(floor(order))}
@@ -48,11 +51,15 @@ fitplane <- function(x, order) {
 
   order <- as.integer(order)
 
-  if (inherits(x, "RasterLayer") == TRUE) {
+  if (class(x)[1] %in% c('RasterLayer')) {
+    x <- rast(x)
+  }
+
+  if (class(x)[1] %in% c('RasterLayer', 'SpatRaster')) {
     # extract coordinates and values
-    xcoord <- sp::coordinates(x)[, 1]
-    ycoord <- sp::coordinates(x)[, 2]
-    z <- getValues(x)
+    xcoord <- crds(x, na.rm = FALSE)[, 1]
+    ycoord <- crds(x, na.rm = FALSE)[, 2]
+    z <- as.numeric(x[])
   } else {
     xcoord <- rep(seq(1, ncol(x)), nrow(x))
     ycoord <- rep(seq(1, nrow(x)), each = ncol(x))
@@ -60,7 +67,7 @@ fitplane <- function(x, order) {
   }
 
   # fit least squares polynomial with order = order
-  surfmod <- spatial::surf.ls(np = order, xcoord[!is.na(z)], ycoord[!is.na(z)], z[!is.na(z)])
+  surfmod <- spatial::surf.ls(np = order, x = xcoord[!is.na(z) & !is.na(xcoord)], y = ycoord[!is.na(z) & !is.na(xcoord)], z = z[!is.na(z) & !is.na(xcoord)])
 
   # predict polynomial model over raster
   surfvals <- matrix(predict(surfmod, xcoord, ycoord), nrow = nrow(x), ncol = ncol(x), byrow = TRUE)
@@ -79,25 +86,26 @@ fitplane <- function(x, order) {
 #' @return A raster or matrix of the same size as the input with values
 #'   predicted from the best polynomial fit.
 #' @examples
-#' library(raster)
 #'
 #' # import raster image
 #' data(orforest)
+#' orforest <- terra::unwrap(orforest)
 #'
 #' # find the least squares polynomial surface
 #' poly <- bestfitplane(orforest)
 #'
 #' # plot the fit
-#' plot(poly)
+#' terra::plot(poly)
+#' @importFrom terra rast setValues crop
 #' @export
 bestfitplane <- function(x) {
-  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
   # fit least squares plane for polynomials from orders 0-3
   mods <- lapply(seq(0, 3), FUN = function(i) fitplane(x, order = i))
 
   # convert raster to matrix
-  if (inherits(x, "RasterLayer") == TRUE) {
+  if (class(x)[1] %in% c('RasterLayer', 'SpatRaster')) {
     xmat <- matrix(x, nrow = nrow(x), ncol = ncol(x), byrow = TRUE)
   } else {
     xmat <- x
@@ -116,8 +124,8 @@ bestfitplane <- function(x) {
   }
 
   # fill in raster with best fit values
-  if (class(x)[1] == 'RasterLayer'){
-    bfx <- setValues(x, mods[[bestfit]])
+  if (class(x)[1] == 'RasterLayer' | class(x)[1] == 'SpatRaster'){
+    bfx <- terra::setValues(x, mods[[bestfit]])
   } else {
     bfx <- matrix(mods[[bestfit]], nrow = nrow(x), ncol = ncol(x), byrow = TRUE)
   }
@@ -138,19 +146,19 @@ bestfitplane <- function(x) {
 #'   equal to the difference between the original and bestfit
 #'   plane.
 #' @examples
-#' library(raster)
-#'
 #' # import raster image
 #' data(orforest)
+#' orforest <- terra::unwrap(orforest)
 #'
 #' # remove the least squares polynomial surface
 #' new_rast <- remove_plane(orforest)
 #'
 #' # plot
-#' plot(new_rast)
+#' terra::plot(new_rast)
+#' @importFrom terra rast
 #' @export
 remove_plane <- function(x) {
-  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
   bfx <- bestfitplane(x)
 

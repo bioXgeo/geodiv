@@ -11,16 +11,19 @@
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # find the surface roughness
 #' roughness <- sa(normforest)
+#' @importFrom terra rast
+#' @importFrom stats na.omit
 #' @export
 #' @importFrom stats na.omit
 sa <- function(x) {
-  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
-  if (inherits(x, "RasterLayer") == TRUE) {
-    z <- getValues(x)
+  if (class(x)[1] %in% c('RasterLayer', 'SpatRaster')) {
+    z <- x[]
   } else {
     z <- x
   }
@@ -47,15 +50,17 @@ sa <- function(x) {
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # find the surface roughness
 #' roughness <- sq(normforest)
+#' @importFrom terra rast
 #' @export
 sq <- function(x) {
-  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
-  if (inherits(x, "RasterLayer") == TRUE) {
-    z <- getValues(x)
+  if (class(x)[1] %in% c('RasterLayer', 'SpatRaster')) {
+    z <- x[]
   } else {
     z <- x
   }
@@ -81,16 +86,19 @@ sq <- function(x) {
 #' @return A numeric value representing skewness.
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # find the adjusted coefficient of skewness
 #' Ssk <- ssk(normforest, adj = TRUE)
+#' @importFrom terra rast
+#' @importFrom stats na.omit
 #' @export
 ssk <- function(x, adj = TRUE) {
-  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
-  if(inherits(adj, "logical") == FALSE) {stop('adj argument must be TRUE/FALSE.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
+  stopifnot('adj argument must be TRUE/FALSE.' = inherits(adj, 'logical'))
 
-  if (inherits(x, "RasterLayer") == TRUE) {
-    z <- getValues(x)
+  if (class(x)[1] %in% c('RasterLayer', 'SpatRaster')) {
+    z <- x[]
   } else {
     z <- x
   }
@@ -127,16 +135,19 @@ ssk <- function(x, adj = TRUE) {
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # find the excess kurtosis of the raster distribution
 #' Sku <- sku(normforest, excess = TRUE)
+#' @importFrom terra rast
+#' @importFrom stats na.omit
 #' @export
 sku <- function(x, excess = TRUE) {
-  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
-  if(inherits(excess, "logical") == FALSE) {stop('excess argument must be TRUE/FALSE.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
+  stopifnot('excess argument must be TRUE/FALSE.' = inherits(excess, 'logical'))
 
-  if (inherits(x, "RasterLayer") == TRUE) {
-    z <- getValues(x)
+  if (class(x)[1] %in% c('RasterLayer', 'SpatRaster')) {
+    z <- x[]
   } else {
     z <- x
   }
@@ -167,15 +178,17 @@ sku <- function(x, excess = TRUE) {
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # find the maximum valley depth
 #' Sv <- sv(normforest)
+#' @importFrom terra rast
 #' @export
 sv <- function(x) {
-  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
-  if (inherits(x, "RasterLayer") == TRUE) {
-    z <- getValues(x)
+  if (class(x)[1] %in% c('RasterLayer', 'SpatRaster')) {
+    z <- x[]
   } else {
     z <- x
   }
@@ -196,15 +209,17 @@ sv <- function(x) {
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # find the maximum peak height
 #' Sph <- sph(normforest)
+#' @importFrom terra rast
 #' @export
 sph <- function(x) {
-  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
-  if (inherits(x, "RasterLayer") == TRUE) {
-    z <- getValues(x)
+  if (class(x)[1] %in% c('RasterLayer', 'SpatRaster')) {
+    z <- x[]
   } else {
     z <- x
   }
@@ -225,15 +240,17 @@ sph <- function(x) {
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # find the maximum peak height
 #' Smean <- smean(normforest)
+#' @importFrom terra rast
 #' @export
 smean <- function(x) {
-  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
-  if (inherits(x, "RasterLayer") == TRUE) {
-    z <- getValues(x)
+  if (class(x)[1] %in% c('RasterLayer', 'SpatRaster')) {
+    z <- x[]
   } else {
     z <- x
   }

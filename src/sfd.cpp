@@ -41,9 +41,10 @@ using namespace Rcpp;
 //'
 //' # import raster image
 //' data(normforest)
+//' normforest <- terra::unwrap(normforest)
 //'
 //' # convert to matrix
-//' mat <- raster::as.matrix(normforest)
+//' mat <- matrix(normforest[], ncol = ncol(normforest), nrow = nrow(normforest))
 //'
 //' # calculate the fractal dimension
 //' Sfd <- sfd_(mat)
@@ -55,7 +56,19 @@ double sfd_(NumericMatrix mat){
   int begin_col = 1;
   int rowmax =  mat.nrow();
   int colmax = mat.ncol();
-  double area[25], resolution[25];
+  int msize;
+  if (rowmax > colmax) {
+    // rowmax is larger than colmax
+    msize = rowmax;
+  } else if (colmax > rowmax) {
+    // colmax is larger than rowmax
+    msize = colmax;
+  } else {
+    // rowmax and colmax are equal
+    msize = rowmax;
+  }
+  double* area = new double[msize];
+  double* resolution = new double[msize];
   double crossr;
   /* normalize matrix values */
   NumericMatrix newmat(rowmax, colmax);
@@ -176,5 +189,7 @@ double sfd_(NumericMatrix mat){
   crossr = cross / sqrt(sumres * sumarea);
   beta = crossr * sqrt(sumarea) / sqrt(sumres);
   fd = 2.0 - beta;
+  delete[] area;
+  delete[] resolution;
   return fd;
 }

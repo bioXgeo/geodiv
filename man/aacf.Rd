@@ -20,14 +20,13 @@ inverse of the Fourier power spectrum. \code{aacf(x)} returns
 the AACF in both matrix and raster format.
 }
 \examples{
-library(raster)
-
 # import raster image
 data(normforest)
+normforest <- terra::unwrap(normforest)
 
 # calculate aacf img and matrix
 aacf_out <- aacf(normforest)
 
 # plot resulting aacf image
-plot(aacf_out)
+terra::plot(aacf_out)
 }

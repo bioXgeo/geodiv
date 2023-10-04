@@ -16,15 +16,19 @@
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # find the slopes along the bearing area curve
 #' ba <- bearing_area(normforest)
 #' x <- seq(0, 1, length.out = 100000)
 #' slopes <- slopecalc(x = x, h = 0.01, f = ba)
+#' @importFrom terra rast
+#' @importFrom stats quantile
 #' @export
 slopecalc <- function(x, h, f) {
-  if(inherits(x, "numeric") == FALSE) {stop('x must be numeric.')}
-  if(inherits(h, "numeric") == FALSE) {stop('h must be numeric.')}
+  stopifnot('x must be numeric.' = inherits(x, 'numeric'))
+  stopifnot('h must be numeric.' = inherits(h, 'numeric'))
+
   if(sum(class(f) %in% c('ecdf', 'stepfun', 'function')) != 3) {stop('f was not produced with bearing_area function.')}
   if(length(h) > 1) {stop('too many values for h.')}
   if(h >= 1 | h <= 0) {stop('h must be less than 1 and greater than 0.')}
@@ -79,6 +83,7 @@ slopecalc <- function(x, h, f) {
 #' @examples
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # find the average slope of segments of the bearing area
 #' # curve.
@@ -86,10 +91,12 @@ slopecalc <- function(x, h, f) {
 #' x <- seq(0, 1, length.out = 10000)
 #' slopes <- slopecalc(x = x, h = 0.01, f = ba)
 #' slopes_forty <- slopemeans(slopes = slopes, l = 0.4)
+#' @importFrom terra rast
 #' @export
 slopemeans <- function(slopes, l = 0.4) {
-  if(inherits(slopes, "data.frame") == FALSE) {stop('slopes must be a dataframe.')}
-  if(inherits(l, "numeric") == FALSE) {stop('l must be numeric.')}
+  stopifnot('slopes must be a dataframe.' = inherits(slopes, 'data.frame'))
+  stopifnot('l must be numeric.' = inherits(l, 'numeric'))
+
   if(length(l) > 1) {stop('too many values for l.')}
   if(l >= 1 | l <= 0) {stop('l must be less than 1 and greater than 0.')}
   if(sum(names(slopes) %in% c('slope', 'x')) != 2) {stop('incorrect column names for slopes dataframe -- need slope and x.')}

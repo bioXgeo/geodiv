@@ -60,20 +60,19 @@ Metrics available from geodiv package:
 }
 }
 \examples{
-library(raster)
-
 # import raster image
 data(normforest)
+normforest <- terra::unwrap(normforest)
 
 # crop raster to smaller area
-x <- crop(normforest, extent(normforest, 1, 100, 1, 100))
+x <- terra::crop(normforest, terra::ext(normforest[1:100, 1:100, drop = FALSE]))
 
 # get a surface of root mean square roughness
 sa_img <- focal_metrics(x = x, window = matrix(1, 5, 5),
                         metrics = list('sa'), progress = TRUE)
 
 # plot the result
-plot(sa_img$sa)
+terra::plot(sa_img$sa)
 }
 \references{
 \enumerate{

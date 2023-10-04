@@ -20,14 +20,14 @@ function tests least squares polynomial fits with orders of
 fit is subtracted from the original image.
 }
 \examples{
-library(raster)
 
 # import raster image
 data(orforest)
+orforest <- terra::unwrap(orforest)
 
 # find the least squares polynomial surface
 poly <- bestfitplane(orforest)
 
 # plot the fit
-plot(poly)
+terra::plot(poly)
 }

@@ -19,17 +19,17 @@ Fits a polynomial surface of order \code{n} to a raster
 or matrix.
 }
 \examples{
-library(raster)
 
 # import raster image
 data(orforest)
+orforest <- terra::unwrap(orforest)
 
 # find the 2nd order least squares polynomial surface
 polyfit <- fitplane(orforest, order = 2)
 
 # create raster of polyfit
-x <- setValues(orforest, polyfit)
+x <- terra::setValues(orforest, polyfit)
 
 # plot the fit
-plot(x)
+terra::plot(x)
 }

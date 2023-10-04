@@ -21,6 +21,7 @@ on the surface.
 \examples{
 # import raster image
 data(normforest)
+normforest <- terra::unwrap(normforest)
 
 # calculate mean summit curvature
 Ssc <- ssc(normforest)

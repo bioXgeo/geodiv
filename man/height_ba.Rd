@@ -22,6 +22,7 @@ specific value along the x-axis (\code{xval}).
 \examples{
 # import raster image
 data(normforest)
+normforest <- terra::unwrap(normforest)
 
 # determine the bearing area function value
 # corresponding to an x value of 0.4

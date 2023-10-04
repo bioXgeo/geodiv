@@ -22,6 +22,7 @@ et al. (2018) for more details.
 \examples{
 # import raster image
 data(normforest)
+normforest <- terra::unwrap(normforest)
 
 # determine the valley fluid retention index
 Svi <- svi(normforest)

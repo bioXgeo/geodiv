@@ -18,6 +18,7 @@ calculated.}
 A numeric value representing skewness.
 # import raster image
 data(normforest)
+normforest <- terra::unwrap(normforest)
 
 # find the adjusted coefficient of skewness
 Ssk <- ssk(normforest, adj = TRUE)

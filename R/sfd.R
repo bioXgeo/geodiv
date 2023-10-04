@@ -15,22 +15,25 @@
 #'
 #' # import raster image
 #' data(normforest)
+#' normforest <- terra::unwrap(normforest)
 #'
 #' # calculate the fractal dimension
 #' Sfd <- sfd(normforest)
+#' @importFrom terra rast
+#' @import Rcpp
 #' @export
 sfd <- function(x, silent = FALSE) {
   # check type
-  if(inherits(x, "RasterLayer") == FALSE & inherits(x, "matrix") == FALSE) {stop('x must be a raster or matrix.')}
+  stopifnot('x must be a raster or matrix.' = inherits(x, c('RasterLayer', 'matrix', 'SpatRaster')))
 
   # if raster, convert to matrix
-  if (inherits(x, "RasterLayer") == TRUE) {
+  if (class(x)[1] %in% c('RasterLayer', 'SpatRaster')) {
     if (silent == FALSE) {
       # tell users that this will always reproject to equal area
       print('Warning: Raster will be converted to matrix format.')
     }
     # matrices are faster for window_metric, so convert to matrix
-    mat <- as.matrix(x, nrow = nrow(x), ncol = ncol(x), byrow = TRUE)
+    mat <- matrix(x[], nrow = nrow(x), ncol = ncol(x), byrow = TRUE)
   } else {
     mat <- x
   }
