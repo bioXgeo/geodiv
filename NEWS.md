@@ -53,3 +53,7 @@ Fixed a bug where length() did not omit NAs, but mean, min, and max calculations
 
 Removed dependencies on raster, rgdal, rgeos, sp, maptools, snow, and landscapemetrics. Converted all raster and vector functions to use terra and sf. Also fixed a bug in sfd that returned NaNs.
 
+## geodiv 1.1.1
+
+Updated contact info and author list to reflect current maintainers.
+
