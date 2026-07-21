@@ -22,7 +22,7 @@ Authors@R: c(person(given = c("Annie", "C."),
                  person(given = "Kelly", 
                         family = "Kapsar",
                         role = "aut",
-                        email = "kapsarke@msu.edu")
+                        email = "kapsarke@msu.edu"))
 Description: Methods for calculating gradient surface metrics for
     continuous analysis of landscape features. 
 URL: https://github.com/bioXgeo/geodiv
