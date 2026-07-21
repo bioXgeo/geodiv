@@ -1,7 +1,7 @@
 ---
 title: "cran-comments.md"
-author: "Annie C. Smith"
-date: "October 5, 2023"
+author: "Kyla M. Dahlin"
+date: "July 21, 2026"
 output: html_document
 ---
 
@@ -9,13 +9,21 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 ## Test environments
-* local Ubuntu 22.04 install, R 4.3.1
-* local Windows 11, R 4.0.2
-* local Windows 10, R 3.6.1
-* win-builder, R-devel
+* local Windows 11 install, R 4.6.0
+* win-builder (devel and release)
+* R-hub v2 (Linux, Windows, macOS)
+* GitHub Actions (ubuntu-latest, macOS-latest, windows-latest): R release, devel, 
+oldrel-1
 
 ## R CMD check results
-There were no ERRORS, WARNINGS, or NOTES.
+There were no ERRORS or WARNINGS, and one note re: ghostscript size reduction.
 
 ## Downstream dependencies
-There are currently no downstream dependencies for this package.
+This package has one reverse dependency, `prior3D`. I have 
+checked that it passes R CMD check with this updated version installed 
+and confirmed no new problems.
+
+## Comments
+This is an update of contact information for authors and a change in the 
+maintainer in response to a flag from CRAN about the maintainer's email address 
+no longer working.
