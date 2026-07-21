@@ -2,8 +2,27 @@ Package: geodiv
 Type: Package
 Title: Methods for Calculating Gradient Surface Metrics
 Version: 1.1.0
-Author: Annie C. Smith, Phoebe Zarnetske, Kyla Dahlin, Adam Wilson, Andrew Latimer
-Maintainer: Annie C. Smith <annie.smith@dnr.wa.gov>
+Authors@R: c(person(given = c("Annie", "C."),
+                        family = "Smith",
+                        role = "aut"),
+                 person(given = "Phoebe",
+                        family = "Zarnetske",
+                        role = "aut", 
+                        email = "plz@msu.edu"),
+                 person(given = "Kyla",
+                        family = "Dahlin",
+                        role = c("aut", "cre"),
+                        email = "kdahlin@msu.edu"),
+                 person(given = "Adam",
+                        family = "Wilson",
+                        role = "aut"),
+                 person(given = "Andrew",
+                        family = "Latimer",
+                        role = "aut"), 
+                 person(given = "Kelly", 
+                        family = "Kapsar",
+                        role = "aut",
+                        email = "kapsarke@msu.edu")
 Description: Methods for calculating gradient surface metrics for
     continuous analysis of landscape features. 
 URL: https://github.com/bioXgeo/geodiv
