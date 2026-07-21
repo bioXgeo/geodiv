@@ -15,6 +15,7 @@ knitr::opts_chunk$set(
 # geodiv
 
 <!-- badges: start -->
+[![R-CMD-check](https://github.com/bioXgeo/geodiv/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/bioXgeo/geodiv/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 *geodiv* calculates gradient surface metrics in R. These metrics are applied to continuous spatial data (i.e., rasters or matrices) and represent spatial heterogeneity. 
